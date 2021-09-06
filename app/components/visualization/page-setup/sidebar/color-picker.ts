@@ -73,7 +73,7 @@ export default class ColorPicker extends Component<Args> {
         colorPickerObject.colorObject.set(inputColor);
 
         if (ColorPicker.isLandscapeObject(colorPickerObject)) {
-          /* this.userSettings.updateLandscapeSetting(colorName, inputColor); */
+          this.userSettings.updateLandscapeSetting(colorPickerObject.colorName, inputColor);
         } else {
           this.userSettings.updateApplicationSetting(colorPickerObject.colorName, inputColor);
         }

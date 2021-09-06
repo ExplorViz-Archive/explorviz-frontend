@@ -1,31 +1,23 @@
-{{!-- <div id="colorHeader">
-  <Visualization::PageSetup::Sidebar::ColorSchemeSelector
-    @colorSchemes={{this.colorSchemes}}
-  />
-</div> --}}
-
-<div class="mt-3">
-  {{#if @isLandscapeView}}
-    <div
-      id={{concat "cp-landscape-" @id}}
-      class="input-group justify-content-between"
-      {{did-insert (fn this.setupLandscapeColorpicker @id)}}
-    >
-      <span class="colorpicker-label">{{format-color-property @setting.displayName}}</span>
-      <span class="input-group-append colorpicker-input">
-        <span class="input-group-text colorpicker-input-addon"><i></i></span>
-      </span>
-    </div>
-  {{else}}
-    <div
-      id={{concat "cp-application-" @id}}
-      class="input-group justify-content-between"
-      {{did-insert (fn this.setupApplicationColorpicker @id)}}
-    >
-      <span class="colorpicker-label">{{format-color-property @setting.displayName}}</span>
-      <span class="input-group-append colorpicker-input">
-        <span class="input-group-text colorpicker-input-addon"><i></i></span>
-      </span>
-    </div>
-  {{/if}}
-</div>
+{{#if @isLandscapeView}}
+  <div
+    id={{concat "cp-landscape-" @id}}
+    class="input-group justify-content-between"
+    {{did-insert (fn this.setupLandscapeColorpicker @id)}}
+  >
+    <span class="colorpicker-label">{{format-color-property @setting.displayName}}</span>
+    <span class="input-group-append colorpicker-input">
+      <span class="input-group-text colorpicker-input-addon"><i></i></span>
+    </span>
+  </div>
+{{else}}
+  <div
+    id={{concat "cp-application-" @id}}
+    class="input-group justify-content-between"
+    {{did-insert (fn this.setupApplicationColorpicker @id)}}
+  >
+    <span class="colorpicker-label">{{format-color-property @setting.displayName}}</span>
+    <span class="input-group-append colorpicker-input">
+      <span class="input-group-text colorpicker-input-addon"><i></i></span>
+    </span>
+  </div>
+{{/if}}

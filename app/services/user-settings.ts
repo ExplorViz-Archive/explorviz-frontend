@@ -1,6 +1,8 @@
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 
+export type ColorScheme = 'default' | 'classic' | 'dark' | 'impaired';
+
 export type SettingGroup = 'Colors' | 'Highlighting' | 'Hover Effects' | 'Communication';
 
 export type LandscapeColorSettingId
@@ -85,74 +87,74 @@ const defaultLandscapeColors = {
   backgroundColor: '#ffffff', // white
 };
 
-/* const classicApplicationColors = {
-  appVizFoundationColor: '#c7c7c7', // grey
-  appVizComponentOddColor: '#169e2b', // dark green
-  appVizComponentEvenColor: '#00bb41', // light green
-  appVizClazzColor: '#3e14a0', // purple-blue
-  appVizHighlightedEntityColor: '#ff0000', // red
-  appVizComponentTextColor: '#ffffff', // white
-  appVizClazzTextColor: '#ffffff', // white
-  appVizFoundationTextColor: '#000000', // black
-  appVizCommunicationColor: '#f49100', // orange
-  appVizCommunicationArrowColor: '#000000', // black
-  appVizBackgroundColor: '#ffffff', // white
+const classicApplicationColors = {
+  foundationColor: '#c7c7c7', // grey
+  componentOddColor: '#169e2b', // dark green
+  componentEvenColor: '#00bb41', // light green
+  clazzColor: '#3e14a0', // purple-blue
+  highlightedEntityColor: '#ff0000', // red
+  componentTextColor: '#ffffff', // white
+  clazzTextColor: '#ffffff', // white
+  foundationTextColor: '#000000', // black
+  communicationColor: '#f49100', // orange
+  communicationArrowColor: '#000000', // black
+  backgroundColor: '#ffffff', // white
 };
 
 const classicLandscapeColors = {
-  landVizNodeColor: '#00bb41', // green
-  landVizApplicationColor: '#3e14a0', // purple-blue
-  landVizCommunicationColor: '#f49100', // orange
-  landVizNodeTextColor: '#ffffff', // white
-  landVizApplicationTextColor: '#ffffff', // white
-  landVizBackgroundColor: '#ffffff', // white
+  nodeColor: '#00bb41', // green
+  applicationColor: '#3e14a0', // purple-blue
+  communicationColor: '#f49100', // orange
+  nodeTextColor: '#ffffff', // white
+  applicationTextColor: '#ffffff', // white
+  backgroundColor: '#ffffff', // white
 };
 
 const visuallyImpairedApplicationColors = {
-  appVizFoundationColor: '#c7c7c7', // light grey
-  appVizComponentOddColor: '#015a6e', // deep teal
-  appVizComponentEvenColor: '#0096be', // light blue
-  appVizClazzColor: '#f7f7f7', // white
-  appVizHighlightedEntityColor: '#ff0000', // red
-  appVizComponentTextColor: '#ffffff', // white
-  appVizClazzTextColor: '#ffffff', // white
-  appVizFoundationTextColor: '#000000', // black
-  appVizCommunicationColor: '#f49100', // orange
-  appVizCommunicationArrowColor: '#000000', // black
-  appVizBackgroundColor: '#ffffff', // white
+  foundationColor: '#c7c7c7', // light grey
+  componentOddColor: '#015a6e', // deep teal
+  componentEvenColor: '#0096be', // light blue
+  clazzColor: '#f7f7f7', // white
+  highlightedEntityColor: '#ff0000', // red
+  componentTextColor: '#ffffff', // white
+  clazzTextColor: '#ffffff', // white
+  foundationTextColor: '#000000', // black
+  communicationColor: '#f49100', // orange
+  communicationArrowColor: '#000000', // black
+  backgroundColor: '#ffffff', // white
 };
 
 const visuallyImpairedLandscapeColors = {
-  landVizNodeColor: '#0096be', // sky blue
-  landVizApplicationColor: '#5f5f5f', // grey
-  landVizCommunicationColor: '#f49100', // orange
-  landVizNodeTextColor: '#ffffff', // white
-  landVizApplicationTextColor: '#ffffff', // white
-  landVizBackgroundColor: '#ffffff', // white
+  nodeColor: '#0096be', // sky blue
+  applicationColor: '#5f5f5f', // grey
+  communicationColor: '#f49100', // orange
+  nodeTextColor: '#ffffff', // white
+  applicationTextColor: '#ffffff', // white
+  backgroundColor: '#ffffff', // white
 };
 
 const darkApplicationColors = {
-  appVizFoundationColor: '#c7c7c7', // grey
-  appVizComponentOddColor: '#2f3d3b', // dark grey
-  appVizComponentEvenColor: '#5B7B88', // blue-grey
-  appVizClazzColor: '#4073b6', // blue
-  appVizHighlightedEntityColor: '#ff0000', // red
-  appVizComponentTextColor: '#ffffff', // white
-  appVizClazzTextColor: '#ffffff', // white
-  appVizFoundationTextColor: '#000000', // black
-  appVizCommunicationColor: '#e3e3e3', // light grey
-  appVizCommunicationArrowColor: '#000000', // black
-  appVizBackgroundColor: '#acacac', // stone grey
+  foundationColor: '#c7c7c7', // grey
+  componentOddColor: '#2f3d3b', // dark grey
+  componentEvenColor: '#5B7B88', // blue-grey
+  clazzColor: '#4073b6', // blue
+  highlightedEntityColor: '#ff0000', // red
+  componentTextColor: '#ffffff', // white
+  clazzTextColor: '#ffffff', // white
+  foundationTextColor: '#000000', // black
+  communicationColor: '#e3e3e3', // light grey
+  communicationArrowColor: '#000000', // black
+  backgroundColor: '#acacac', // stone grey
 };
 
 const darkLandscapeColors = {
-  landVizNodeColor: '#2f3d3b', // light black
-  landVizApplicationColor: '#5B7B88', // blue-grey
-  landVizCommunicationColor: '#e3e3e3', // light grey
-  landVizNodeTextColor: '#ffffff', // white
-  landVizApplicationTextColor: '#ffffff', // white
-  landVizBackgroundColor: '#acacac', // stone grey
-}; */
+  nodeColor: '#2f3d3b', // light black
+  applicationColor: '#5B7B88', // blue-grey
+  communicationColor: '#e3e3e3', // light grey
+  nodeTextColor: '#ffffff', // white
+  applicationTextColor: '#ffffff', // white
+  backgroundColor: '#acacac', // stone grey
+};
 
 export type ApplicationSettings
 = ApplicationColorSettings
@@ -404,15 +406,19 @@ const defaultLanscapeSettings: LandscapeSettings = {
 
 export default class UserSettings extends Service {
   @tracked
-  landscapeSettings: LandscapeSettings;
+  landscapeSettings!: LandscapeSettings;
 
   @tracked
-  applicationSettings: ApplicationSettings;
+  applicationSettings!: ApplicationSettings;
 
   constructor() {
     super(...arguments);
-    this.landscapeSettings = JSON.parse(JSON.stringify(defaultLanscapeSettings));
-    this.applicationSettings = JSON.parse(JSON.stringify(defaultApplicationSettings));
+
+    try {
+      this.restoreSettings();
+    } catch (e) {
+      this.applyDefaultSettings();
+    }
   }
 
   private restoreSettings() {
@@ -465,6 +471,30 @@ export default class UserSettings extends Service {
     }
   }
 
+  updateLandscapeSetting(name: LandscapeSettingId, value: unknown) {
+    // eslint-disable-next-line
+    const setting = this.landscapeSettings[name];
+
+    if (isRangeSetting(setting) && typeof value === 'number') {
+      this.validateRangeSetting(setting, value);
+      this.landscapeSettings = {
+        ...this.landscapeSettings,
+        [name]: { ...JSON.parse(JSON.stringify(setting)), value },
+      };
+      this.updateSettings();
+    } else if (isFlagSetting(setting) && typeof value === 'boolean') {
+      this.landscapeSettings = {
+        ...this.landscapeSettings,
+        [name]: { ...JSON.parse(JSON.stringify(setting)), value },
+      };
+      this.updateSettings();
+    } else if (isColorSetting(setting) && typeof value === 'string') {
+      /*       const regExHex = /^#(?:[0-9a-f]{3}){1,2}$/i; */
+      setting.value = value;
+      this.updateSettings();
+    }
+  }
+
   // eslint-disable-next-line class-methods-use-this
   private validateRangeSetting(rangeSetting: RangeSetting, value: number) {
     const { range } = rangeSetting;
@@ -475,39 +505,37 @@ export default class UserSettings extends Service {
     }
   }
 
-  /*   updateLandscapeColor(attribute: keyof LandscapeColorsHexString, value: string) {
-    this.settings.colors.landscape[attribute] = value;
-    this.updateSettings(this.settings);
+  setColorScheme(scheme: ColorScheme) {
+    let applicationColors = defaultApplicationColors;
+    let landscapeColors = defaultLandscapeColors;
+
+    if (scheme === 'classic') {
+      applicationColors = classicApplicationColors;
+      landscapeColors = classicLandscapeColors;
+    } else if (scheme === 'dark') {
+      applicationColors = darkApplicationColors;
+      landscapeColors = darkLandscapeColors;
+    } else if (scheme === 'impaired') {
+      applicationColors = visuallyImpairedApplicationColors;
+      landscapeColors = visuallyImpairedLandscapeColors;
+    }
+
+    let settingId: keyof LandscapeColorSettings;
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
+    for (settingId in landscapeColors) {
+      const setting = this.landscapeSettings[settingId];
+      setting.value = landscapeColors[settingId];
+    }
+
+    let settingId2: keyof ApplicationColorSettings;
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
+    for (settingId2 in applicationColors) {
+      const setting = this.applicationSettings[settingId2];
+      setting.value = applicationColors[settingId2];
+    }
+
+    this.updateSettings();
   }
-
-  updateApplicationColor(attribute: keyof ApplicationColorsHexString, value: string) {
-    this.settings.colors.application[attribute] = value;
-    this.updateSettings(this.settings);
-  } */
-
-  /*   setDefaultColors() {
-    this.settings.colors.landscape = { ...defaultLandscapeColors };
-    this.settings.colors.application = { ...defaultApplicationColors };
-    this.updateSettings(this.settings);
-  }
-
-  setImpairedColors() {
-    this.settings.colors.landscape = { ...visuallyImpairedLandscapeColors };
-    this.settings.colors.application = { ...visuallyImpairedApplicationColors };
-    this.updateSettings(this.settings);
-  }
-
-  setClassicColors() {
-    this.settings.colors.landscape = { ...classicLandscapeColors };
-    this.settings.colors.application = { ...classicApplicationColors };
-    this.updateSettings(this.settings);
-  }
-
-  setDarkColors() {
-    this.settings.colors.landscape = { ...darkLandscapeColors };
-    this.settings.colors.application = { ...darkApplicationColors };
-    this.updateSettings(this.settings);
-  } */
 
   // eslint-disable-next-line class-methods-use-this
   private areValidSettings(settings: unknown): settings is Settings {

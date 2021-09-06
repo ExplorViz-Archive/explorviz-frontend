@@ -1,10 +1,14 @@
 import Component from '@glimmer/component';
 import UserSettings, {
-  ApplicationSettingId, ApplicationSettings, LandscapeHoveringSettingId, LandscapeSettingId, SettingGroup,
+  ApplicationColorSettings,
+  ApplicationSettingId, ApplicationSettings, ColorScheme,
+  LandscapeColorSettings, LandscapeSettingId,
+  LandscapeSettings, SettingGroup,
 } from 'explorviz-frontend/services/user-settings';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { inject as service } from '@ember/service';
 import { action } from '@ember/object';
+import Configuration from 'explorviz-frontend/services/configuration';
 
 interface Args {
   isLandscapeView: boolean;
@@ -16,6 +20,16 @@ interface Args {
 export default class Settings extends Component<Args> {
   @service('user-settings')
   userSettings!: UserSettings;
+
+  @service('configuration')
+  configuration!: Configuration;
+
+  colorSchemes: { name: string, id: ColorScheme }[] = [
+    { name: 'Default', id: 'default' },
+    { name: 'Vision Impairment', id: 'impaired' },
+    { name: 'Classic (Initial)', id: 'classic' },
+    { name: 'Dark', id: 'dark' },
+  ];
 
   get applicationSettingsSortedByGroup() {
     const { applicationSettings } = this.userSettings;
@@ -47,17 +61,47 @@ export default class Settings extends Component<Args> {
     return settingGroupToSettingIds;
   }
 
+  get landscapeSettingsSortedByGroup() {
+    const { landscapeSettings } = this.userSettings;
+
+    const settingGroupToSettingIds: Record<SettingGroup, LandscapeSettingId[]> = {
+      'Hover Effects': [],
+      Colors: [],
+      Communication: [],
+      Highlighting: [],
+    };
+
+    let settingId: keyof LandscapeSettings;
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
+    for (settingId in landscapeSettings) {
+      const setting = landscapeSettings[settingId];
+      settingGroupToSettingIds[setting.group].push(settingId);
+    }
+
+    let settingGroupId: SettingGroup;
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
+    for (settingGroupId in settingGroupToSettingIds) {
+      const settingArray = settingGroupToSettingIds[settingGroupId];
+      settingArray.sort(
+        (settingId1, settingId2) => landscapeSettings[settingId1].orderNumber
+            - landscapeSettings[settingId2].orderNumber,
+      );
+    }
+
+    return settingGroupToSettingIds;
+  }
+
   @action
   updateRangeSetting(name: ApplicationSettingId | LandscapeSettingId, event: Event) {
     const input = event.target as HTMLInputElement;
 
     if (this.args.isLandscapeView) {
-      /*       try {
-        this.userSettings.updateApplicationSetting(name as ApplicationSettingId,
-          input.valueAsNumber);
+      const settingId = name as LandscapeSettingId;
+      try {
+        this.userSettings.updateLandscapeSetting(settingId, input.valueAsNumber);
       } catch (e) {
         AlertifyHandler.showAlertifyError(e.message);
-      } */
+      }
     } else {
       const settingId = name as ApplicationSettingId;
       try {
@@ -94,12 +138,12 @@ export default class Settings extends Component<Args> {
   @action
   updateFlagSetting(name: ApplicationSettingId | LandscapeSettingId, value: boolean) {
     if (this.args.isLandscapeView) {
-      /*       try {
-        this.userSettings.updateApplicationSetting(name as ApplicationSettingId,
-          input.valueAsNumber);
+      const settingId = name as LandscapeSettingId;
+      try {
+        this.userSettings.updateLandscapeSetting(settingId, value);
       } catch (e) {
         AlertifyHandler.showAlertifyError(e.message);
-      } */
+      }
     } else {
       const settingId = name as ApplicationSettingId;
       try {
@@ -107,11 +151,6 @@ export default class Settings extends Component<Args> {
           value);
       } catch (e) {
         AlertifyHandler.showAlertifyError(e.message);
-      }
-
-      switch (settingId) {
-        default:
-          break;
       }
     }
   }
@@ -119,25 +158,45 @@ export default class Settings extends Component<Args> {
   @action
   updateColorSetting(name: ApplicationSettingId | LandscapeSettingId, value: string) {
     if (this.args.isLandscapeView) {
-      /*       try {
-        this.userSettings.updateApplicationSetting(name as ApplicationSettingId,
-          input.valueAsNumber);
+      const settingId = name as LandscapeSettingId;
+      try {
+        this.userSettings.updateLandscapeSetting(settingId, value);
       } catch (e) {
         AlertifyHandler.showAlertifyError(e.message);
-      } */
+      }
     } else {
       const settingId = name as ApplicationSettingId;
       try {
-        this.userSettings.updateApplicationSetting(settingId,
-          value);
+        this.userSettings.updateApplicationSetting(settingId, value);
       } catch (e) {
         AlertifyHandler.showAlertifyError(e.message);
       }
-
-      switch (settingId) {
-        default:
-          break;
-      }
     }
+  }
+
+  @action
+  applyColorScheme(colorScheme: ColorScheme) {
+    this.userSettings.setColorScheme(colorScheme);
+    this.applyColorsFromUserSettings();
+  }
+
+  applyColorsFromUserSettings() {
+    const { landscapeColors, applicationColors } = this.configuration;
+
+    let settingId: keyof LandscapeColorSettings;
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
+    for (settingId in landscapeColors) {
+      this.configuration.landscapeColors[settingId]
+        .set(this.userSettings.landscapeSettings[settingId].value);
+    }
+
+    let settingId2: keyof ApplicationColorSettings;
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
+    for (settingId2 in applicationColors) {
+      this.configuration.applicationColors[settingId2]
+        .set(this.userSettings.applicationSettings[settingId2].value);
+    }
+
+    this.args.updateColors?.();
   }
 }
