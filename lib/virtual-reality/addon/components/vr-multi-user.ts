@@ -348,7 +348,7 @@ export default class VrMultiUser extends VrRendering {
 
     this.applicationGroup.children.forEach((child) => {
       if (child instanceof ApplicationObject3D) {
-        child.setHighlightingColor(this.configuration.applicationColors.highlightedEntity);
+        child.setHighlightingColor(this.configuration.applicationColors.highlightedEntityColor);
       }
     });
 
@@ -578,7 +578,7 @@ export default class VrMultiUser extends VrRendering {
 
             if (drawableComm) {
               this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-              const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+              const { value } = this.userSettings.applicationSettings.transparencyIntensity;
               Highlighting.updateHighlighting(applicationObject3D, drawableComm, value);
             }
 
@@ -731,7 +731,7 @@ export default class VrMultiUser extends VrRendering {
       const boxMesh = applicationObject3D.getBoxMeshbyModelId(update.entityID);
       if (boxMesh instanceof ComponentMesh || boxMesh instanceof ClazzMesh) {
         if (drawableComm) {
-          const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+          const { value } = this.userSettings.applicationSettings.transparencyIntensity;
           Highlighting.highlight(boxMesh, applicationObject3D, drawableComm, value);
         }
       }
@@ -743,7 +743,7 @@ export default class VrMultiUser extends VrRendering {
         if (classIds.has(commMesh.dataModel.sourceClass.id)
           && classIds.has(commMesh.dataModel.targetClass.id)) {
           if (drawableComm) {
-            const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+            const { value } = this.userSettings.applicationSettings.transparencyIntensity;
             Highlighting.highlight(commMesh, applicationObject3D, drawableComm, value);
           }
         }

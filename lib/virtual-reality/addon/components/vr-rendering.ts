@@ -212,7 +212,7 @@ export default class VrRendering extends Component<Args> {
      */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = this.configuration.landscapeColors.background;
+    this.scene.background = this.configuration.landscapeColors.backgroundColor;
     this.scene.add(this.landscapeObject3D);
 
     const floorSize = 10;
@@ -554,7 +554,7 @@ export default class VrRendering extends Component<Args> {
       });
 
       // Render application communication
-      const color = this.configuration.landscapeColors.communication;
+      const color = this.configuration.landscapeColors.communicationColor;
       const tiles = LandscapeCommunicationRendering
         .computeCommunicationTiles(applicationCommunications, modelIdToPointsComplete,
           color, this.landscapeDepth / 2 + 0.25);
@@ -590,8 +590,8 @@ export default class VrRendering extends Component<Args> {
     const nodeMesh = new NodeMesh(
       layout,
       node,
-      this.configuration.landscapeColors.node,
-      this.configuration.applicationColors.highlightedEntity,
+      this.configuration.landscapeColors.nodeColor,
+      this.configuration.applicationColors.highlightedEntityColor,
       this.landscapeDepth,
       0.2,
     );
@@ -603,7 +603,7 @@ export default class VrRendering extends Component<Args> {
     const labelText = nodeMesh.getDisplayName();
 
     this.landscapeLabeler.addNodeTextLabel(nodeMesh, labelText, this.font,
-      this.configuration.landscapeColors.nodeText);
+      this.configuration.landscapeColors.nodeTextColor);
 
     // Add to scene
     this.landscapeObject3D.add(nodeMesh);
@@ -625,8 +625,8 @@ export default class VrRendering extends Component<Args> {
     const applicationMesh = new ApplicationMesh(
       layout,
       application,
-      this.configuration.landscapeColors.application,
-      this.configuration.applicationColors.highlightedEntity,
+      this.configuration.landscapeColors.applicationColor,
+      this.configuration.applicationColors.highlightedEntityColor,
       this.landscapeDepth,
       0.3,
     );
@@ -634,7 +634,7 @@ export default class VrRendering extends Component<Args> {
 
     // Create and add label + icon
     this.landscapeLabeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
-      this.configuration.landscapeColors.applicationText);
+      this.configuration.landscapeColors.applicationTextColor);
     LandscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
@@ -747,9 +747,11 @@ export default class VrRendering extends Component<Args> {
   addLabels(applicationObject3D: ApplicationObject3D) {
     if (!this.font) { return; }
 
-    const clazzTextColor = this.configuration.applicationColors.clazzText;
-    const componentTextColor = this.configuration.applicationColors.componentText;
-    const foundationTextColor = this.configuration.applicationColors.foundationText;
+    const {
+      clazzTextColor,
+      componentTextColor,
+      foundationTextColor,
+    } = this.configuration.applicationColors;
 
     applicationObject3D.getBoxMeshes().forEach((mesh) => {
     /* Labeling is time-consuming. Thus, label only visible meshes incrementally
@@ -1049,7 +1051,7 @@ export default class VrRendering extends Component<Args> {
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
-      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      const { value } = this.userSettings.applicationSettings.transparencyIntensity;
       Highlighting.updateHighlighting(applicationObject3D, drawableComm, value);
     }
   }
@@ -1063,7 +1065,7 @@ export default class VrRendering extends Component<Args> {
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
-      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      const { value } = this.userSettings.applicationSettings.transparencyIntensity;
       Highlighting.updateHighlighting(applicationObject3D, drawableComm, value);
     }
   }
@@ -1084,7 +1086,7 @@ export default class VrRendering extends Component<Args> {
       const drawableComm = this.drawableClassCommunications.get(application.dataModel.instanceId);
 
       if (drawableComm) {
-        const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+        const { value } = this.userSettings.applicationSettings.transparencyIntensity;
         Highlighting.highlight(object, application, drawableComm, value);
       }
     }
