@@ -2,8 +2,9 @@ import { action } from '@ember/object';
 import Component from '@glimmer/component';
 import { inject as service } from '@ember/service';
 import Configuration, { ApplicationColors, LandscapeColors } from 'explorviz-frontend/services/configuration';
-import UserSettings, { ApplicationColorSettingId, ColorSetting, LandscapeColorSettingId } from 'explorviz-frontend/services/user-settings';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 import isObject from 'explorviz-frontend/utils/object-helpers';
+import { ApplicationColorSettingId, ColorSetting, LandscapeColorSettingId } from 'explorviz-frontend/utils/settings/settings-schemas';
 
 interface Args {
   id: ApplicationColorSettingId | LandscapeColorSettingId;

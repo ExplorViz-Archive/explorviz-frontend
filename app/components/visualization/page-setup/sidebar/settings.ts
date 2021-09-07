@@ -1,14 +1,14 @@
 import Component from '@glimmer/component';
-import UserSettings, {
-  ApplicationColorSettings,
-  ApplicationSettingId, ApplicationSettings, ColorScheme,
-  LandscapeColorSettings, LandscapeSettingId,
-  LandscapeSettings, SettingGroup,
-} from 'explorviz-frontend/services/user-settings';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { inject as service } from '@ember/service';
 import { action } from '@ember/object';
 import Configuration from 'explorviz-frontend/services/configuration';
+import { ColorScheme } from 'explorviz-frontend/utils/settings/color-schemes';
+import {
+  ApplicationColorSettings, ApplicationSettingId, ApplicationSettings,
+  LandscapeColorSettings, LandscapeSettingId, LandscapeSettings, SettingGroup,
+} from 'explorviz-frontend/utils/settings/settings-schemas';
 
 interface Args {
   isLandscapeView: boolean;
@@ -39,6 +39,7 @@ export default class Settings extends Component<Args> {
       Colors: [],
       Communication: [],
       Highlighting: [],
+      Debugging: [],
     };
 
     let settingId: keyof ApplicationSettings;
@@ -69,6 +70,7 @@ export default class Settings extends Component<Args> {
       Colors: [],
       Communication: [],
       Highlighting: [],
+      Debugging: [],
     };
 
     let settingId: keyof LandscapeSettings;

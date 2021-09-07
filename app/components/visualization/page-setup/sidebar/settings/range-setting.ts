@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import { RangeSetting as RangeSettingObject } from 'explorviz-frontend/services/user-settings';
+import { RangeSetting as RangeSettingObject } from 'explorviz-frontend/utils/settings/settings-schemas';
 
 interface Args {
   setting: RangeSettingObject;

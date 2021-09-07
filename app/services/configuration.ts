@@ -1,30 +1,12 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import { tracked } from '@glimmer/tracking';
+import { ApplicationColorSettingId, LandscapeColorSettingId } from 'explorviz-frontend/utils/settings/settings-schemas';
 import UserSettings from './user-settings';
 
-export type LandscapeColors = {
-  nodeColor: THREE.Color,
-  applicationColor: THREE.Color,
-  communicationColor: THREE.Color,
-  nodeTextColor: THREE.Color,
-  applicationTextColor: THREE.Color,
-  backgroundColor: THREE.Color
-};
+export type LandscapeColors = Record<LandscapeColorSettingId, THREE.Color>;
 
-export type ApplicationColors = {
-  foundationColor: THREE.Color,
-  componentOddColor: THREE.Color,
-  componentEvenColor: THREE.Color,
-  clazzColor: THREE.Color,
-  highlightedEntityColor: THREE.Color,
-  componentTextColor: THREE.Color,
-  clazzTextColor: THREE.Color,
-  foundationTextColor: THREE.Color,
-  communicationColor: THREE.Color,
-  communicationArrowColor: THREE.Color,
-  backgroundColor: THREE.Color
-};
+export type ApplicationColors = Record<ApplicationColorSettingId, THREE.Color>;
 
 /**
  * The Configuration Service handles color settings for the

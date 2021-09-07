@@ -6,20 +6,15 @@ import {
   defaultLandscapeColors, visuallyImpairedApplicationColors,
   visuallyImpairedLandscapeColors,
 } from 'explorviz-frontend/utils/settings/color-schemes';
-import { defaultApplicationSettings, defaultLanscapeSettings } from 'explorviz-frontend/utils/settings/default-settings';
+import {
+  defaultApplicationSettings, defaultLanscapeSettings,
+} from 'explorviz-frontend/utils/settings/default-settings';
 import {
   ApplicationColorSettings, ApplicationSettingId,
   ApplicationSettings, isColorSetting, isFlagSetting,
   isRangeSetting, LandscapeColorSettings,
   LandscapeSettingId, LandscapeSettings, RangeSetting,
 } from 'explorviz-frontend/utils/settings/settings-schemas';
-
-/* const COMMONSETTINGINFOS = {
-  showFpsCounter: {
-    displayName: 'Show FPS Counter',
-    description: '\'Frames Per Second\' metrics in visualizations',
-  },
-}; */
 
 export default class UserSettings extends Service {
   @tracked

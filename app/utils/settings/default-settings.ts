@@ -135,6 +135,14 @@ export const defaultApplicationSettings: ApplicationSettings = {
     description: 'If greater 0.0, communication lines are rendered arc-shaped (Straight lines: 0.0)',
     isRangeSetting: true,
   },
+  showFpsCounter: {
+    value: false,
+    orderNumber: 1,
+    group: 'Debugging',
+    displayName: 'Show FPS Counter',
+    description: '\'Frames Per Second\' metrics in visualizations',
+    isFlagSetting: true,
+  },
 };
 
 export const defaultLanscapeSettings: LandscapeSettings = {
@@ -188,6 +196,14 @@ export const defaultLanscapeSettings: LandscapeSettings = {
     group: 'Hover Effects',
     displayName: 'Enable Hover Effects',
     description: 'Hover effect (flashing entities) for mouse cursor',
+    isFlagSetting: true,
+  },
+  showFpsCounter: {
+    value: false,
+    orderNumber: 1,
+    group: 'Debugging',
+    displayName: 'Show FPS Counter',
+    description: '\'Frames Per Second\' metrics in visualizations',
     isFlagSetting: true,
   },
 };

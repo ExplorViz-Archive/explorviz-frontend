@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import { ColorScheme } from 'explorviz-frontend/services/user-settings';
+import { ColorScheme } from 'explorviz-frontend/utils/settings/color-schemes';
 
 interface Args {
   colorSchemes: { name: string, action: () => void };

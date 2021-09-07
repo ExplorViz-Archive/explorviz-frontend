@@ -1,4 +1,4 @@
-export type SettingGroup = 'Colors' | 'Highlighting' | 'Hover Effects' | 'Communication';
+export type SettingGroup = 'Colors' | 'Highlighting' | 'Hover Effects' | 'Communication' | 'Debugging';
 
 export type LandscapeColorSettingId
 = 'nodeColor'
@@ -10,8 +10,11 @@ export type LandscapeColorSettingId
 
 export type LandscapeHoveringSettingId = 'enableHoverEffects';
 
+export type LandscapeDebugSettingId = 'showFpsCounter';
+
 export type LandscapeSettingId
 = LandscapeColorSettingId
+| LandscapeDebugSettingId
 | LandscapeHoveringSettingId;
 
 export type ApplicationColorSettingId
@@ -37,15 +40,20 @@ export type ApplicationCommunicationSettingId =
 | 'commArrowSize'
 | 'curvyCommHeight';
 
+export type ApplicationDebugSettingId = 'showFpsCounter';
+
 export type ApplicationSettingId
 = ApplicationColorSettingId
 | ApplicationHighlightingSettingId
 | ApplicationHoveringSettingId
-| ApplicationCommunicationSettingId;
+| ApplicationCommunicationSettingId
+| ApplicationDebugSettingId;
 
 export type LandscapeColorSettings = Record<LandscapeColorSettingId, ColorSetting>;
 
 export type LandscapeHoveringSettings = Record<LandscapeHoveringSettingId, FlagSetting>;
+
+export type LandscapeDebugSettings = Record<LandscapeDebugSettingId, FlagSetting>;
 
 export type ApplicationColorSettings = Record<ApplicationColorSettingId, ColorSetting>;
 
@@ -59,13 +67,17 @@ export type ApplicationHoveringSettings = Record<ApplicationHoveringSettingId, F
 export type ApplicationCommunicationSettings
 = Record<ApplicationCommunicationSettingId, RangeSetting>;
 
+export type ApplicationDebugSettings = Record<ApplicationDebugSettingId, FlagSetting>;
+
 export type ApplicationSettings
 = ApplicationColorSettings
 & ApplicationHighlightingSettings
 & ApplicationHoveringSettings
+& ApplicationDebugSettings
 & ApplicationCommunicationSettings;
 
-export type LandscapeSettings = LandscapeColorSettings & LandscapeHoveringSettings;
+export type LandscapeSettings = LandscapeColorSettings
+& LandscapeHoveringSettings & LandscapeDebugSettings;
 
 export interface Setting<T> {
   value: T;

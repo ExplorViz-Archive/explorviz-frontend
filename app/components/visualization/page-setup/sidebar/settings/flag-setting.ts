@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import { FlagSetting as FlagSettingObject } from 'explorviz-frontend/services/user-settings';
+import { FlagSetting as FlagSettingObject } from 'explorviz-frontend/utils/settings/settings-schemas';
 
 interface Args {
   setting: FlagSettingObject;
