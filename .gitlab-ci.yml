@@ -3,20 +3,23 @@ image: explorviz/build-images:frontend
 cache:
   paths:
     - node_modules/
-  
-before_script:
-  - npm install
-  - npm install -g ember-template-lint
+    - .npm/
 
 stages:
   - code-analysis
-  - build
   - test
+  - build
+  - deploy:images
+  - deploy:retagging
 
 linting:
   stage: code-analysis
   tags:
     - exec-docker
+  before_script:
+    - npm ci --cache .npm --prefer-offline
+    - npm install
+    - npm install -g ember-template-lint
   script:
     - npm run lint
 
@@ -25,11 +28,64 @@ test:
   tags:
     - exec-docker
   script:
+    - npm ci --cache .npm --prefer-offline
+    - npm install
     - ember test --launch chromium
 
-# - stage: deploy
-#    if: (type = push) AND ((branch = dev-1) OR (branch = master))
-#    skip_cleanup: false
-#    env:
-#      - EMBER_VERSION=release
-#    script: ember build --prod && chmod +x .travis/docker_push.sh && .travis/docker_push.sh
+build:
+  stage: build
+  tags:
+    - exec-docker
+  script:
+    - npm ci --cache .npm --prefer-offline
+    - npm install
+    - ember build --prod
+  artifacts:
+    paths:
+      - dist
+
+.deploy-to-dockerhub:
+  stage: deploy:images
+  tags:
+    - exec-docker
+  variables:
+    DOCKERHUB_TAG: "latest"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(echo -n ${DOCKERHUB_USER}:${DOCKERHUB_PASSWORD} | base64)\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context=$CI_PROJECT_DIR --dockerfile=$CI_PROJECT_DIR/Dockerfile --destination=$DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG
+
+deploy-dockerhub-master:
+  extends:
+    - .deploy-to-dockerhub
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+
+deploy-dockerhub-dev:
+  extends:
+    - .deploy-to-dockerhub
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      variables:
+        DOCKERHUB_TAG: "dev"
+  script:
+    - echo "DOCKERHUB_TAG=dev" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+retag-dockerhub-image:
+  stage: deploy:retagging
+  tags:
+    - exec-docker
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [""]
+  script:
+    - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD "index.docker.io"
+    - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
