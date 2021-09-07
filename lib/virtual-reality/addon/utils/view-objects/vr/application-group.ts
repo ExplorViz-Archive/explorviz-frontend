@@ -81,5 +81,6 @@ export default class ApplicationGroup extends THREE.Group {
         }
       });
     });
+    return this;
   }
 }
