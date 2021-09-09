@@ -83,6 +83,8 @@ retag-dockerhub-image:
   stage: deploy:retagging
   tags:
     - exec-docker
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master"
   image:
     name: gcr.io/go-containerregistry/crane:debug
     entrypoint: [""]
