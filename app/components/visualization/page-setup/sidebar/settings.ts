@@ -15,6 +15,7 @@ interface Args {
   updateHighlighting?(): void;
   updateColors?(): void;
   redrawCommunication?(): void;
+  removeComponent(componentPath: string): void;
 }
 
 export default class Settings extends Component<Args> {
@@ -200,5 +201,10 @@ export default class Settings extends Component<Args> {
     }
 
     this.args.updateColors?.();
+  }
+
+  @action
+  close() {
+    this.args.removeComponent('settings');
   }
 }
