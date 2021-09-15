@@ -46,17 +46,23 @@ module.exports = function initEnvironment(environment) {
   };
 
   if (environment === 'production') {
-    console.log('EXPL-WARNING: This is production mode. You may override the following variables via Docker environment variables:'.yellow);
+    console.log('EXPL-WARNING: This is production mode. You may override the following variables via Docker environment variables in a Docker Compose file:'.yellow);
     console.log('- LANDSCAPE_URL'.yellow);
     console.log('- TRACE_URL'.yellow);
     console.log('- USER_URL'.yellow);
     console.log('- COLLAB_URL'.yellow);
+    console.log('- FRONTEND_HOST_NAME'.yellow);
     console.log('... depending on your deployment, e.g., reverse proxy in use.'.yellow);
 
     ENV.backendAddresses.landscapeService = 'change-landscape-url';
     ENV.backendAddresses.traceService = 'change-trace-url';
     ENV.backendAddresses.userService = 'change-user-url';
     ENV.backendAddresses.collaborativeService = 'change-collab-url';
+
+    ENV.auth0.logoUrl = ENV.auth0.logoUrl.replace("localhost", "change-frontend-host-name");
+    ENV.auth0.callbackUrl = ENV.auth0.callbackUrl.replace("localhost", "change-frontend-host-name");
+    ENV.auth0.logoutReturnUrl = ENV.auth0.logoutReturnUrl.replace("localhost", "change-frontend-host-name");
+
   }
 
   if (environment === 'test') {
