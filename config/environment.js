@@ -58,11 +58,9 @@ module.exports = function initEnvironment(environment) {
     ENV.backendAddresses.traceService = 'change-trace-url';
     ENV.backendAddresses.userService = 'change-user-url';
     ENV.backendAddresses.collaborativeService = 'change-collab-url';
-
-    ENV.auth0.logoUrl = ENV.auth0.logoUrl.replace("localhost", "change-frontend-host-name");
-    ENV.auth0.callbackUrl = ENV.auth0.callbackUrl.replace("localhost", "change-frontend-host-name");
-    ENV.auth0.logoutReturnUrl = ENV.auth0.logoutReturnUrl.replace("localhost", "change-frontend-host-name");
-
+    ENV.auth0.logoUrl = ENV.auth0.logoUrl.replace('localhost', 'change-frontend-host-name');
+    ENV.auth0.callbackUrl = ENV.auth0.callbackUrl.replace('localhost', 'change-frontend-host-name');
+    ENV.auth0.logoutReturnUrl = ENV.auth0.logoutReturnUrl.replace('localhost', 'change-frontend-host-name');
   }
 
   if (environment === 'test') {
