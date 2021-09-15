@@ -99,6 +99,12 @@
                     @application={{@landscapeData.application}}
                   />
                 {{/if}}
+                {{#if (eq componentName "collaborative-settings")}}
+                  <h5 class="text-center">Collaborative Settings</h5>
+                  <CollaborativeSettings
+                    @removeComponent={{@removeComponent}}
+                  />
+                {{/if}}
                 {{#if (eq componentName "settings")}}
                   <h5 class="text-center">Settings</h5>
                   <Visualization::PageSetup::Sidebar::Settings
@@ -106,12 +112,6 @@
                     @updateHighlighting={{this.updateHighlighting}}
                     @redrawCommunication={{this.addCommunication}}
                     @updateColors={{this.updateColors}}
-                    @removeComponent={{@removeComponent}}
-                  />
-                {{/if}}
-                {{#if (eq componentName "collaborative-settings")}}
-                  <h5 class="text-center">Collaborative Settings</h5>
-                  <CollaborativeSettings
                     @removeComponent={{@removeComponent}}
                   />
                 {{/if}}
