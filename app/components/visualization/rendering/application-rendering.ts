@@ -757,7 +757,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     super.willDestroy();
     cancelAnimationFrame(this.animationFrameId);
     this.cleanUpApplication();
-    this.scene.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
 

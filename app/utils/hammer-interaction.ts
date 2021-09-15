@@ -1,18 +1,18 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
-import InteractionModifierModifier from 'explorviz-frontend/modifiers/interaction-modifier';
+import InteractionModifierModifier, { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import Hammer from 'hammerjs';
 
 /* eslint-disable no-bitwise */
 export default class HammerInteraction extends Object.extend(Evented) {
-  hammerManager = null;
+  hammerManager: HammerManager | null = null;
 
   /**
    * Setups events which are triggered by hammer interaction
    *
    * @param {*} canvas Events are registered on the canvas
    */
-  setupHammer(canvas) {
+  setupHammer(canvas: HTMLCanvasElement) {
     const self = this;
 
     let mouseDeltaX = 0;
@@ -28,13 +28,21 @@ export default class HammerInteraction extends Object.extend(Evented) {
         pointerout: Hammer.INPUT_CANCEL,
       };
 
+      // @ts-ignore
       Hammer.inherit(Hammer.PointerEventInput, Hammer.Input, {
 
-        handler: function PEhandler(ev) {
+        handler: function PEhandler(ev: PointerEvent) {
           const { store } = this;
           let removePointer = false;
 
           const eventTypeNormalized = ev.type.toLowerCase();
+          if (!(eventTypeNormalized === 'pointerdown'
+            || eventTypeNormalized === 'pointermove'
+            || eventTypeNormalized === 'pointerup'
+            || eventTypeNormalized === 'pointercancel'
+            || eventTypeNormalized === 'pointerout')) {
+            return;
+          }
           const eventType = POINTER_INPUT_MAP[eventTypeNormalized];
           const { pointerType } = ev;
 
@@ -47,7 +55,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
 
           // var isTouch = (pointerType === Hammer.INPUT_TYPE_TOUCH);
 
-          function isCorrectPointerId(element) {
+          function isCorrectPointerId(element: any) {
             return element.pointerId === ev.pointerId;
           }
 
@@ -115,7 +123,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
     singleTap.requireFailure(doubleTap);
     doubleTap.dropRequireFailure(singleTap);
 
-    hammer.on('panstart', (evt) => {
+    hammer.on('panstart', (evt: any) => {
       if (evt.button !== 1 && evt.button !== 3) {
         return;
       }
@@ -133,12 +141,10 @@ export default class HammerInteraction extends Object.extend(Evented) {
     /**
      * Triggers a panning event
      */
-    hammer.on('panmove', (evt) => {
+    hammer.on('panmove', (evt: any) => {
       if (evt.button !== 1 && evt.button !== 3) {
         return;
       }
-
-      const delta = {};
 
       if (evt.srcEvent.target !== canvas) {
         return;
@@ -146,8 +152,10 @@ export default class HammerInteraction extends Object.extend(Evented) {
 
       const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
-      delta.x = mousePosition.x - mouseDeltaX;
-      delta.y = mousePosition.y - mouseDeltaY;
+      const delta = {
+        x: mousePosition.x - mouseDeltaX,
+        y: mousePosition.y - mouseDeltaY,
+      };
 
       mouseDeltaX = mousePosition.x;
       mouseDeltaY = mousePosition.y;
@@ -160,7 +168,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
     /**
      * Triggers a panningEnd event if mouse is moved without clicking a button
      */
-    hammer.on('mousemove', (evt) => {
+    hammer.on('mousemove', (evt: any) => {
       if (evt.button !== 1 && evt.button !== 3) {
         return;
       }
@@ -177,7 +185,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
     /**
      * Triggers a doubletap event for the right mouse button
      */
-    hammer.on('doubletap', (evt) => {
+    hammer.on('doubletap', (evt: any) => {
       if (evt.button !== 1) {
         return;
       }
@@ -186,7 +194,13 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
+      let mousePosition: Position2D;
+
+      if (evt.srcEvent instanceof TouchEvent) {
+        mousePosition = InteractionModifierModifier.getTouchPos(canvas, evt.srcEvent);
+      } else {
+        mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
+      }
 
       self.trigger('doubletap', mousePosition);
     });
@@ -194,12 +208,18 @@ export default class HammerInteraction extends Object.extend(Evented) {
     /**
      * Triggers a single tap event for the left and right mouse button
      */
-    hammer.on('singletap', (evt) => {
+    hammer.on('singletap', (evt: any) => {
       if (evt.srcEvent.target !== canvas) {
         return;
       }
 
-      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
+      let mousePosition: Position2D;
+
+      if (evt.srcEvent instanceof TouchEvent) {
+        mousePosition = InteractionModifierModifier.getTouchPos(canvas, evt.srcEvent);
+      } else {
+        mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
+      }
 
       if (evt.button === 1) {
         self.trigger('lefttap', mousePosition, canvas);
