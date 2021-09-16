@@ -145,6 +145,9 @@ export default class UserSettings extends Service {
       setting.value = applicationColors[settingId2];
     }
 
+    this.notifyPropertyChange('applicationSettings');
+    this.notifyPropertyChange('landscapeSettings');
+
     this.updateSettings();
   }
 }
