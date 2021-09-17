@@ -27,4 +27,4 @@ testem.log
 jsconfig.json
 
 # .env files
-.env-akr
+.env-custom
