@@ -8,7 +8,9 @@ var colors = require('colors'); // eslint-disable-line
 module.exports = function initEnvironment(environment) {
   const path = { path: process.env.DOTENV };
 
-  if (process.env.DOTENV) {
+  const P_ENV = process.env;
+
+  if (P_ENV.DOTENV) {
     DOTENV.config(path);
   } else if (environment === 'production') {
     console.log('EXPL-WARNING: This is production mode. You must override the following variables via Docker environment variables in a Docker Compose file:'.yellow);
@@ -20,11 +22,9 @@ module.exports = function initEnvironment(environment) {
     console.log('... depending on your deployment, e.g., reverse proxy in use.'.yellow);
 
     DOTENV.config({ path: '.env-prod' });
-  } else if (environment === 'development') {
+  } else {
     DOTENV.config();
   }
-
-  const P_ENV = process.env;
 
   const ENV = {
     modulePrefix: 'explorviz-frontend',
