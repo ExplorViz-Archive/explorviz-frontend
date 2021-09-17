@@ -103,6 +103,7 @@
     "bootstrap-colorpicker": "3.2.0",
     "chart.js": "^2.9.4",
     "colors": "^1.4.0",
+    "dotenv": "^10.0.0",
     "elkjs": "^0.7.0",
     "ember-ajax": "^5.0.0",
     "ember-cli": "^3.24.0",

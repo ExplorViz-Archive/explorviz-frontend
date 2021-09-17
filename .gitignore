@@ -25,3 +25,6 @@
 npm-debug.log*
 testem.log
 jsconfig.json
+
+# .env files
+.env-akr
