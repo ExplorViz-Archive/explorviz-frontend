@@ -1,0 +1,11 @@
+<div class="d-flex justify-content-between pr-3">
+  <div>
+    <HelpTooltip @title={{@setting.description}} />
+    {{@setting.displayName}}
+  </div>
+  <XToggle
+    @theme="skewed"
+    @value={{@setting.value}}
+    @onToggle={{@onChange}}
+  />
+</div>

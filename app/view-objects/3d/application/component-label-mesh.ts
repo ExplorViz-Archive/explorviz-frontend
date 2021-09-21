@@ -31,7 +31,7 @@ export default class ComponentLabelMesh extends LabelMesh {
     /**
      * Updates bounding box of geometry and returns respective dimensions
      */
-    function computeBoxSize(geometry: THREE.Geometry | THREE.BufferGeometry) {
+    function computeBoxSize(geometry: THREE.BufferGeometry) {
       geometry.computeBoundingBox();
       const boxDimensions = new THREE.Vector3();
       geometry.boundingBox?.getSize(boxDimensions);

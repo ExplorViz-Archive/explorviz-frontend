@@ -1,33 +1,54 @@
 import { action } from '@ember/object';
 import Component from '@glimmer/component';
 import { inject as service } from '@ember/service';
-import Configuration, { LandscapeColors, ApplicationColors } from 'explorviz-frontend/services/configuration';
+import Configuration, { ApplicationColors, LandscapeColors } from 'explorviz-frontend/services/configuration';
+import UserSettings from 'explorviz-frontend/services/user-settings';
+import isObject from 'explorviz-frontend/utils/object-helpers';
+import { ApplicationColorSettingId, ColorSetting, LandscapeColorSettingId } from 'explorviz-frontend/utils/settings/settings-schemas';
 
 interface Args {
-  isLandscapeView: Boolean
-  removeComponent(componentPath: string): void
-  updateView(): void
+  id: ApplicationColorSettingId | LandscapeColorSettingId;
+  setting: ColorSetting;
+  updateColors(): void;
+}
+
+interface ColorPickerObjectApplication {
+  colorObject: THREE.Color;
+  colorName: keyof ApplicationColors;
+  isApplicationObject: true;
+}
+
+interface ColorPickerObjectLandscape {
+  colorObject: THREE.Color;
+  colorName: keyof LandscapeColors;
+  isLandscapeObject: true;
 }
 
 export default class ColorPicker extends Component<Args> {
   @service('configuration')
   configuration!: Configuration;
 
-  @action
-  close() {
-    this.args.removeComponent('color-picker');
-  }
+  @service('user-settings')
+  userSettings!: UserSettings;
 
   @action
   setupLandscapeColorpicker(colorName: keyof LandscapeColors, element: HTMLElement) {
-    const configColor = this.configuration.landscapeColors[colorName];
-    this.setupColorpicker(element, configColor);
+    const colorObject = this.configuration.landscapeColors[colorName];
+    this.setupColorpicker(element, {
+      colorObject,
+      colorName,
+      isLandscapeObject: true,
+    });
   }
 
   @action
-  setupApplicationColorPicker(colorName: keyof ApplicationColors, element: HTMLElement) {
-    const configColor = this.configuration.applicationColors[colorName];
-    this.setupColorpicker(element, configColor);
+  setupApplicationColorpicker(colorName: keyof ApplicationColors, element: HTMLElement) {
+    const colorObject = this.configuration.applicationColors[colorName];
+    this.setupColorpicker(element, {
+      colorObject,
+      colorName,
+      isApplicationObject: true,
+    });
   }
 
   /**
@@ -37,21 +58,32 @@ export default class ColorPicker extends Component<Args> {
    * @param element The HTML colorpicker element
    * @param configColor Reference to the respective color in the configuration service
    */
-  setupColorpicker(element: HTMLElement, configColor: THREE.Color) {
+  setupColorpicker(element: HTMLElement,
+    colorPickerObject: ColorPickerObjectApplication | ColorPickerObjectLandscape) {
     // eslint-disable-next-line
     $(`#${element.id}`)
     // @ts-ignore
       .colorpicker(
         {
-          color: configColor.getHexString(),
+          color: colorPickerObject.colorObject.getHexString(),
           format: 'hex',
           useAlpha: false,
         },
       ).on('colorpickerChange', (e: any) => {
         const inputColor = e.color.toHexString();
-        configColor.set(inputColor);
+        colorPickerObject.colorObject.set(inputColor);
 
-        this.args.updateView();
+        if (ColorPicker.isLandscapeObject(colorPickerObject)) {
+          this.userSettings.updateLandscapeSetting(colorPickerObject.colorName, inputColor);
+        } else {
+          this.userSettings.updateApplicationSetting(colorPickerObject.colorName, inputColor);
+        }
+
+        this.args.updateColors();
       });
+  }
+
+  private static isLandscapeObject(object: unknown): object is ColorPickerObjectLandscape {
+    return isObject(object) && {}.hasOwnProperty.call(object, 'isLandscapeObject');
   }
 }
