@@ -26,7 +26,7 @@ export default class HeatmapLegend extends Component<Args> {
   get descriptions() {
     return this.args.descriptions ?? {
       aggregatedHeatmap: 'Continuously aggregates metric scores by adding a part of the previous metric score to the new (visualized) value.',
-      windowedHeatmap: 'Visualizes the alteration for the selected metric considering the last ten scores.',
+      windowedHeatmap: 'Visualizes the average for the selected metric considering the last ten scores.',
       snapshotHeatmap: 'Visualizes the metric scores of the currently rendered snapshot.',
     };
   }
@@ -40,7 +40,7 @@ export default class HeatmapLegend extends Component<Args> {
       return 'Cont. score:';
     }
     if (mode === 'windowedHeatmap') {
-      return 'Windowed difference:';
+      return 'Windowed (average) scroe:';
     }
     return 'Subheader';
   }

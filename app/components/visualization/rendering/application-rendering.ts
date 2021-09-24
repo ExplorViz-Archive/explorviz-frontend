@@ -492,6 +492,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         const clipAction = animationMixer.clipAction(clip);
         clipAction.play();
         this.animationMixers.push(animationMixer);
+      } else {
+        // reposition
+        EntityRendering.repositionGlobeToApplication(this.applicationObject3D, this.globeMesh);
       }
 
       // Restore old state of components

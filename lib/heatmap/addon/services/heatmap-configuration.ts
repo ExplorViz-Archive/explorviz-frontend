@@ -43,7 +43,7 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
 
   aggregatedMetricScores: Map<string, Metric> = new Map<string, Metric>();
 
-  windowSize: number = 10;
+  windowSize: number = 9;
 
   @tracked
   selectedMetric: Metric | null = null;
@@ -179,10 +179,11 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
               const oldValue = oldMetricScore.values.get(key);
               // console.log('oldValue', key, oldValue);
               if (oldValue) {
-                newMetricValue = oldValue - newMetricValue;
+                newMetricValue += oldValue;
               }
             });
-            newMetricValue = value - newMetricValue;
+            newMetricValue += value;
+            newMetricValue /= (this.windowSize + 1);
             newWindowedMetricsMap.set(key, roundToTwoDecimalPlaces(newMetricValue));
             // console.log('set new Window', key, newMetricValue);
           } else {

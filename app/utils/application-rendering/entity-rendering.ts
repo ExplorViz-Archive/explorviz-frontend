@@ -158,3 +158,12 @@ export function addGlobeToApplication(appObject3D: ApplicationObject3D): THREE.M
 
   return mesh;
 }
+
+export function repositionGlobeToApplication(appObject3D: ApplicationObject3D, globe: THREE.Mesh) {
+  const applicationCenter = appObject3D.layout.center;
+  const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+  centerPoint.sub(applicationCenter);
+
+  globe.position.copy(centerPoint);
+}
