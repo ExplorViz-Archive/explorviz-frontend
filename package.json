@@ -131,6 +131,7 @@
     "plotly.js-dist": "^1.57.1",
     "rsvp": "^4.8.5",
     "sass": "^1.24.2",
+    "simpleheat": "^0.4.0",
     "stats.js": "^0.17.0",
     "three": "^0.131.3",
     "threejs-meshline": "^2.0.12",
@@ -138,6 +139,7 @@
   },
   "ember-addon": {
     "paths": [
+      "lib/heatmap",
       "lib/virtual-reality",
       "lib/collaborative-mode"
     ]

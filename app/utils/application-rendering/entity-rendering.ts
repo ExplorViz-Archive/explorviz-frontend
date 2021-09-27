@@ -117,8 +117,12 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
 
   const { foundationColor, highlightedEntityColor } = applicationColors;
 
+  const segmentScalar = 0.45;
+  const widthSegments = Math.floor(applicationLayout.width * segmentScalar);
+  const depthSegments = Math.floor(applicationLayout.depth * segmentScalar);
+
   const mesh = new FoundationMesh(applicationLayout,
-    application, foundationColor, highlightedEntityColor);
+    application, foundationColor, highlightedEntityColor, widthSegments, depthSegments);
 
   addMeshToApplication(mesh, applicationObject3D);
 
@@ -153,4 +157,13 @@ export function addGlobeToApplication(appObject3D: ApplicationObject3D): THREE.M
   appObject3D.add(mesh);
 
   return mesh;
+}
+
+export function repositionGlobeToApplication(appObject3D: ApplicationObject3D, globe: THREE.Mesh) {
+  const applicationCenter = appObject3D.layout.center;
+  const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+  centerPoint.sub(applicationCenter);
+
+  globe.position.copy(centerPoint);
 }

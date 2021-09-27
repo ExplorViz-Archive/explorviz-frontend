@@ -14,6 +14,13 @@
       {{did-insert this.outerDivInserted}}
       {{did-resize this.resize debounce=100}}
     >
+      {{#if this.heatmapConf.heatmapActive}}
+        <HeatmapInfo
+          @triggerHeatmapVisualization={{this.triggerHeatmapVisualization}}
+          @updateMetric={{this.updateMetric}}
+        />
+      {{/if}}
+
       <canvas
         class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
         {{interaction-modifier

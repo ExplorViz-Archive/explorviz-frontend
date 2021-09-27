@@ -1,0 +1,15 @@
+@media (min-width: 576px) {
+  .popover {
+    max-width: 550px!important;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .popover > .popover-body {
+    overflow-x: auto;
+
+    > table {
+      display: inline-table;
+    }
+  }
+}

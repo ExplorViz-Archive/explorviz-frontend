@@ -21,4 +21,8 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
   get requests() {
     return this.args.communication.totalRequests;
   }
+
+  get operationName() {
+    return this.args.communication.operationName;
+  }
 }

@@ -5,21 +5,26 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import CommunicationLayout from 'explorviz-frontend/view-objects/layout-models/communication-layout';
 import UserSettings from 'explorviz-frontend/services/user-settings';
 import { Vector3 } from 'three';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 
 export default class CommunicationRendering {
-  // Service to access color preferences
+  // Service to access preferences
   configuration: Configuration;
+
+  heatmapConf: HeatmapConfiguration;
 
   userSettings: UserSettings;
 
-  get appSettings() {
-    return this.userSettings.applicationSettings;
-  }
-
-  constructor(configuration: Configuration, userSettings: UserSettings) {
+  constructor(configuration: Configuration,
+    userSettings: UserSettings, heatmapConf: HeatmapConfiguration) {
     this.configuration = configuration;
     this.userSettings = userSettings;
+    this.heatmapConf = heatmapConf;
+  }
+
+  get appSettings() {
+    return this.userSettings.applicationSettings;
   }
 
   private computeCurveHeight(commLayout: CommunicationLayout) {
@@ -56,6 +61,8 @@ export default class CommunicationRendering {
    */
   addCommunication(applicationObject3D: ApplicationObject3D,
     drawableClassCommunications: DrawableClassCommunication[]) {
+    if (!this.configuration.isCommRendered) return;
+
     const application = applicationObject3D.dataModel;
     const applicationLayout = applicationObject3D.boxLayoutMap.get(application.id);
 
@@ -93,6 +100,10 @@ export default class CommunicationRendering {
       applicationObject3D.add(pipe);
 
       this.addArrows(pipe, curveHeight, viewCenterPoint);
+
+      if (this.heatmapConf.heatmapActive) {
+        pipe.turnTransparent(0.1);
+      }
     });
   }
 }

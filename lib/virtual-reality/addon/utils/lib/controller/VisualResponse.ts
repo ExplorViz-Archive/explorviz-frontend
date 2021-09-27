@@ -97,12 +97,8 @@ export default class VisualResponse {
    */
   updateFromComponent({
     xAxis, yAxis, button, state,
-  }: {
-    xAxis: number | undefined,
-    yAxis: number | undefined,
-    button: number | undefined,
-    state: string
-  }) {
+  }: { xAxis: number | undefined, yAxis: number | undefined, button: number | undefined,
+    state: string }) {
     const { normalizedXAxis, normalizedYAxis } = VisualResponse.normalizeAxes(xAxis, yAxis);
     switch (this.componentProperty) {
       case Constants.ComponentProperty.X_AXIS:

@@ -8,6 +8,7 @@ import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';
 import ClazzCommunicationMesh from './clazz-communication-mesh';
 import BaseMesh from '../base-mesh';
+import BoxMesh from './box-mesh';
 
 /**
  * This extended Object3D adds additional functionality to
@@ -159,6 +160,103 @@ export default class ApplicationObject3D extends THREE.Object3D {
     return openComponentIds;
   }
 
+  /**
+   * Sets the visiblity of all component meshes with the current application
+   * @param opaccity Determines how opaque / visible component meshes should be
+   */
+  setBoxMeshOpacity(opacity = 1) {
+    this.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof BoxMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+          mesh.defaultOpacity = 1;
+        } else {
+          mesh.turnTransparent(opacity);
+          mesh.defaultOpacity = opacity;
+        }
+      }
+    });
+  }
+
+  /**
+   * Sets the visiblity of all component meshes with the current application
+   * @param opaccity Determines how opaque / visible component meshes should be
+   */
+  setComponentMeshOpacity(opacity = 1) {
+    this.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof ComponentMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+          mesh.defaultOpacity = 1;
+        } else {
+          mesh.turnTransparent(opacity);
+          mesh.defaultOpacity = opacity;
+        }
+      }
+    });
+  }
+
+  /**
+   * Sets the visiblity of all communication meshes with the current application
+   * @param opaccity Determines how opaque/visible component meshes should be
+   */
+  setCommunicationOpacity(opacity = 1) {
+    const commMeshes = this.getCommMeshes();
+
+    commMeshes.forEach((mesh) => {
+      if (mesh instanceof ClazzCommunicationMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+        } else {
+          mesh.turnTransparent(opacity);
+        }
+      }
+    });
+  }
+
+  setOpacity(opacity = 1) {
+    this.setBoxMeshOpacity(opacity);
+    this.setCommunicationOpacity(opacity);
+  }
+
+  /**
+   * Sets the opacity of all box meshes within the application object to 1.
+   *
+   * @param setAsDefault Determines whether default opacity value should be set
+   */
+  turnOpaque(setAsDefault = true) {
+    if (setAsDefault) {
+      this.setBoxMeshOpacity(1);
+    } else {
+      this.getBoxMeshes().forEach((mesh) => {
+        if (mesh instanceof BoxMesh) {
+          mesh.turnOpaque();
+        }
+      });
+    }
+  }
+
+  /**
+   * Sets the opacity of all box meshes within the application object to the
+   * default opacity value (which is 1 if not set otherwise).
+   */
+  setToDefaultOpacity() {
+    this.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof BoxMesh) {
+        if (mesh.defaultOpacity === 1) {
+          mesh.turnOpaque();
+        } else {
+          mesh.turnTransparent(mesh.defaultOpacity);
+        }
+      }
+    });
+  }
+
+  /**
+   * Sets the highlighting color for all meshes within the application object.
+   *
+   * @param color Color for highlighting of objects within the application.
+   */
   setHighlightingColor(color: THREE.Color) {
     this.getAllMeshes().forEach((mesh) => {
       mesh.highlightingColor = color;

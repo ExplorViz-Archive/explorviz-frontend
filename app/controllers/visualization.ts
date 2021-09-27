@@ -16,6 +16,7 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
 import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -38,6 +39,8 @@ export default class VisualizationController extends Controller {
   @service('collaborative-service') collaborativeService!: CollaborativeService;
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
+
+  @service('heatmap-configuration') heatmapConf!: HeatmapConfiguration;
 
   @service('landscape-token') landscapeTokenService!: LandscapeTokenService;
 
@@ -103,6 +106,7 @@ export default class VisualizationController extends Controller {
   receiveNewLandscapeData(structureData: StructureLandscapeData,
     dynamicData: DynamicLandscapeData) {
     if (!this.visualizationPaused) {
+      this.heatmapConf.latestClazzMetricScores = [];
       this.updateLandscape(structureData, dynamicData);
     }
   }

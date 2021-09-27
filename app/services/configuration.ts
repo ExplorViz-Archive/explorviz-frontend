@@ -38,6 +38,9 @@ export default class Configuration extends Service {
 
   // #region APPLICATION LAYOUT
 
+  @tracked
+  isCommRendered = true;
+
   commCurveHeightDependsOnDistance = true;
 
   // #endregion APPLICATION LAYOUT
