@@ -24,9 +24,16 @@ function computeClassCommunicationRecursively(span: Span, spanIdToChildSpanMap: 
   childSpans.forEach((childSpan) => {
     const classMatchingChildSpan = hashCodeToClassMap.get(childSpan.hashCode);
     if (classMatchingChildSpan !== undefined) {
+      // retrieve operationName
+      const methodMatchingSpanHash = classMatchingChildSpan
+        .methods.find((method) => method.hashCode === childSpan.hashCode);
+
+      const methodName = methodMatchingSpanHash ? methodMatchingSpanHash.name : 'UNKNOWN';
+
       classCommunications.push({
         sourceClass: classMatchingSpan,
         targetClass: classMatchingChildSpan,
+        operationName: methodName,
       });
       classCommunications.push(...computeClassCommunicationRecursively(childSpan,
         spanIdToChildSpanMap, hashCodeToClassMap));
@@ -61,7 +68,7 @@ export default function computeDrawableClassCommunication(
 
   const classIdsToAggregated = new Map<string, AggregatedClassCommunication>();
 
-  totalClassCommunications.forEach(({ sourceClass, targetClass }) => {
+  totalClassCommunications.forEach(({ sourceClass, targetClass, operationName }) => {
     const sourceAndTargetClassId = `${sourceClass.id}_${targetClass.id}`;
 
     const aggregatedClassCommunication = classIdsToAggregated.get(sourceAndTargetClassId);
@@ -71,6 +78,7 @@ export default function computeDrawableClassCommunication(
         totalRequests: 1,
         sourceClass,
         targetClass,
+        operationName,
       });
     } else {
       aggregatedClassCommunication.totalRequests++;
@@ -79,7 +87,9 @@ export default function computeDrawableClassCommunication(
 
   const sourceTargetClassIdToDrawable = new Map<string, DrawableClassCommunication>();
 
-  classIdsToAggregated.forEach(({ sourceClass, targetClass, totalRequests }) => {
+  classIdsToAggregated.forEach(({
+    sourceClass, targetClass, totalRequests, operationName,
+  }) => {
     const targetSourceClassId = `${targetClass.id}_${sourceClass.id}`;
 
     if (sourceClass === targetClass) {
@@ -89,6 +99,7 @@ export default function computeDrawableClassCommunication(
         sourceClass,
         targetClass,
         bidirectional: true,
+        operationName,
       });
     } else {
       const drawableClassCommunication = sourceTargetClassIdToDrawable.get(targetSourceClassId);
@@ -104,6 +115,7 @@ export default function computeDrawableClassCommunication(
           sourceClass,
           targetClass,
           bidirectional: false,
+          operationName,
         });
       }
     }
@@ -121,12 +133,14 @@ export function isDrawableClassCommunication(x: any): x is DrawableClassCommunic
 interface ClassCommunication {
   sourceClass: Class;
   targetClass: Class;
+  operationName: string;
 }
 
 interface AggregatedClassCommunication {
   totalRequests: number;
   sourceClass: Class;
   targetClass: Class;
+  operationName: string;
 }
 
 export interface DrawableClassCommunication {
@@ -135,4 +149,5 @@ export interface DrawableClassCommunication {
   sourceClass: Class;
   targetClass: Class;
   bidirectional: boolean;
+  operationName: string;
 }

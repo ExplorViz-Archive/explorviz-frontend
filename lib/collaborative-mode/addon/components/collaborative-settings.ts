@@ -8,9 +8,7 @@ import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 
 interface CollaborativeSettingsArgs {
-  isLandscapeView: Boolean
   removeComponent(componentPath: string): void
-  updateView(): void
 }
 
 export default class CollaborativeSettings extends Component<CollaborativeSettingsArgs> {

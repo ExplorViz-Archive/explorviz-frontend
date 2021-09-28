@@ -3,15 +3,28 @@ import applyCommunicationLayout from 'explorviz-frontend/utils/application-rende
 import Configuration from 'explorviz-frontend/services/configuration';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationLayout from 'explorviz-frontend/view-objects/layout-models/communication-layout';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 import { Vector3 } from 'three';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 
 export default class CommunicationRendering {
-  // Service to access color preferences
+  // Service to access preferences
   configuration: Configuration;
 
-  constructor(configuration: Configuration) {
+  heatmapConf: HeatmapConfiguration;
+
+  userSettings: UserSettings;
+
+  constructor(configuration: Configuration,
+    userSettings: UserSettings, heatmapConf: HeatmapConfiguration) {
     this.configuration = configuration;
+    this.userSettings = userSettings;
+    this.heatmapConf = heatmapConf;
+  }
+
+  get appSettings() {
+    return this.userSettings.applicationSettings;
   }
 
   private computeCurveHeight(commLayout: CommunicationLayout) {
@@ -24,17 +37,17 @@ export default class CommunicationRendering {
       baseCurveHeight = classDistance * 0.5;
     }
 
-    return baseCurveHeight * this.configuration.commCurveHeightMultiplier;
+    return baseCurveHeight * this.appSettings.curvyCommHeight.value;
   }
 
   // Add arrow indicators for drawable class communication
   private addArrows(pipe: ClazzCommunicationMesh, curveHeight: number, viewCenterPoint: Vector3) {
     const arrowOffset = 0.8;
     const arrowHeight = curveHeight / 2 + arrowOffset;
-    const arrowThickness = this.configuration.commArrowThickness;
-    const arrowColorHex = this.configuration.applicationColors.communicationArrow.getHex();
+    const arrowThickness = this.appSettings.commArrowSize.value;
+    const arrowColorHex = this.configuration.applicationColors.communicationArrowColor.getHex();
 
-    if (typeof arrowThickness === 'number' && arrowThickness > 0.0) {
+    if (arrowThickness > 0.0) {
       pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColorHex);
     }
   }
@@ -48,6 +61,8 @@ export default class CommunicationRendering {
    */
   addCommunication(applicationObject3D: ApplicationObject3D,
     drawableClassCommunications: DrawableClassCommunication[]) {
+    if (!this.configuration.isCommRendered) return;
+
     const application = applicationObject3D.dataModel;
     const applicationLayout = applicationObject3D.boxLayoutMap.get(application.id);
 
@@ -63,10 +78,7 @@ export default class CommunicationRendering {
       applicationObject3D.boxLayoutMap, drawableClassCommunications);
 
     // Retrieve color preferences
-    const {
-      communication: communicationColor,
-      highlightedEntity: highlightedEntityColor,
-    } = this.configuration.applicationColors;
+    const { communicationColor, highlightedEntityColor } = this.configuration.applicationColors;
 
     // Render all drawable communications
     drawableClassCommunications.forEach((drawableClazzComm) => {
@@ -88,6 +100,10 @@ export default class CommunicationRendering {
       applicationObject3D.add(pipe);
 
       this.addArrows(pipe, curveHeight, viewCenterPoint);
+
+      if (this.heatmapConf.heatmapActive) {
+        pipe.turnTransparent(0.1);
+      }
     });
   }
 }

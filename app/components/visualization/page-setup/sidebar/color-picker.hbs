@@ -1,45 +1,23 @@
-<div
-  class="sidebar-component-close"
-  {{on "click" this.close}}
->
-  {{svg-jar "x-16" class="octicon"}}
-</div>
-
-<div id="colorHeader">
-  <Visualization::PageSetup::Sidebar::ColorSchemeSelector
-    @updateView={{@updateView}}
-  />
-</div>
-
-<div class="mt-3">
-  {{#if @isLandscapeView}}
-
-    {{#each (entries this.configuration.landscapeColors) as |entry|}}
-      <div
-        id={{concat "cp-landscape-" (get entry 0)}}
-        class="input-group justify-content-between"
-        {{did-insert (fn this.setupLandscapeColorpicker (get entry 0))}}
-      >
-        <span class="colorpicker-label">{{format-color-property (get entry 0)}}</span>
-        <span class="input-group-append colorpicker-input">
-          <span class="input-group-text colorpicker-input-addon"><i></i></span>
-        </span>
-      </div>
-    {{/each}}
-
-  {{else}}
-
-    {{#each (entries this.configuration.applicationColors) as |entry|}}
-      <div
-        id={{concat "cp-application-" (get entry 0)}}
-        class="input-group justify-content-between"
-        {{did-insert (fn this.setupApplicationColorPicker (get entry 0))}}
-      >
-        <span class="colorpicker-label">{{format-color-property (get entry 0)}}</span>
-        <span class="input-group-append colorpicker-input">
-          <span class="input-group-text colorpicker-input-addon"><i></i></span>
-        </span>
-      </div>
-    {{/each}}
-  {{/if}}
-</div>
+{{#if @isLandscapeView}}
+  <div
+    id={{concat "cp-landscape-" @id}}
+    class="input-group justify-content-between"
+    {{did-insert (fn this.setupLandscapeColorpicker @id)}}
+  >
+    <span class="colorpicker-label">{{format-color-property @setting.displayName}}</span>
+    <span class="input-group-append colorpicker-input">
+      <span class="input-group-text colorpicker-input-addon"><i></i></span>
+    </span>
+  </div>
+{{else}}
+  <div
+    id={{concat "cp-application-" @id}}
+    class="input-group justify-content-between"
+    {{did-insert (fn this.setupApplicationColorpicker @id)}}
+  >
+    <span class="colorpicker-label">{{format-color-property @setting.displayName}}</span>
+    <span class="input-group-append colorpicker-input">
+      <span class="input-group-text colorpicker-input-addon"><i></i></span>
+    </span>
+  </div>
+{{/if}}

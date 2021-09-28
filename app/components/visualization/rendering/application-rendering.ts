@@ -41,6 +41,12 @@ import {
   toggleComponentMeshState,
 } from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
+import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPos, removeHeatmapHelperLines } from 'heatmap/utils/heatmap-helper';
+import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -76,8 +82,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @service('configuration')
   configuration!: Configuration;
 
+  @service('heatmap-configuration')
+  heatmapConf!: HeatmapConfiguration;
+
   @service()
   worker!: any;
+
+  @service('user-settings')
+  userSettings!: UserSettings;
 
   debug = debugLogger('ApplicationRendering');
 
@@ -116,11 +128,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   readonly communicationRendering: CommunicationRendering;
 
   get rightClickMenuItems() {
+    const commButtonTitle = this.configuration.isCommRendered ? 'Hide Communication' : 'Add Communication';
+    const heatmapButtonTitle = this.heatmapConf.heatmapActive ? 'Disable Heatmap' : 'Enable Heatmap';
     const pauseButtonTitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
 
     return [
       { title: 'Reset View', action: this.resetView },
       { title: 'Open All Components', action: this.openAllComponents },
+      { title: commButtonTitle, action: this.toggleCommunicationRendering },
+      { title: heatmapButtonTitle, action: this.toggleHeatmap },
       { title: pauseButtonTitle, action: this.args.toggleVisualizationUpdating },
       { title: 'Open Sidebar', action: this.args.openDataSelection },
     ];
@@ -139,6 +155,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     return this.args.font;
   }
 
+  get appSettings() {
+    return this.userSettings.applicationSettings;
+  }
+
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -155,7 +175,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.applicationObject3D = new ApplicationObject3D(application!,
       new Map(), dynamicLandscapeData);
 
-    this.communicationRendering = new CommunicationRendering(this.configuration);
+    this.communicationRendering = new CommunicationRendering(
+      this.configuration,
+      this.userSettings,
+      this.heatmapConf,
+    );
 
     this.hoveredObject = null;
   }
@@ -185,8 +209,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     // Display application nicely for first rendering
     applyDefaultApplicationLayout(this.applicationObject3D);
-    this.communicationRendering.addCommunication(this.applicationObject3D,
-      this.drawableClassCommunications);
+    this.addCommunication();
     this.applicationObject3D.resetRotation();
   }
 
@@ -200,13 +223,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    /*
-    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
-      'showFpsCounter');
+    const { value: showFpsCounter } = this.userSettings.applicationSettings.showFpsCounter;
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();
-    } */
+    }
   }
 
   /**
@@ -214,7 +235,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = this.configuration.applicationColors.background;
+    this.scene.background = this.configuration.applicationColors.backgroundColor;
     this.debug('Scene created');
   }
 
@@ -286,7 +307,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       removeHighlighting(this.applicationObject3D);
     } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
-      highlight(mesh, this.applicationObject3D, this.drawableClassCommunications);
+      const { value } = this.appSettings.transparencyIntensity;
+      highlight(mesh, this.applicationObject3D, this.drawableClassCommunications, value);
+
+      if (this.heatmapConf.heatmapActive) {
+        this.applicationObject3D.setComponentMeshOpacity(0.1);
+        this.applicationObject3D.setCommunicationOpacity(0.1);
+      }
     }
   }
 
@@ -302,16 +329,28 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
       toggleComponentMeshState(mesh, this.applicationObject3D);
-      this.communicationRendering.addCommunication(this.applicationObject3D,
-        this.drawableClassCommunications);
-      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+      this.addCommunication();
+      if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+        const { value } = this.appSettings.transparencyIntensity;
+        updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+      } else {
+        this.unhighlightAll();
+      }
       // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
       closeAllComponents(this.applicationObject3D);
       // Re-compute communication and highlighting
-      this.communicationRendering.addCommunication(this.applicationObject3D,
-        this.drawableClassCommunications);
-      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+      this.addCommunication();
+      if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+        const { value } = this.appSettings.transparencyIntensity;
+        updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+      } else {
+        this.unhighlightAll();
+      }
+    }
+    if (this.heatmapConf.heatmapActive) {
+      this.applicationObject3D.setComponentMeshOpacity(0.1);
+      this.applicationObject3D.setCommunicationOpacity(0.1);
     }
   }
 
@@ -324,14 +363,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   mouseMoveOnMesh(mesh: THREE.Object3D) {
-    const enableHoverEffects = true;
-    // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
+    const { value: enableHoverEffects } = this.appSettings.enableHoverEffects;
 
     // Update hover effect
     if (mesh === undefined && this.hoveredObject) {
       this.hoveredObject.resetHoverEffect();
       this.hoveredObject = null;
-    } else if (mesh instanceof BaseMesh && enableHoverEffects) {
+    } else if (mesh instanceof BaseMesh && enableHoverEffects && !this.heatmapConf.heatmapActive) {
       if (this.hoveredObject) { this.hoveredObject.resetHoverEffect(); }
 
       this.hoveredObject = mesh;
@@ -454,16 +492,25 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         const clipAction = animationMixer.clipAction(clip);
         clipAction.play();
         this.animationMixers.push(animationMixer);
+      } else {
+        // reposition
+        EntityRendering.repositionGlobeToApplication(this.applicationObject3D, this.globeMesh);
       }
 
       // Restore old state of components
       restoreComponentState(this.applicationObject3D, openComponentIds);
       this.updateDrawableClassCommunications();
-      this.communicationRendering.addCommunication(this.applicationObject3D,
-        this.drawableClassCommunications);
+      this.addCommunication();
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
+
+      if (this.heatmapConf.heatmapActive) {
+        perform(this.calculateHeatmapTask, this.applicationObject3D, () => {
+          this.applyHeatmap();
+          this.heatmapConf.triggerLatestHeatmapUpdate();
+        });
+      }
     } catch (e) {
       // console.log(e);
     }
@@ -475,9 +522,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   addLabels() {
     if (!this.font) { return; }
 
-    const clazzTextColor = this.configuration.applicationColors.clazzText;
-    const componentTextColor = this.configuration.applicationColors.componentText;
-    const foundationTextColor = this.configuration.applicationColors.foundationText;
+    const {
+      clazzTextColor, componentTextColor, foundationTextColor,
+    } = this.configuration.applicationColors;
 
     // Label all entities (excluding communication)
     this.applicationObject3D.getBoxMeshes().forEach((mesh) => {
@@ -517,6 +564,201 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
   // #endregion COLLABORATIVE
 
+  // #region HEATMAP
+
+  @restartableTask*
+  calculateHeatmapTask(
+    applicationObject3D: ApplicationObject3D,
+    callback?: () => void,
+  ) {
+    try {
+      const workerPayload = {
+        structure: applicationObject3D.dataModel,
+        dynamic: applicationObject3D.traces,
+      };
+
+      const metrics: Metric[] = yield this.worker.postMessage('metrics-worker', workerPayload);
+
+      this.heatmapConf.applicationID = applicationObject3D.dataModel.id;
+      this.heatmapConf.latestClazzMetricScores = metrics;
+      this.heatmapConf.saveAndCalculateMetricScores(metrics);
+
+      this.heatmapConf.updateCurrentlyViewedMetric();
+
+      if (callback) callback();
+    } catch (e) {
+      this.debug(e);
+    }
+  }
+
+  applyHeatmap() {
+    if (!this.heatmapConf.latestClazzMetricScores
+      || !this.heatmapConf.latestClazzMetricScores.firstObject) {
+      AlertifyHandler.showAlertifyError('No metrics available.');
+      return;
+    }
+
+    // Selected first metric if none is selected yet
+    if (!this.heatmapConf.selectedMetric) {
+      this.heatmapConf.selectedMetric = this.heatmapConf.latestClazzMetricScores.firstObject;
+    }
+
+    const { selectedMetric } = this.heatmapConf;
+
+    this.applicationObject3D.setComponentMeshOpacity(0.1);
+    this.applicationObject3D.setCommunicationOpacity(0.1);
+
+    const foundationMesh = this.applicationObject3D
+      .getBoxMeshbyModelId(this.args.landscapeData.application!.id);
+
+    if (!(foundationMesh instanceof FoundationMesh)) {
+      return;
+    }
+
+    let colorMap: number[];
+    let simpleHeatMap: any;
+    let canvas: any;
+
+    if (!this.heatmapConf.useSimpleHeat) {
+      const { depthSegments, widthSegments } = foundationMesh.geometry.parameters;
+      // Compute face numbers of top side of the cube
+      const size = widthSegments * depthSegments * 2;
+      // Prepare color map with same size as the surface of the foundation topside
+      colorMap = new Array(size).fill(0);
+    } else {
+      canvas = document.createElement('canvas');
+      canvas.width = foundationMesh.width;
+      canvas.height = foundationMesh.depth;
+      simpleHeatMap = simpleHeatmap(selectedMetric.max, canvas,
+        this.heatmapConf.getSimpleHeatGradient(),
+        this.heatmapConf.heatmapRadius, this.heatmapConf.blurRadius);
+    }
+
+    const foundationWorldPosition = new THREE.Vector3();
+
+    foundationMesh.getWorldPosition(foundationWorldPosition);
+
+    removeHeatmapHelperLines(this.applicationObject3D);
+
+    const boxMeshes = this.applicationObject3D.getBoxMeshes();
+
+    boxMeshes.forEach((boxMesh) => {
+      if (boxMesh instanceof ClazzMesh) {
+        this.heatmapClazzUpdate(boxMesh.dataModel, foundationMesh,
+          simpleHeatMap, colorMap);
+      }
+    });
+
+    if (!this.heatmapConf.useSimpleHeat) {
+      const color = 'rgb(255, 255, 255)';
+      foundationMesh.material = new THREE.MeshLambertMaterial({
+        color: new THREE.Color(color),
+        vertexColors: true,
+      });
+
+      invokeRecoloring(colorMap!, foundationMesh, selectedMetric.max,
+        this.heatmapConf.getArrayHeatGradient());
+    } else {
+      simpleHeatMap.draw(0.0);
+
+      applySimpleHeatOnFoundation(foundationMesh, canvas);
+    }
+
+    this.heatmapConf.currentApplication = this.applicationObject3D;
+    this.heatmapConf.applicationID = this.applicationObject3D.dataModel.id;
+    this.heatmapConf.heatmapActive = true;
+  }
+
+  removeHeatmap() {
+    this.applicationObject3D.setOpacity(1);
+    removeHeatmapHelperLines(this.applicationObject3D);
+
+    const foundationMesh = this.applicationObject3D
+      .getBoxMeshbyModelId(this.args.landscapeData.application!.id);
+
+    if (foundationMesh && foundationMesh instanceof FoundationMesh) {
+      foundationMesh.setDefaultMaterial();
+    }
+
+    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, 1);
+
+    this.heatmapConf.currentApplication = null;
+    this.heatmapConf.heatmapActive = false;
+  }
+
+  heatmapClazzUpdate(clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any,
+    colorMap: number[]) {
+    // Calculate center point of the clazz floor. This is used for computing the corresponding
+    // face on the foundation box.
+    const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id) as
+          ClazzMesh | undefined;
+
+    if (!clazzMesh || !this.heatmapConf.selectedMetric) {
+      return;
+    }
+
+    const heatmapValues = this.heatmapConf.selectedMetric.values;
+    const heatmapValue = heatmapValues.get(clazz.id);
+
+    if (!heatmapValue) return;
+
+    const raycaster = new THREE.Raycaster();
+    const { selectedMode } = this.heatmapConf;
+
+    const clazzPos = clazzMesh.position.clone();
+    const viewPos = computeHeatMapViewPos(foundationMesh, this.camera);
+
+    clazzPos.y -= clazzMesh.height / 2;
+
+    this.applicationObject3D.localToWorld(clazzPos);
+
+    // The vector from the viewPos to the clazz floor center point
+    const rayVector = clazzPos.clone().sub(viewPos);
+
+    // Following the ray vector from the floor center get the intersection with the foundation.
+    raycaster.set(clazzPos, rayVector.normalize());
+
+    const firstIntersection = raycaster.intersectObject(foundationMesh, false)[0];
+
+    const worldIntersectionPoint = firstIntersection.point.clone();
+    this.applicationObject3D.worldToLocal(worldIntersectionPoint);
+
+    if (this.heatmapConf.useHelperLines) {
+      addHeatmapHelperLine(this.applicationObject3D, clazzPos, worldIntersectionPoint);
+    }
+
+    // Compute color only for the first intersection point for consistency if one was found.
+    if (firstIntersection) {
+      if (!this.heatmapConf.useSimpleHeat && firstIntersection.faceIndex) {
+        // The number of faces at front and back of the foundation mesh,
+        // i.e. the starting index for the faces on top.
+        const depthOffset = foundationMesh.geometry.parameters.depthSegments * 4;
+        if (selectedMode === 'aggregatedHeatmap') {
+          setColorValues(firstIntersection.faceIndex - depthOffset,
+            heatmapValue - (this.heatmapConf.largestValue / 2),
+            colorMap,
+            foundationMesh);
+        } else {
+          setColorValues(firstIntersection.faceIndex - depthOffset,
+            heatmapValue,
+            colorMap,
+            foundationMesh);
+        }
+      } else if (this.heatmapConf.useSimpleHeat && firstIntersection.uv) {
+        const xPos = firstIntersection.uv.x * foundationMesh.width;
+        const zPos = (1 - firstIntersection.uv.y) * foundationMesh.depth;
+        if (selectedMode === 'aggregatedHeatmap') {
+          simpleHeatMap.add([xPos, zPos, heatmapValues.get(clazz.id)]);
+        } else {
+          simpleHeatMap.add([xPos, zPos,
+            heatmapValue + (this.heatmapConf.largestValue / 2)]);
+        }
+      }
+    }
+  }
+
+  // #endregion HEATMAP
+
   // #region RENDERING LOOP
 
   /**
@@ -527,6 +769,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     const animationId = requestAnimationFrame(this.render);
     this.animationFrameId = animationId;
+
+    const { value: showFpsCounter } = this.userSettings.applicationSettings.showFpsCounter;
+
+    if (showFpsCounter && !this.threePerformance) {
+      this.threePerformance = new THREEPerformance();
+    } else if (!showFpsCounter && this.threePerformance) {
+      this.threePerformance.removePerformanceMeasurement();
+      this.threePerformance = undefined;
+    }
 
     if (this.threePerformance) {
       this.threePerformance.threexStats.update(this.renderer);
@@ -614,9 +865,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         openComponentMesh(ancestorMesh, this.applicationObject3D);
       }
     });
-    this.communicationRendering.addCommunication(this.applicationObject3D,
-      this.drawableClassCommunications);
-    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+    this.addCommunication();
+
+    if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+      const { value } = this.appSettings.transparencyIntensity;
+      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+    } else {
+      this.unhighlightAll();
+    }
   }
 
   /**
@@ -630,9 +886,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh instanceof ComponentMesh) {
       closeComponentMesh(mesh, this.applicationObject3D);
     }
-    this.communicationRendering.addCommunication(this.applicationObject3D,
-      this.drawableClassCommunications);
-    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+    this.addCommunication();
+
+    if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+      const { value } = this.appSettings.transparencyIntensity;
+      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+    } else {
+      this.unhighlightAll();
+    }
   }
 
   /**
@@ -648,9 +909,52 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       openComponentsRecursively(child, this.applicationObject3D);
     });
 
+    this.addCommunication();
+
+    if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+      const { value } = this.appSettings.transparencyIntensity;
+      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+    } else {
+      this.unhighlightAll();
+    }
+  }
+
+  @action
+  updateHighlighting() {
+    const { value } = this.appSettings.transparencyIntensity;
+    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+  }
+
+  @action
+  addCommunication() {
     this.communicationRendering.addCommunication(this.applicationObject3D,
       this.drawableClassCommunications);
-    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, 1);
+
+    if (this.heatmapConf.heatmapActive) {
+      this.applicationObject3D.setComponentMeshOpacity(0.1);
+      this.applicationObject3D.setCommunicationOpacity(0.1);
+    }
+  }
+
+  /**
+   * Toggles the visualization of communication lines.
+   */
+  @action
+  toggleCommunicationRendering() {
+    this.configuration.isCommRendered = !this.configuration.isCommRendered;
+
+    if (this.configuration.isCommRendered) {
+      this.communicationRendering.addCommunication(this.applicationObject3D,
+        this.drawableClassCommunications);
+    } else {
+      this.applicationObject3D.removeAllCommunication();
+
+      // Remove highlighting if highlighted communication is no longer visible
+      if (this.applicationObject3D.highlightedEntity instanceof ClazzCommunicationMesh) {
+        removeHighlighting(this.applicationObject3D);
+      }
+    }
   }
 
   /**
@@ -660,7 +964,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   highlightModel(entity: Package | Class) {
-    highlightModel(entity, this.applicationObject3D, this.drawableClassCommunications);
+    const { value } = this.appSettings.transparencyIntensity;
+    highlightModel(entity, this.applicationObject3D, this.drawableClassCommunications, value);
   }
 
   /**
@@ -728,8 +1033,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   highlightTrace(trace: Trace, traceStep: string) {
     // Open components such that complete trace is visible
     this.openAllComponents();
+    const { value } = this.appSettings.transparencyIntensity;
     highlightTrace(trace, traceStep, this.applicationObject3D,
-      this.drawableClassCommunications, this.args.landscapeData.structureLandscapeData);
+      this.drawableClassCommunications, this.args.landscapeData.structureLandscapeData, value);
   }
 
   @action
@@ -744,9 +1050,48 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         object3D.updateColor();
         // Special case because communication arrow is no base mesh
       } else if (object3D instanceof CommunicationArrowMesh) {
-        object3D.updateColor(this.configuration.applicationColors.communicationArrow);
+        object3D.updateColor(this.configuration.applicationColors.communicationArrowColor);
       }
     });
+  }
+
+  @action
+  triggerHeatmapVisualization() {
+    const metricName = this.heatmapConf.selectedMetric?.name;
+
+    if (metricName) {
+      this.heatmapConf.setSelectedMetricForCurrentMode(metricName);
+    }
+
+    if (this.heatmapConf.heatmapActive) {
+      this.applyHeatmap();
+    }
+  }
+
+  @action
+  updateMetric(metric: Metric) {
+    const metricName = metric.name;
+
+    this.heatmapConf.setSelectedMetricForCurrentMode(metricName);
+
+    if (this.heatmapConf.heatmapActive) {
+      this.applyHeatmap();
+    }
+  }
+
+  @action
+  toggleHeatmap() {
+    // Avoid unwanted reflections in heatmap mode
+    this.setSpotLightVisibilityInScene(this.heatmapConf.heatmapActive);
+
+    if (this.heatmapConf.heatmapActive) {
+      this.removeHeatmap();
+    } else {
+      // TODO: Check whether new calculation of heatmap is necessary
+      perform(this.calculateHeatmapTask, this.applicationObject3D, () => {
+        this.applyHeatmap();
+      });
+    }
   }
 
   // #endregion ACTIONS
@@ -755,10 +1100,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   willDestroy() {
     super.willDestroy();
+
     cancelAnimationFrame(this.animationFrameId);
     this.cleanUpApplication();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
+
+    this.heatmapConf.cleanup();
+    this.configuration.isCommRendered = true;
 
     if (this.threePerformance) {
       this.threePerformance.removePerformanceMeasurement();
@@ -775,6 +1124,19 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #endregion COMPONENT AND SCENE CLEAN-UP
 
   // #region ADDITIONAL HELPER FUNCTIONS
+
+  /**
+   * Sets all objects within the scene of type SpotLight to desired visibility
+   *
+   * @param isVisible Determines whether a spotlight is visible or not
+   */
+  setSpotLightVisibilityInScene(isVisible = true) {
+    this.scene.children.forEach((child) => {
+      if (child instanceof THREE.SpotLight) {
+        child.visible = isVisible;
+      }
+    });
+  }
 
   /**
    * Takes a map with plain JSON layout objects and creates BoxLayout objects from it

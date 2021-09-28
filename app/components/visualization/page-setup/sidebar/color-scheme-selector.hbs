@@ -9,11 +9,11 @@
     Presets
   </button>
 
-  <div class="dropdown-menu">
-    {{#each this.colorSchemes as |colorScheme|}}
+  <div class="dropdown-menu dropdown-menu-right">
+    {{#each @colorSchemes as |colorScheme|}}
       <div
       class="dropdown-item pointer-cursor"
-      {{on "click" (fn this.applyColorScheme colorScheme.identifier)}}
+      {{on "click" (fn @applyColorScheme colorScheme.id)}}
       >
         {{colorScheme.name}}
       </div>

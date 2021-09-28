@@ -8,9 +8,12 @@
 @import "_token_selection";
 @import "_login";
 @import '_right_click_menu';
+@import '_popover';
 // located in lib/virtual-reality/addon/styles
 @import "_virtual_reality";
 
+// located in lib/heatmap/addon/styles
+@import "_heatmap";
 @import "ember-bootstrap/bootstrap";
 @import 'ember-power-select/themes/bootstrap';
 @import "ember-power-select";
