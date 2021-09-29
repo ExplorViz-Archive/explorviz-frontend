@@ -1,6 +1,5 @@
 import THREE from 'three';
-// @ts-ignore: Typescript does not recognize meshline package
-import { MeshLine, MeshLineMaterial } from 'threejs-meshline';
+import { MeshLine, MeshLineMaterial } from 'meshline';
 import BaseMesh from '../base-mesh';
 
 // Simple 2-dimensional point
@@ -34,13 +33,16 @@ export default class AppCommunicationMesh extends BaseMesh {
       tile.positionZ,
     );
 
-    const points = [firstVector, secondVector];
+    const points = [firstVector.x, firstVector.y, firstVector.z,
+      secondVector.x, secondVector.y, secondVector.z];
+
     const geometry = new MeshLine();
-    geometry.setVertices(points, () => tile.lineThickness);
+    geometry.setPoints(points, () => tile.lineThickness);
     this.geometry = geometry;
 
     this.material = new MeshLineMaterial({
       color: tile.pipeColor,
+      resolution: new THREE.Vector2(1, 1),
     });
   }
 
