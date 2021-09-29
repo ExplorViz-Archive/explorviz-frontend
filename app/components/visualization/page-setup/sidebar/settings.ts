@@ -95,21 +95,20 @@ export default class Settings extends Component<Args> {
   }
 
   @action
-  updateRangeSetting(name: ApplicationSettingId | LandscapeSettingId, event: Event) {
-    const input = event.target as HTMLInputElement;
+  updateRangeSetting(name: ApplicationSettingId | LandscapeSettingId, event?: Event) {
+    const input = event?.target ? (event.target as HTMLInputElement).valueAsNumber : undefined;
 
     if (this.args.isLandscapeView) {
       const settingId = name as LandscapeSettingId;
       try {
-        this.userSettings.updateLandscapeSetting(settingId, input.valueAsNumber);
+        this.userSettings.updateLandscapeSetting(settingId, input);
       } catch (e) {
         AlertifyHandler.showAlertifyError(e.message);
       }
     } else {
       const settingId = name as ApplicationSettingId;
       try {
-        this.userSettings.updateApplicationSetting(settingId,
-          input.valueAsNumber);
+        this.userSettings.updateApplicationSetting(settingId, input);
       } catch (e) {
         AlertifyHandler.showAlertifyError(e.message);
       }
