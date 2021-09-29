@@ -1,14 +1,26 @@
 <div class="mb-3">
   <HelpTooltip @title={{@setting.description}} />
   <label for={{@setting.name}}>{{@setting.displayName}}</label>
-  <input
-    id={{@setting.name}}
-    value={{@setting.value}}
-    min={{@setting.range.min}}
-    max={{@setting.range.max}}
-    type="number"
-    step="0.1"
-    class="form-control"
-    {{on "change" @onChange}}
-  >
+  <div class="d-flex">
+    <input
+      id={{@setting.name}}
+      value={{@setting.value}}
+      min={{@setting.range.min}}
+      max={{@setting.range.max}}
+      type="number"
+      step="0.1"
+      class="form-control"
+      {{on "change" @onChange}}
+    >
+    <BsButton
+      title="Reset to default"
+      class=""
+      style="height:35px"
+      @onClick={{@onChange}}
+      @type="light"
+      @outline={{false}}
+    >
+      {{svg-jar "sync-16" class="octicon align-middle"}}
+    </BsButton>
+  </div>
 </div>

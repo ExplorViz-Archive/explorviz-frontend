@@ -1,11 +1,24 @@
-<div class="d-flex justify-content-between pr-3">
+<div class="d-flex justify-content-between">
   <div>
     <HelpTooltip @title={{@setting.description}} />
     {{@setting.displayName}}
   </div>
-  <XToggle
-    @theme="skewed"
-    @value={{@setting.value}}
-    @onToggle={{@onChange}}
-  />
+  <div class="d-flex">
+    <XToggle
+      class="mr-4"
+      @theme="skewed"
+      @value={{@setting.value}}
+      @onToggle={{@onChange}}
+    />
+    <BsButton
+      title="Reset to default"
+      class=""
+      style="height:35px"
+      @onClick={{@onChange}}
+      @type="light"
+      @outline={{false}}
+    >
+      {{svg-jar "sync-16" class="octicon align-middle"}}
+    </BsButton>
+  </div>
 </div>
