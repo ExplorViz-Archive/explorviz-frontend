@@ -1,7 +1,7 @@
 <div class="mb-3">
   <HelpTooltip @title={{@setting.description}} />
   <label for={{@setting.name}}>{{@setting.displayName}}</label>
-  <div class="d-flex">
+  <div class="d-flex align-items-center">
     <input
       id={{@setting.name}}
       value={{@setting.value}}
@@ -9,18 +9,9 @@
       max={{@setting.range.max}}
       type="number"
       step="0.1"
-      class="form-control"
+      class="form-control mr-2"
       {{on "change" @onChange}}
     >
-    <BsButton
-      title="Reset to default"
-      class=""
-      style="height:35px"
-      @onClick={{@onChange}}
-      @type="light"
-      @outline={{false}}
-    >
-      {{svg-jar "sync-16" class="octicon align-middle"}}
-    </BsButton>
+    <Visualization::PageSetup::Sidebar::Settings::ResetButton @onClick={{@onChange}} />
   </div>
 </div>

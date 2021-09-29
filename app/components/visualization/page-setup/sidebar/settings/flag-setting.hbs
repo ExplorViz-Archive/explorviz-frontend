@@ -3,22 +3,13 @@
     <HelpTooltip @title={{@setting.description}} />
     {{@setting.displayName}}
   </div>
-  <div class="d-flex">
+  <div class="d-flex align-self-center">
     <XToggle
       class="mr-4"
       @theme="skewed"
       @value={{@setting.value}}
       @onToggle={{@onChange}}
     />
-    <BsButton
-      title="Reset to default"
-      class=""
-      style="height:35px"
-      @onClick={{@onChange}}
-      @type="light"
-      @outline={{false}}
-    >
-      {{svg-jar "sync-16" class="octicon align-middle"}}
-    </BsButton>
+    <Visualization::PageSetup::Sidebar::Settings::ResetButton @onClick={{@onChange}} />
   </div>
 </div>
