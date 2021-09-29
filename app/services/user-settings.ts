@@ -58,50 +58,52 @@ export default class UserSettings extends Service {
     localStorage.setItem('userApplicationSettings', JSON.stringify(this.applicationSettings));
   }
 
-  updateApplicationSetting(name: ApplicationSettingId, value: unknown) {
-    // eslint-disable-next-line
+  updateApplicationSetting(name: ApplicationSettingId, value?: unknown) {
     const setting = this.applicationSettings[name];
 
-    if (isRangeSetting(setting) && typeof value === 'number') {
-      this.validateRangeSetting(setting, value);
+    const newValue = value ?? defaultApplicationSettings[name].value;
+
+    if (isRangeSetting(setting) && typeof newValue === 'number') {
+      this.validateRangeSetting(setting, newValue);
       this.applicationSettings = {
         ...this.applicationSettings,
-        [name]: { ...JSON.parse(JSON.stringify(setting)), value },
+        [name]: { ...JSON.parse(JSON.stringify(setting)), value: newValue },
       };
       this.updateSettings();
-    } else if (isFlagSetting(setting) && typeof value === 'boolean') {
+    } else if (isFlagSetting(setting) && typeof newValue === 'boolean') {
       this.applicationSettings = {
         ...this.applicationSettings,
-        [name]: { ...JSON.parse(JSON.stringify(setting)), value },
+        [name]: { ...JSON.parse(JSON.stringify(setting)), value: newValue },
       };
       this.updateSettings();
-    } else if (isColorSetting(setting) && typeof value === 'string') {
+    } else if (isColorSetting(setting) && typeof newValue === 'string') {
       /*       const regExHex = /^#(?:[0-9a-f]{3}){1,2}$/i; */
-      setting.value = value;
+      setting.value = newValue;
       this.updateSettings();
     }
   }
 
-  updateLandscapeSetting(name: LandscapeSettingId, value: unknown) {
-    // eslint-disable-next-line
+  updateLandscapeSetting(name: LandscapeSettingId, value?: unknown) {
     const setting = this.landscapeSettings[name];
 
-    if (isRangeSetting(setting) && typeof value === 'number') {
-      this.validateRangeSetting(setting, value);
+    const newValue = value ?? defaultLanscapeSettings[name].value;
+
+    if (isRangeSetting(setting) && typeof newValue === 'number') {
+      this.validateRangeSetting(setting, newValue);
       this.landscapeSettings = {
         ...this.landscapeSettings,
-        [name]: { ...JSON.parse(JSON.stringify(setting)), value },
+        [name]: { ...JSON.parse(JSON.stringify(setting)), value: newValue },
       };
       this.updateSettings();
-    } else if (isFlagSetting(setting) && typeof value === 'boolean') {
+    } else if (isFlagSetting(setting) && typeof newValue === 'boolean') {
       this.landscapeSettings = {
         ...this.landscapeSettings,
-        [name]: { ...JSON.parse(JSON.stringify(setting)), value },
+        [name]: { ...JSON.parse(JSON.stringify(setting)), value: newValue },
       };
       this.updateSettings();
-    } else if (isColorSetting(setting) && typeof value === 'string') {
+    } else if (isColorSetting(setting) && typeof newValue === 'string') {
       /*       const regExHex = /^#(?:[0-9a-f]{3}){1,2}$/i; */
-      setting.value = value;
+      setting.value = newValue;
       this.updateSettings();
     }
   }
