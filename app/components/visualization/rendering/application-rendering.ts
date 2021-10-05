@@ -377,13 +377,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
 
     // Hide popups when mouse moves
-    this.popupData = null;
+    if (!this.appSettings.enableCustomPopupPosition.value) {
+      this.popupData = null;
+    }
   }
 
   @action
   handleMouseWheel(delta: number) {
     // Do not show popups while zooming
-    this.popupData = null;
+    if (!this.appSettings.enableCustomPopupPosition.value) {
+      this.popupData = null;
+    }
 
     // Change zoom depending on mouse wheel direction
     this.camera.position.z += delta * 3.5;
@@ -391,7 +395,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseOut() {
-    this.popupData = null;
+    if (!this.appSettings.enableCustomPopupPosition.value) {
+      this.popupData = null;
+    }
   }
 
   /*   handleMouseEnter() {
