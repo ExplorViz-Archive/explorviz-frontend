@@ -40,6 +40,7 @@ export default class Settings extends Component<Args> {
       Colors: [],
       Communication: [],
       Highlighting: [],
+      Popup: [],
       Debugging: [],
     };
 
@@ -71,6 +72,7 @@ export default class Settings extends Component<Args> {
       Colors: [],
       Communication: [],
       Highlighting: [],
+      Popup: [],
       Debugging: [],
     };
 

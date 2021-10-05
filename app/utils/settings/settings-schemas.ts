@@ -1,4 +1,5 @@
-export type SettingGroup = 'Colors' | 'Highlighting' | 'Hover Effects' | 'Communication' | 'Debugging';
+export type SettingGroup = 'Colors' | 'Highlighting' | 'Hover Effects'
+| 'Communication' | 'Popup' | 'Debugging';
 
 export type LandscapeColorSettingId
 = 'nodeColor'
@@ -42,12 +43,15 @@ export type ApplicationCommunicationSettingId =
 
 export type ApplicationDebugSettingId = 'showFpsCounter';
 
+export type ApplicationPopupSettingId = 'enableCustomPopupPosition';
+
 export type ApplicationSettingId
 = ApplicationColorSettingId
 | ApplicationHighlightingSettingId
 | ApplicationHoveringSettingId
 | ApplicationCommunicationSettingId
-| ApplicationDebugSettingId;
+| ApplicationDebugSettingId
+| ApplicationPopupSettingId;
 
 export type LandscapeColorSettings = Record<LandscapeColorSettingId, ColorSetting>;
 
@@ -69,11 +73,14 @@ export type ApplicationCommunicationSettings
 
 export type ApplicationDebugSettings = Record<ApplicationDebugSettingId, FlagSetting>;
 
+export type ApplicationPopupSettings = Record<ApplicationPopupSettingId, FlagSetting>;
+
 export type ApplicationSettings
 = ApplicationColorSettings
 & ApplicationHighlightingSettings
 & ApplicationHoveringSettings
 & ApplicationDebugSettings
+& ApplicationPopupSettings
 & ApplicationCommunicationSettings;
 
 export type LandscapeSettings = LandscapeColorSettings
