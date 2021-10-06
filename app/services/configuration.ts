@@ -2,6 +2,7 @@ import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import { tracked } from '@glimmer/tracking';
 import { ApplicationColorSettingId, LandscapeColorSettingId } from 'explorviz-frontend/utils/settings/settings-schemas';
+import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import UserSettings from './user-settings';
 
 export type LandscapeColors = Record<LandscapeColorSettingId, THREE.Color>;
@@ -42,6 +43,9 @@ export default class Configuration extends Service {
   isCommRendered = true;
 
   commCurveHeightDependsOnDistance = true;
+
+  @tracked
+  popupPosition: Position2D | undefined = undefined;
 
   // #endregion APPLICATION LAYOUT
 

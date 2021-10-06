@@ -1,10 +1,12 @@
 import { action } from '@ember/object';
 import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import { isDrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import {
   Application, Class, isApplication, isClass, isNode, isPackage, Node, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import Configuration from 'explorviz-frontend/services/configuration';
 
 interface IArgs {
   isMovable: boolean;
@@ -16,9 +18,12 @@ interface IArgs {
 }
 
 export default class PopupCoordinator extends Component<IArgs> {
+  @service('configuration')
+  configuration!: Configuration;
+
   element!: HTMLDivElement;
 
-  lastPosition: Position2D = {
+  lastMousePosition: Position2D = {
     x: 0,
     y: 0,
   };
@@ -31,8 +36,8 @@ export default class PopupCoordinator extends Component<IArgs> {
 
     event.preventDefault();
     // get the mouse cursor position at startup:
-    this.lastPosition.x = event.clientX;
-    this.lastPosition.y = event.clientY;
+    this.lastMousePosition.x = event.clientX;
+    this.lastMousePosition.y = event.clientY;
     document.onmouseup = this.closeDragElement;
     // call a function whenever the cursor moves:
     document.onmousemove = this.elementDrag;
@@ -42,10 +47,10 @@ export default class PopupCoordinator extends Component<IArgs> {
   elementDrag(event: MouseEvent) {
     event.preventDefault();
     // calculate the new cursor position:
-    const diffX = this.lastPosition.x - event.clientX;
-    const diffY = this.lastPosition.y - event.clientY;
-    this.lastPosition.x = event.clientX;
-    this.lastPosition.y = event.clientY;
+    const diffX = this.lastMousePosition.x - event.clientX;
+    const diffY = this.lastMousePosition.y - event.clientY;
+    this.lastMousePosition.x = event.clientX;
+    this.lastMousePosition.y = event.clientY;
     // set the element's new position:
     const containerDiv = this.element.parentElement as HTMLElement;
 
@@ -68,6 +73,11 @@ export default class PopupCoordinator extends Component<IArgs> {
       && newPositionY > containerDiv.clientHeight - popoverHeight) {
       newPositionY = containerDiv.clientHeight - popoverHeight;
     }
+
+    this.configuration.popupPosition = {
+      x: newPositionX,
+      y: newPositionY,
+    };
 
     this.element.style.top = `${newPositionY}px`;
     this.element.style.left = `${newPositionX}px`;

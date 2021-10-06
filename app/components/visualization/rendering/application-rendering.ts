@@ -64,7 +64,7 @@ interface Args {
 type PopupData = {
   mouseX: number,
   mouseY: number,
-  entity: Package | Class | DrawableClassCommunication
+  entity?: Package | Class | DrawableClassCommunication
 };
 
 type LayoutData = {
@@ -211,6 +211,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     applyDefaultApplicationLayout(this.applicationObject3D);
     this.addCommunication();
     this.applicationObject3D.resetRotation();
+
+    if (this.configuration.popupPosition) {
+      this.popupData = {
+        mouseX: this.configuration.popupPosition.x,
+        mouseY: this.configuration.popupPosition.y,
+      };
+    }
   }
 
   /**
