@@ -116,7 +116,14 @@
         @timestamps={{this.timelineTimestamps}}
         @clicked={{this.timelineClicked}}
         @setChildReference={{this.getTimelineReference}}
+        @toggleConfigurationOverview={{this.toggleTimelineConfigurationOverview}}
       />
     </div>
+    <Visualization::PageSetup::Timeline::Configuration::ConfigurationOverview
+        @configurations={{this.timelineConfiguration}}
+        @softwaremetrics={{this.timelineMetrics}}
+        @showConfiguration={{this.showConfigurationOverview}}
+        @toggleConfigurationOverview={{this.toggleTimelineConfigurationOverview}}
+     />
   </div>
 {{/unless}}

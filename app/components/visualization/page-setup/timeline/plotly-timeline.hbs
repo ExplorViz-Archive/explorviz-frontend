@@ -6,6 +6,16 @@
     {{did-update this.didRender @timestamps}}
     {{did-insert this.didRender}}
   >
+    <button
+      class="btn-configuration"
+      type="button"
+      {{ on "click" this.toggleConfigOverview }}
+    >
+      {{svg-jar "gear-16" class="octicon align-middle"}}
+      <BsTooltip @placement="bottom" @triggerEvents="hover">
+        Open configuration overview
+      </BsTooltip>
+    </button>
   </div>
 {{else}}
   <div class="timeline-no-timestamps-outer">

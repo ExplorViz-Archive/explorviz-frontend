@@ -9,6 +9,7 @@ import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
 import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
+import ConfigurationRepository, { ConfigurationItem } from 'explorviz-frontend/services/repos/configuration-repository';
 import { tracked } from '@glimmer/tracking';
 import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
@@ -16,7 +17,6 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
 import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
-import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -40,7 +40,7 @@ export default class VisualizationController extends Controller {
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
-  @service('heatmap-configuration') heatmapConf!: HeatmapConfiguration;
+  @service('repos/configuration-repository') configRepo!: ConfigurationRepository;
 
   @service('landscape-token') landscapeTokenService!: LandscapeTokenService;
 
@@ -66,6 +66,9 @@ export default class VisualizationController extends Controller {
   showTimeline: boolean = true;
 
   @tracked
+  showConfigurationOverview: boolean = false;
+
+  @tracked
   landscapeData: LandscapeData | null = null;
 
   @tracked
@@ -73,6 +76,12 @@ export default class VisualizationController extends Controller {
 
   @tracked
   timelineTimestamps: Timestamp[] = [];
+
+  @tracked
+  timelineConfiguration: ConfigurationItem[] = [];
+
+  @tracked
+  timelineMetrics: String[] = [];
 
   debug = debugLogger();
 
@@ -99,14 +108,16 @@ export default class VisualizationController extends Controller {
   @action
   updateTimestampList() {
     const currentToken = this.landscapeTokenService.token!.value;
-    this.timelineTimestamps = this.timestampRepo.getTimestamps(currentToken) ?? [];
+    const currentApp = this.landscapeData?.application?.name ?? '';
+    this.timelineConfiguration = this.configRepo.getConfiguration(currentToken);
+    this.timelineMetrics = this.configRepo.getSoftwaremetrics(currentToken);
+    this.timelineTimestamps = this.timestampRepo.getTimestamps(currentToken, currentApp);
   }
 
   @action
   receiveNewLandscapeData(structureData: StructureLandscapeData,
     dynamicData: DynamicLandscapeData) {
     if (!this.visualizationPaused) {
-      this.heatmapConf.latestClazzMetricScores = [];
       this.updateLandscape(structureData, dynamicData);
     }
   }
@@ -151,6 +162,7 @@ export default class VisualizationController extends Controller {
   openLandscapeView() {
     this.receiveOpenLandscapeView();
     this.collaborativeService.send(CollaborativeEvents.OpenLandscapeView, { });
+    this.updateTimestampList(); // Faster Timeline switch from Application to Landscape
   }
 
   @action
@@ -175,6 +187,7 @@ export default class VisualizationController extends Controller {
       };
       this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.id });
     }
+    this.updateTimestampList(); // Faster Timeline switch from Landscape to Application
   }
 
   @action
@@ -193,8 +206,8 @@ export default class VisualizationController extends Controller {
 
   @action
   resetLandscapeListenerPolling() {
-    if (this.landscapeListener.timer !== null) {
-      clearTimeout(this.landscapeListener.timer);
+    if (this.landscapeListener.visualisation !== null) {
+      clearTimeout(this.landscapeListener.visualisation);
     }
   }
 
@@ -273,6 +286,11 @@ export default class VisualizationController extends Controller {
     } else {
       this.pauseVisualizationUpdating();
     }
+  }
+
+  @action
+  toggleTimelineConfigurationOverview(){
+    this.showConfigurationOverview = !this.showConfigurationOverview;
   }
 
   resumeVisualizationUpdating() {

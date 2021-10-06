@@ -18,6 +18,7 @@ export interface Span {
   traceId: string;
   startTime: number,
   endTime: number,
+  metric: string,
   hashCode: string;
 }
 

@@ -52,6 +52,22 @@
   background-color: #6c757d!important;
 }
 
+.btn-configuration {
+  all: unset;
+  position: relative;
+  left: 13px;
+  top: 13px;
+  z-index: 489;
+}
+
+.btn-configuration:focus {
+  outline: none;
+}
+
+.btn-configuration:hover {
+  color: #6c757d!important;
+}
+
 .hidetimeline-icon-down {
   transform:rotate(180deg);
 }
