@@ -289,7 +289,7 @@ export default class VisualizationController extends Controller {
   }
 
   @action
-  toggleTimelineConfigurationOverview(){
+  toggleTimelineConfigurationOverview() {
     this.showConfigurationOverview = !this.showConfigurationOverview;
   }
 

@@ -4,7 +4,7 @@ import debugLogger from 'ember-debug-logger';
 import { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import Plotly from 'plotly.js-dist';
 import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
-import Service, { inject as service } from '@ember/service';
+import { inject as service } from '@ember/service';
 import { ConfigurationItem } from 'explorviz-frontend/services/repos/configuration-repository';
 
 interface IMarkerStates {
@@ -101,6 +101,7 @@ export default class PlotlyTimeline extends Component<IArgs> {
     this.userSlidingWindow = null;
   }
   // END Ember Div Events
+
   @action
   toggleConfigOverview() {
     this.args.toggleConfigurationOverview();
@@ -160,7 +161,7 @@ export default class PlotlyTimeline extends Component<IArgs> {
         sizes[pn] = highlightedMarkerSize;
 
         const timestampId = data.points[0].data.timestampId[pn];
-        const metric = plotlyDiv.data[data.points[0].curveNumber].name // Associated metric point
+        const metric = plotlyDiv.data[data.points[0].curveNumber].name; // Associated metric point
 
         self.markerState[timestampId].color.set(metric, highlightedMarkerColor);
         self.markerState[timestampId].size.set(metric, highlightedMarkerSize);
@@ -215,13 +216,8 @@ export default class PlotlyTimeline extends Component<IArgs> {
       }
 
       // Deactives legendclick Events
-      plotlyDiv.on('plotly_legendclick', () => {
-        return false;
-      });
-
-      plotlyDiv.on('plotly_legenddoubleclick', () => {
-        return false;
-      });
+      plotlyDiv.on('plotly_legendclick', () => false);
+      plotlyDiv.on('plotly_legenddoubleclick', () => false);
     }
   }
 
@@ -289,8 +285,8 @@ export default class PlotlyTimeline extends Component<IArgs> {
 
       colors.set(timestampId, this.markerState[timestampId].color);
       sizes.set(timestampId, this.markerState[timestampId].size);
-    })
-  
+    });
+
     this.resetHighlingInStateObjects();
 
     // call this to initialize the internal marker state variable
@@ -386,21 +382,21 @@ export default class PlotlyTimeline extends Component<IArgs> {
           font: {
             color: '#7f7f7f',
             size: 16,
-          }
+          },
         },
       },
       showlegend: true,
       legend: {
-        x : 0,
-        y : 1.5,
-        "orientation": "h",
-        font: { size: 10 }
-      }
+        x: 0,
+        y: 1.5,
+        orientation: 'h',
+        font: { size: 10 },
+      },
     };
   }
 
   getUpdatedPlotlyDataObject(timestamps: Timestamp[], markerStates: IMarkerStates): [{}] {
-    const {config, active} = this.landscapeListener.getConfiguration();
+    const { config, active } = this.landscapeListener.getConfiguration();
     const colors: Map<string, string[]> = new Map<string, string[]>();
     const sizes: Map<string, number[]> = new Map<string, number[]>();
 
@@ -409,17 +405,16 @@ export default class PlotlyTimeline extends Component<IArgs> {
 
     const timestampIds: string[] = [];
 
-    const activeMetrics = config.filter(x => active.includes(x.id));
+    const activeMetrics = config.filter((m) => active.includes(m.id));
 
     const defaultColor = new Map<string, string>();
     const defaultSize = new Map<string, number>();
 
     activeMetrics.forEach((metric) => {
-      const key = metric.key;
-      const color = metric.color;
+      const { key, color } = metric;
       const size = this.defaultMarkerSize;
 
-      y.set(key, timestamps.map(timestamp => timestamp.data.get(key) ?? 0));
+      y.set(key, timestamps.map((timestamp) => timestamp.data.get(key) ?? 0));
 
       colors.set(key, Array(timestamps.length).fill(color));
       sizes.set(key, Array(timestamps.length).fill(size));
@@ -431,11 +426,11 @@ export default class PlotlyTimeline extends Component<IArgs> {
       const timestampId = timestamp.id;
 
       if (activeMetrics.length !== 0) {
-        x.push(new Date(timestamp.timestamp))
+        x.push(new Date(timestamp.timestamp));
 
-        const markerState = markerStates[timestampId]
+        const markerState = markerStates[timestampId];
         if (!markerState) {
-          //eslint-disable-next-line
+          // eslint-disable-next-line
           markerStates[timestampId] = {
             color: defaultColor,
             emberModel: timestamp,
@@ -451,15 +446,15 @@ export default class PlotlyTimeline extends Component<IArgs> {
 
   static getPlotlyDataObject(
     dates: Date[],
-    data: Map<string,number[]>,
-    colors: Map<string,string[]>,
-    sizes: Map<string,number[]>,
+    data: Map<string, number[]>,
+    colors: Map<string, string[]>,
+    sizes: Map<string, number[]>,
     timestampIds: string[],
-    activeConfig: ConfigurationItem[]
+    activeConfig: ConfigurationItem[],
   ): [{}] {
-    const result : [{}] = [{}];
+    const result: [{}] = [{}];
     activeConfig.forEach((config) => {
-      const key = config.key;
+      const { key } = config;
       result.push({
         fill: 'tozeroy',
         hoverinfo: 'text',
@@ -467,7 +462,7 @@ export default class PlotlyTimeline extends Component<IArgs> {
           align: 'left',
         },
         marker: { color: colors.get(key), size: sizes.get(key) },
-        line: { color : config.color},
+        line: { color: config.color },
         mode: 'lines+markers',
         text: PlotlyTimeline.hoverText(config.name, dates, data.get(key)!),
         timestampId: timestampIds,
@@ -487,15 +482,14 @@ export default class PlotlyTimeline extends Component<IArgs> {
 
   resetSelectionInStateObjects() {
     const selTimestamps: Timestamp[] = this.selectedTimestamps;
-    const {config, active} = this.landscapeListener.getConfiguration();
-
-    const { defaultMarkerColor, defaultMarkerSize } = this;
+    const { config } = this.landscapeListener.getConfiguration();
+    const { defaultMarkerSize } = this;
 
     selTimestamps.forEach((t) => {
-      config.forEach(x => {
+      config.forEach((x) => {
         this.markerState[t.id].color.set(x.key, x.color);
         this.markerState[t.id].size.set(x.key, defaultMarkerSize);
-      })
+      });
     });
 
     this.selectedTimestamps = [];

@@ -4,11 +4,11 @@ import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
 
 export interface ConfigurationItem {
-    id: string,
-    name: string,
-    key: string,
-    color: string,
-    status: boolean
+  id: string,
+  name: string,
+  key: string,
+  color: string,
+  status: boolean,
 }
 
 /**
@@ -18,104 +18,120 @@ export interface ConfigurationItem {
 * @extends Ember.Service
 */
 export default class ConfigurationRepository extends Service.extend(Evented) {
-    debug = debugLogger();
+  debug = debugLogger();
 
-    private configurations: Map<string, ConfigurationItem[]> = new Map(); // Configuration per Landscape
-    private softwaremetrics: Map<string, string[]> = new Map(); // Possible Softwaremetrics per Landscape (Ocelot List)
+  private configurations: Map<string, ConfigurationItem[]> = new Map();
 
-    // Getter
-    getConfiguration(landscapeToken: string) {
-        return this.configurations.get(landscapeToken) ?? [];
-    }
+  private softwaremetrics: Map<string, string[]> = new Map();
 
-    getActiveConfigurations(landscapeToken: string) {
-        return this.getConfiguration(landscapeToken).filter(x => x.status).map(x => x.id) ?? [];
-    }
+  // Getter
+  getConfiguration(landscapeToken: string) {
+    return this.configurations.get(landscapeToken) ?? [];
+  }
 
-    getSoftwaremetrics(landscapeToken: string) {
-        return this.softwaremetrics.get(landscapeToken) ?? [];
-    }
+  getActiveConfigurations(landscapeToken: string) {
+    return this.getConfiguration(landscapeToken).filter((x) => x.status).map((x) => x.id) ?? [];
+  }
 
-    // Add
-    addConfiguration(landscapeToken: string, name: string, key: string, color: string) {
-        const config = this.getConfiguration(landscapeToken);
+  getSoftwaremetrics(landscapeToken: string) {
+    return this.softwaremetrics.get(landscapeToken) ?? [];
+  }
 
-        // Build ConfigurationItem
-        /**
-         * Generates a unique string ID
-         */
-        //  See: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-        function uuidv4() {
-            /* eslint-disable */
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-            });
-            /* eslint-enable */
-        }
-        const item = {id: uuidv4(), name: name, key: key, color: color, status: false};
-        this.configurations.set(landscapeToken, [...config, item]);
-        this.triggerTimelineUpdate();
-        return item.id;
-    }
+  // Add
+  addConfiguration(landscapeToken: string, name: string, key: string, color: string) {
+    const config = this.getConfiguration(landscapeToken);
 
-    addSoftwaremetric(landscapeToken: string, metric: string) {
-        const metrics = this.getSoftwaremetrics(landscapeToken);
-        if (metrics) {
-            if (!(metrics.includes(metric))) {
-                this.softwaremetrics.set(landscapeToken, [...metrics, metric]);
-            }
-        }
-        this.triggerTimelineUpdate();
-    }
-
-    // Remove
-    removeConfiguration(landscapeToken: string, id: string) {
-        const config = this.getConfiguration(landscapeToken);
-        this.configurations.set(landscapeToken, config.filter(x => x.id != id));
-        this.deactiveConfiguration(landscapeToken, id);
-        this.triggerTimelineUpdate();
-    }
-
-    // Active and deactive Configurations
-    activateConfiguration(landscapeToken: string, id: string) {
-        const config = this.getConfiguration(landscapeToken).find(x => x.id == id);
-        if (config) {
-            this.editConfiguration(landscapeToken, {id: config.id, name: config.name, key: config.key, color: config.color, status: true});
-        }
-        this.triggerTimelineUpdate();
-    }
-
-    deactiveConfiguration(landscapeToken: string, id: string) {
-        const config = this.getConfiguration(landscapeToken).find(x => x.id == id);
-        if (config) {
-            this.editConfiguration(landscapeToken, {id: config.id, name: config.name, key: config.key, color: config.color, status: false});
-        }
-        this.triggerTimelineUpdate();
-    }
-
-    //Edit Configuration
-    editConfiguration(landscapeToken: string, configuration: ConfigurationItem) {
-        const configs = this.getConfiguration(landscapeToken);
-        const config = configs.find(x => x.id == configuration.id);
-        if (config) {
-            const index = configs.indexOf(config);
-            this.configurations.set(landscapeToken, [...configs.slice(0, index), configuration, ...configs.slice(index + 1)]);
-        }
-        this.triggerTimelineUpdate();
-    }
-
+    // Build ConfigurationItem
     /**
-     * Triggers the 'updated' event in the timeline for updating the chart
-     * @method triggerTimelineUpdate
+     * Generates a unique string ID
      */
-    triggerTimelineUpdate() {
-        this.trigger('updated');
+    //  See: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+    function uuidv4() {
+      /* eslint-disable */
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+      });
+      /* eslint-enable */
     }
+    const item = {
+      id: uuidv4(), name, key, color, status: false,
+    };
+    this.configurations.set(landscapeToken, [...config, item]);
+    this.triggerTimelineUpdate();
+    return item.id;
+  }
+
+  addSoftwaremetric(landscapeToken: string, metric: string) {
+    const metrics = this.getSoftwaremetrics(landscapeToken);
+    if (metrics) {
+      if (!(metrics.includes(metric))) {
+        this.softwaremetrics.set(landscapeToken, [...metrics, metric]);
+      }
+    }
+    this.triggerTimelineUpdate();
+  }
+
+  // Remove
+  removeConfiguration(landscapeToken: string, id: string) {
+    const config = this.getConfiguration(landscapeToken);
+    this.configurations.set(landscapeToken, config.filter((x) => x.id !== id));
+    this.deactiveConfiguration(landscapeToken, id);
+    this.triggerTimelineUpdate();
+  }
+
+  // Active and deactive Configurations
+  activateConfiguration(landscapeToken: string, id: string) {
+    const config = this.getConfiguration(landscapeToken).find((x) => x.id === id);
+    if (config) {
+      this.editConfiguration(
+        landscapeToken,
+        {
+          id: config.id, name: config.name, key: config.key, color: config.color, status: true,
+        },
+      );
+    }
+    this.triggerTimelineUpdate();
+  }
+
+  deactiveConfiguration(landscapeToken: string, id: string) {
+    const config = this.getConfiguration(landscapeToken).find((x) => x.id === id);
+    if (config) {
+      this.editConfiguration(
+        landscapeToken,
+        {
+          id: config.id, name: config.name, key: config.key, color: config.color, status: false,
+        },
+      );
+    }
+    this.triggerTimelineUpdate();
+  }
+
+  // Edit Configuration
+  editConfiguration(landscapeToken: string, configuration: ConfigurationItem) {
+    const configs = this.getConfiguration(landscapeToken);
+    const config = configs.find((x) => x.id === configuration.id);
+    if (config) {
+      const index = configs.indexOf(config);
+      this.configurations.set(
+        landscapeToken,
+        [...configs.slice(0, index), configuration, ...configs.slice(index + 1)],
+      );
+    }
+    this.triggerTimelineUpdate();
+  }
+
+  /**
+   * Triggers the 'updated' event in the timeline for updating the chart
+   * @method triggerTimelineUpdate
+   */
+  triggerTimelineUpdate() {
+    this.trigger('updated');
+  }
 }
 
 declare module '@ember/service' {
-    interface Registry {
-        'repos/configuration-repository': ConfigurationRepository;
-    }
+  interface Registry {
+    'repos/configuration-repository': ConfigurationRepository;
+  }
 }

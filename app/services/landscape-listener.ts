@@ -1,7 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
-import { Package, preProcessAndEnhanceStructureLandscape, StructureLandscapeData, } 
+import { Package, preProcessAndEnhanceStructureLandscape, StructureLandscapeData }
   from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import ENV from 'explorviz-frontend/config/environment';
@@ -26,8 +26,11 @@ export default class LandscapeListener extends Service.extend(Evented) {
   latestDynamicData: DynamicLandscapeData | null = null;
 
   slidingWindowMin: number = this.timestampRepo.minTimestamp;
+
   slidingWindowMax: number = this.timestampRepo.maxTimestamp;
+
   timeline: NodeJS.Timeout | null = null;
+
   currentlyUpdating: boolean = false;
 
   debug = debugLogger();
@@ -58,7 +61,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
     this.timeline = setIntervalImmediately(async () => {
       try {
         // Request data and update timeline accordingly
-        if(!this.currentlyUpdating) {
+        if (!this.currentlyUpdating) {
           await this.updateWindowTimestamps();
         }
       } catch (e) {
@@ -100,7 +103,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
         .catch((e) => reject(e));
     });
   }
-  
+
   requestDynamicData(fromTimestamp: number, toTimestamp: number) {
     return new Promise<DynamicLandscapeData>((resolve, reject) => {
       if (this.tokenService.token === null) {
@@ -123,35 +126,36 @@ export default class LandscapeListener extends Service.extend(Evented) {
         .catch((e) => reject(e));
     });
   }
+
   async updateWindowData(userSlidingWindow: any) {
-    let minTimestamp, maxTimestamp;
+    let minTimestamp;
+    let maxTimestamp;
     if (userSlidingWindow) {
       minTimestamp = Date.parse(userSlidingWindow.xaxis.range[0]);
       maxTimestamp = Date.parse(userSlidingWindow.xaxis.range[1]);
     }
 
     if (!userSlidingWindow || !minTimestamp || !maxTimestamp) {
-      //Default values: -5 minutes until now
+      // Default values: -5 minutes until now
       minTimestamp = Date.now() - (6 * 60 * 1000);
       maxTimestamp = Date.now();
-
     }
     const n = maxTimestamp - minTimestamp;
-    minTimestamp -= Math.round(n/2);
-    maxTimestamp += Math.round(n/2);
+    minTimestamp -= Math.round(n / 2);
+    maxTimestamp += Math.round(n / 2);
 
     this.slidingWindowMin = minTimestamp;
     this.slidingWindowMax = maxTimestamp;
   }
+
   async updateWindowTimestamps(intervalInSeconds: number = 10) {
     this.currentlyUpdating = true;
     const landscapeToken = this.tokenService.token!.value;
     const now = Date.now() - (60 * 1000);
     // Get current borders
-    let minTimestamp = this.timestampRepo.minTimestamp;
-    let maxTimestamp = this.timestampRepo.maxTimestamp;
+    let { minTimestamp, maxTimestamp } = this.timestampRepo;
 
-    if (this.slidingWindowMin != minTimestamp || this.slidingWindowMax != maxTimestamp) {
+    if (this.slidingWindowMin !== minTimestamp || this.slidingWindowMax !== maxTimestamp) {
       // Update Window Borders
       this.timestampRepo.set('minTimestamp', this.slidingWindowMin);
       minTimestamp = this.slidingWindowMin;
@@ -168,8 +172,9 @@ export default class LandscapeListener extends Service.extend(Evented) {
     // First: Fill up the gap between the latest timestamp and the right border (maxTimestamp / now)
     if (last <= maxTimestamp && last <= now) {
       last += (intervalInSeconds * 1000);
-      while(last <= maxTimestamp && last <= now) {
-        await this._updateSlidingWindow(last, intervalInSeconds);
+      while (last <= maxTimestamp && last <= now) {
+        // eslint-disable-next-line
+        await this.updateSlidingWindow(last, intervalInSeconds);
         last += (intervalInSeconds * 1000);
       }
       this.timestampRepo.triggerTimelineUpdate();
@@ -178,8 +183,9 @@ export default class LandscapeListener extends Service.extend(Evented) {
     // Second: Fill up the gap between the left border (minTimestamp) and the first timestamp
     if (minTimestamp <= first) {
       first -= (intervalInSeconds * 1000);
-      while(minTimestamp <= first) {
-        await this._updateSlidingWindow(first, intervalInSeconds, true);
+      while (minTimestamp <= first) {
+        // eslint-disable-next-line
+        await this.updateSlidingWindow(first, intervalInSeconds, true);
         first -= (intervalInSeconds * 1000);
       }
       this.timestampRepo.triggerTimelineUpdate();
@@ -187,45 +193,73 @@ export default class LandscapeListener extends Service.extend(Evented) {
     this.currentlyUpdating = false;
   }
 
-  async _updateSlidingWindow(endTime: number, intervalInSeconds: number, front : boolean = false) {
+  async updateSlidingWindow(endTime: number, intervalInSeconds: number, front: boolean = false) {
     // Copied from above (initLandscapePolling)
     const [structureData, dynamicData] = await this.requestData(endTime, intervalInSeconds);
     const processedStructureData = preProcessAndEnhanceStructureLandscape(structureData);
 
-    const appData = LandscapeListener.computeMetricDataPerApp(this.tokenService.token!.value, this.configRepo, dynamicData, processedStructureData);
+    const appData = LandscapeListener.computeMetricDataPerApp(
+      this.tokenService.token!.value, this.configRepo, dynamicData, processedStructureData,
+    );
     const genData = LandscapeListener.computeTotalMetricData(appData);
 
     this.updateTimestampRepoAndTimeline(endTime, appData, genData, front);
   }
 
   static generateApplicationData(structureData: StructureLandscapeData) {
-    const applicationData = new Map<string, string>(); // Matches Methods hashcodes (found in spans) to applications
+    const applicationData = new Map<string, string>();
     structureData.nodes.forEach((node) => node.applications.forEach((app) => {
       const applicationName = app.name;
-      app.packages.forEach((component) => this._generateApplicationData(applicationData, applicationName, component));
+      app.packages.forEach((component) => this.generateApplicationDataIntern(applicationData,
+        applicationName, component));
     }));
     return applicationData;
   }
 
-  static _generateApplicationData(applicationData: Map<string, string>, applicationName: string, component: Package) {
-    component.classes.forEach((subcomponent) => subcomponent.methods.forEach((method) => applicationData.set(method.hashCode, applicationName)));
-    component.subPackages.forEach((subcomponent) => this._generateApplicationData(applicationData, applicationName, subcomponent));
+  static generateApplicationDataIntern(
+    applicationData: Map<string, string>,
+    applicationName: string,
+    component: Package,
+  ) {
+    component.classes.forEach(
+      (subcomponent) => subcomponent.methods.forEach(
+        (method) => applicationData.set(method.hashCode, applicationName),
+      ),
+    );
+    component.subPackages.forEach(
+      (subcomponent) => this.generateApplicationDataIntern(
+        applicationData, applicationName, subcomponent,
+      ),
+    );
   }
 
   static computeTotalMetricData(metricDataPerApp: Map<string, Map<string, number>>) {
     const totalMetricData = new Map<string, number>();
-    
-    Array.from(metricDataPerApp.values()).forEach(app => Array.from(app.keys()).forEach(metric => {
-      const currentValue = totalMetricData.get(metric) ?? 0;
-      totalMetricData.set(metric, currentValue + (app.get(metric)!));
-    }) );
+
+    Array.from(metricDataPerApp.values()).forEach(
+      (app) => Array.from(app.keys()).forEach(
+        (metric) => {
+          const currentValue = totalMetricData.get(metric) ?? 0;
+          totalMetricData.set(metric, currentValue + (app.get(metric)!));
+        },
+      ),
+    );
     return totalMetricData;
   }
 
-  static computeMetricDataPerApp(landscapeToken: string, configRepo: ConfigurationRepository ,dynamicData: DynamicLandscapeData, structureData: StructureLandscapeData) {
+  static computeMetricDataPerApp(
+    landscapeToken: string,
+    configRepo: ConfigurationRepository,
+    dynamicData: DynamicLandscapeData,
+    structureData: StructureLandscapeData,
+  ) {
     const data = new Map<string, Map<string, number>>();
-    structureData.nodes.forEach((node) => node.applications.forEach((app) => data.set(app.name, new Map<string, number>())));
-    
+    structureData.nodes.forEach(
+      (node) => node.applications.forEach(
+        (app) => data.set(app.name, new Map<string, number>()),
+      ),
+    );
+
     if (dynamicData.length !== 0) {
       const applicationData = this.generateApplicationData(structureData);
       dynamicData.forEach((trace) => trace.spanList.forEach((span) => {
@@ -233,16 +267,20 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
         const app = applicationData.get(span.hashCode);
         if (app) {
-          const currentValue = data.get(app)!.get(span.metric) ?? 0
+          const currentValue = data.get(app)!.get(span.metric) ?? 0;
           data.get(app)?.set(span.metric, currentValue + 1);
         }
-
       }));
     }
-    return data
+    return data;
   }
 
-  updateTimestampRepoAndTimeline(timestamp: number, applicationData: Map<string, Map<string, number>>, generalData: Map<string, number>, front: boolean = false) {
+  updateTimestampRepoAndTimeline(
+    timestamp: number,
+    applicationData: Map<string, Map<string, number>>,
+    generalData: Map<string, number>,
+    front: boolean = false,
+  ) {
     /**
      * Generates a unique string ID
      */
@@ -257,19 +295,23 @@ export default class LandscapeListener extends Service.extend(Evented) {
     }
     const landscapeToken = this.tokenService.token!.value;
 
-    const appData : Map<string, Timestamp> = new Map<string, Timestamp>(); // Timestamp per Application
-    applicationData.forEach((data, app) => appData.set(app, {id: uuidv4(), timestamp, data}));
+    // Timestamp per Application
+    const appData: Map<string, Timestamp> = new Map<string, Timestamp>();
+    applicationData.forEach((data, app) => appData.set(app, { id: uuidv4(), timestamp, data }));
 
-    const genData : Timestamp = { id : uuidv4(), timestamp, data: generalData}; // Timestamp for total landscape
+    // Timestamp for total landscape
+    const genData: Timestamp = { id: uuidv4(), timestamp, data: generalData };
 
-    const record = { id: uuidv4(), timestamp, structuredData: appData, generalData: genData};
+    const record = {
+      id: uuidv4(), timestamp, structuredData: appData, generalData: genData,
+    };
     this.timestampRepo.addTimestamp(landscapeToken, record, front);
   }
 
   getConfiguration() {
     const active = this.configRepo.getActiveConfigurations(this.tokenService.token!.value);
     const config = this.configRepo.getConfiguration(this.tokenService.token!.value);
-    return {config, active};
+    return { config, active };
   }
 }
 

@@ -12,8 +12,8 @@ export interface Timestamp {
 export interface StructuredTimestamp {
   id: string,
   timestamp: number,
-  structuredData: Map<string, Timestamp>, //Application based timestamps
-  generalData : Timestamp //Landscape based timestamp
+  structuredData: Map<string, Timestamp>, // Application based timestamps
+  generalData: Timestamp // Landscape based timestamp
 }
 
 /**
@@ -26,17 +26,23 @@ export default class TimestampRepository extends Service.extend(Evented) {
   debug = debugLogger();
 
   private structuredTimestamps: Map<string, StructuredTimestamp[]> = new Map();
-  latestApplication: string | null = null
-  minTimestamp: number = Date.now() - (6 * 60 * 1000);;
+
+  latestApplication: string | null = null;
+
+  minTimestamp: number = Date.now() - (6 * 60 * 1000);
+
   maxTimestamp: number = Date.now();
 
   getTimestamps(landscapeToken: string, application: string) {
     this.set('latestApplication', application);
     const landscape = this.structuredTimestamps.get(landscapeToken);
     if (landscape) {
-      return (application !== '' ? landscape.map(x => x.structuredData.get(application)!) : landscape.map(x => x.generalData));
+      if (application) {
+        return landscape.map((x) => x.structuredData.get(application)!);
+      }
+      return landscape.map((x) => x.generalData);
     }
-    return []
+    return [];
   }
 
   getFirstTimestamp(landscapeToken: string) {
@@ -57,16 +63,26 @@ export default class TimestampRepository extends Service.extend(Evented) {
     return undefined;
   }
 
-  addTimestamp(landscapeToken: string, structuredTimestamp: StructuredTimestamp, reverse: boolean = false) {
+  addTimestamp(
+    landscapeToken: string,
+    structuredTimestamp: StructuredTimestamp,
+    reverse: boolean = false,
+  ) {
     const structuredtimestamps = this.structuredTimestamps.get(landscapeToken);
     if (structuredtimestamps) {
       if (reverse) {
-        this.structuredTimestamps.set(landscapeToken, [structuredTimestamp, ...structuredtimestamps]);
+        this.structuredTimestamps.set(
+          landscapeToken, [structuredTimestamp, ...structuredtimestamps],
+        );
       } else {
-        this.structuredTimestamps.set(landscapeToken, [...structuredtimestamps, structuredTimestamp]);
+        this.structuredTimestamps.set(
+          landscapeToken, [...structuredtimestamps, structuredTimestamp],
+        );
       }
     } else {
-      this.structuredTimestamps.set(landscapeToken, [structuredTimestamp]);
+      this.structuredTimestamps.set(
+        landscapeToken, [structuredTimestamp],
+      );
     }
   }
 
@@ -80,7 +96,12 @@ export default class TimestampRepository extends Service.extend(Evented) {
       if (first > this.maxTimestamp || last < this.minTimestamp) {
         this.structuredTimestamps.set(landscapeToken, []);
       } else {
-        this.structuredTimestamps.set(landscapeToken, timestamps.filter(x => this.minTimestamp <= x.timestamp && x.timestamp <= this.maxTimestamp));
+        this.structuredTimestamps.set(
+          landscapeToken,
+          timestamps.filter(
+            (x) => this.minTimestamp <= x.timestamp && x.timestamp <= this.maxTimestamp,
+          ),
+        );
       }
     }
   }
