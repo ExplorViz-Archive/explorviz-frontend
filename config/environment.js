@@ -18,6 +18,7 @@ module.exports = function initEnvironment(environment) {
     console.log('- TRACE_URL'.yellow);
     console.log('- USER_URL'.yellow);
     console.log('- COLLAB_URL'.yellow);
+    console.log('- VR_URL'.yellow);
     console.log('- FRONTEND_HOST_NAME'.yellow);
     console.log('... depending on your deployment, e.g., reverse proxy in use.'.yellow);
 
