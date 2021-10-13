@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = ({
   // landscapeService: 'http://localhost:32680',
   landscapeService: 'http://localhost:8082',
   // traceService: 'http://localhost:32681',
@@ -7,4 +7,4 @@ module.exports = {
   userService: 'http://localhost:8084',
   collaborativeService: 'ws://localhost:8085',
   vrService: 'http://localhost:4443',
-};
+});

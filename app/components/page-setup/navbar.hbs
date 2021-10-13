@@ -1,53 +1,57 @@
 <div
-  class="d-flex flex-row justify-content-between p-3 disable-select pointer-events-none"
-  style="position: absolute; width: 100vw; z-index: 100"
+  class="p-3 disable-select pointer-events-none"
+  style="position: absolute; width: 100vw; z-index: 100;"
 >
   <img
-    style="height: 30px"
+    style="height: 30px; float: left"
     src="images/explorviz-30px.png"
     alt="ExplorViz"
     draggable="false"
   >
   {{#if this.tokenService.token}}
-    <div id="navbar-token-item" class="pointer-events-all">
+    <div class="navbar-token-link pointer-events-all d-none d-md-block">
       <LinkTo @route="landscapes" class="d-flex-center">
-        {{svg-jar "key" class="octicon"}}
-        <span>
-          {{!-- {{#if this.tokenService.token.alias}}
-            {{truncate this.tokenService.token.alias 20 true}}
-          {{else}} --}}
-          {{truncate this.tokenService.token.value 20 true}}
-          {{!-- {{/if}} --}}
-        </span>
+        {{svg-jar "key-16" class="octicon"}}
+        <span>{{this.tokenService.token.alias}}</span>
       </LinkTo>
-      <BsTooltip @placement="bottom" @delayShow={{1000}} @triggerEvents="hover">
-        <div>
-          <div>ID: {{this.tokenService.token.value}}</div>
-          {{!-- {{#if this.tokenService.token.alias}}
-            <div>Alias: {{this.tokenService.token.alias}}</div>
-          {{/if}}
-          <div>Created: {{this.tokenService.token.creationDate}}</div>
-          <div>Last Updated: {{this.tokenService.token.lastUpdated}}</div> --}}
-        </div>
-      </BsTooltip>
     </div>
   {{/if}}
   <div id="navbar-user-options" class="btn-group pointer-events-all">
-    <div class="dropdown-menu dropdown-menu-right">
-      <button
-        class="dropdown-item"
-        type="button"
-        {{on "click" this.logout}}
-      >
-        Logout
-      </button>
-    </div>
-    <button
-      class="dropdown-toggle d-flex align-items-center navbar-user-button"
-      data-toggle="dropdown"
-      type="button"
-    >
-      {{svg-jar "person" class="octicon"}}<span>{{this.auth.user.nickname}} ({{this.auth.user.sub}})</span><span class="caret ml-1"></span>
-    </button>
+    <BsDropdown @closeOnMenuClick={{false}} as |dd|>
+      <dd.toggle class="d-flex align-items-center navbar-user-button">
+        {{!-- template-lint-disable require-valid-alt-text --}}
+        <img id="avatar" class="pointer-events-none" src={{this.auth.user.picture}}>
+        <span class="caret ml-1"></span>
+      </dd.toggle>
+      <dd.menu @align="right" class="ml-3 mr-3 ml-md-0 mr-md-0" as |ddm|>
+        <div class="dropdown-header">
+          <div><strong class="truncate-text">{{this.auth.user.nickname}}</strong></div>
+          <span class="truncate-text">{{this.auth.user.sub}}</span>
+        </div>
+        <ddm.divider></ddm.divider>
+        {{#if this.tokenService.token}}
+          <ddm.item>
+            <ddm.link-to
+              class="truncate-text d-flex-center d-md-none"
+              @route="landscapes"
+              {{on "click" dd.closeDropdown}}
+            >
+              {{svg-jar "key-16" class="octicon"}}
+              <span>{{this.tokenService.token.alias}}</span>
+            </ddm.link-to>
+          </ddm.item>
+          <ddm.divider class="d-md-none"></ddm.divider>
+        {{/if}}
+        <ddm.item>
+          <button
+            class="dropdown-item"
+            type="button"
+            {{on "click" this.logout}}
+          >
+            Logout
+          </button>
+        </ddm.item>
+      </dd.menu>
+    </BsDropdown>
   </div>
 </div>

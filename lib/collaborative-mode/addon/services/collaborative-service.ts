@@ -2,7 +2,6 @@ import Service, { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 import {
   Perspective,
-  instanceOfIdentifiableMesh,
   CursorPosition, CollaborativeEvents,
 } from 'collaborative-mode/utils/collaborative-data';
 import THREE from 'three';
@@ -11,6 +10,11 @@ import adjustForObjectRotation from 'collaborative-mode/utils/collaborative-util
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import ENV from 'explorviz-frontend/config/environment';
+import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
+import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
+import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
+import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
+import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 
 const { collaborativeService } = ENV.backendAddresses;
 
@@ -76,8 +80,12 @@ export default class CollaborativeService extends Service.extend(Evented) {
   }
 
   sendClick(action: string, mesh: THREE.Mesh) {
-    if (instanceOfIdentifiableMesh(mesh)) {
-      this.send(action, { id: mesh.colabId });
+    if (mesh instanceof ClazzCommunicationMesh
+      || mesh instanceof ClazzMesh
+      || mesh instanceof ComponentMesh
+      || mesh instanceof ApplicationMesh
+      || mesh instanceof NodeMesh) {
+      this.send(action, { id: mesh.dataModel.id });
     }
   }
 
@@ -103,8 +111,12 @@ export default class CollaborativeService extends Service.extend(Evented) {
     const payload: CursorPosition = {
       point: vectorWithoutObjectRotation.toArray(),
     };
-    if (mesh && instanceOfIdentifiableMesh(mesh)) {
-      payload.id = mesh.colabId;
+    if (mesh && (mesh instanceof ClazzCommunicationMesh
+      || mesh instanceof ClazzMesh
+      || mesh instanceof ComponentMesh
+      || mesh instanceof ApplicationMesh
+      || mesh instanceof NodeMesh)) {
+      payload.id = mesh.dataModel.id;
     }
     this.send(event, payload);
   }

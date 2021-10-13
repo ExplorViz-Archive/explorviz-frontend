@@ -302,7 +302,7 @@ export default class PlotlyTimeline extends Component<IArgs> {
   // BEGIN Helper functions
 
   static getPlotlySlidingWindowUpdateObject(minTimestamp: number, maxTimestamp: number):
-  {xaxis: {type: 'date', range: number[], title: {}} } {
+  { xaxis: { type: 'date', range: number[], title: {} } } {
     return {
       xaxis: {
         range: [minTimestamp, maxTimestamp],

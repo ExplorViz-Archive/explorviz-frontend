@@ -47,7 +47,7 @@ function composeApplicationContent(applicationMesh: ApplicationMesh) {
 
   const content: DetailedInfo = { title: application.name, entries: [] };
 
-  content.entries.push({ key: 'Instance ID: ', value: application.instanceId });
+  content.entries.push({ key: 'Instance ID: ', value: application.id });
   content.entries.push({ key: 'Language: ', value: application.language });
 
   return content;
@@ -144,12 +144,6 @@ export function isEntityMesh(object: any): object is EntityMesh {
 
 export function getIdOfEntity(entity: EntityMesh): string {
   const model = entity.dataModel;
-  if (isNode(model)) {
-    return model.ipAddress;
-  }
-  if (isApplication(model)) {
-    return model.instanceId;
-  }
   return model.id;
 }
 

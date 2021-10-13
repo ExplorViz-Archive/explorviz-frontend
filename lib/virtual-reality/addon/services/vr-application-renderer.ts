@@ -4,6 +4,7 @@ import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
 import Configuration from 'explorviz-frontend/services/configuration';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
@@ -19,6 +20,7 @@ import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 import THREE from 'three';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
@@ -54,6 +56,12 @@ export default class VrApplicationRenderer extends Service {
 
   @service('configuration')
   private configuration!: Configuration;
+
+  @service('user-settings')
+  private userSettings!: UserSettings;
+
+  @service('heatmap-configuration')
+  private heatmapConfiguration!: HeatmapConfiguration;
 
   @service('vr-asset-repo')
   private assetRepo!: VrAssetRepository;
@@ -95,7 +103,8 @@ export default class VrApplicationRenderer extends Service {
     this.applicationGroup = new THREE.Group();
     this.sceneService.scene.add(this.applicationGroup);
 
-    this.appCommRendering = new AppCommunicationRendering(this.configuration);
+    this.appCommRendering = new AppCommunicationRendering(this.configuration,
+      this.userSettings, this.heatmapConfiguration);
     this.drawableClassCommunications = new Map();
   }
 
@@ -170,11 +179,12 @@ export default class VrApplicationRenderer extends Service {
 
     // Draw communication lines.
     const drawableComm = this.drawableClassCommunications.get(
-      application.dataModel.instanceId,
+      application.dataModel.id,
     );
     if (drawableComm) {
       this.appCommRendering.addCommunication(application, drawableComm);
-      Highlighting.updateHighlighting(application, drawableComm);
+      const { value } = this.userSettings.applicationSettings.transparencyIntensity;
+      Highlighting.updateHighlighting(application, drawableComm, value);
     }
 
     // Hightlight components.
@@ -189,7 +199,7 @@ export default class VrApplicationRenderer extends Service {
   removeApplication(application: ApplicationObject3D): Promise<boolean> {
     return new Promise((resolve) => {
       // Ask backend to close the application.
-      const nonce = this.sender.sendAppClosed(application.dataModel.instanceId);
+      const nonce = this.sender.sendAppClosed(application.dataModel.id);
 
       // Remove the application only when the backend allowed the application to be closed.
       this.receiver.awaitResponse({
@@ -208,7 +218,7 @@ export default class VrApplicationRenderer extends Service {
   }
 
   removeApplicationLocally(application: ApplicationObject3D) {
-    this.openApplications.delete(application.dataModel.instanceId);
+    this.openApplications.delete(application.dataModel.id);
     application.parent?.remove(application);
     application.children.forEach((child) => {
       if (child instanceof BaseMesh) {
@@ -227,7 +237,7 @@ export default class VrApplicationRenderer extends Service {
   ) {
     this.toggleComponentLocally(componentMesh, applicationObject3D);
     this.sender.sendComponentUpdate(
-      applicationObject3D.dataModel.instanceId,
+      applicationObject3D.dataModel.id,
       componentMesh.dataModel.id,
       componentMesh.opened,
       false,
@@ -249,7 +259,7 @@ export default class VrApplicationRenderer extends Service {
   closeAllComponents(applicationObject3D: ApplicationObject3D) {
     this.closeAllComponentsLocally(applicationObject3D);
     this.sender.sendComponentUpdate(
-      applicationObject3D.dataModel.instanceId,
+      applicationObject3D.dataModel.id,
       '',
       false,
       true,
@@ -267,12 +277,15 @@ export default class VrApplicationRenderer extends Service {
     callback?: (applicationObject3D: ApplicationObject3D) => void,
   ) {
     try {
-      if (this.isApplicationOpen(applicationModel.instanceId)) return;
+      if (this.isApplicationOpen(applicationModel.id)) return;
 
       const layoutedApplication: Map<
       string,
       LayoutData
-      > = yield this.worker.postMessage('city-layouter', applicationModel);
+      > = yield this.worker.postMessage('city-layouter', {
+        structure: applicationModel,
+        dynamic: this.dynamicLandscapeData,
+      });
 
       // Converting plain JSON layout data due to worker limitations
       const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(
@@ -294,7 +307,7 @@ export default class VrApplicationRenderer extends Service {
       this.createDrawableClassCommunications(applicationObject3D);
 
       const drawableComm = this.drawableClassCommunications.get(
-        applicationObject3D.dataModel.instanceId,
+        applicationObject3D.dataModel.id,
       )!;
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
@@ -313,7 +326,7 @@ export default class VrApplicationRenderer extends Service {
 
       this.applicationGroup.add(applicationObject3D);
       this.openApplications.set(
-        applicationModel.instanceId,
+        applicationModel.id,
         applicationObject3D,
       );
 
@@ -328,7 +341,7 @@ export default class VrApplicationRenderer extends Service {
   ) {
     if (
       this.drawableClassCommunications.has(
-        applicationObject3D.dataModel.instanceId,
+        applicationObject3D.dataModel.id,
       )
     ) {
       return;
@@ -346,7 +359,7 @@ export default class VrApplicationRenderer extends Service {
       (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
     );
     this.drawableClassCommunications.set(
-      applicationObject3D.dataModel.instanceId,
+      applicationObject3D.dataModel.id,
       communicationInApplication,
     );
   }
@@ -355,11 +368,11 @@ export default class VrApplicationRenderer extends Service {
    * Adds labels to all box meshes of a given application
    */
   private addLabels(applicationObject3D: ApplicationObject3D) {
-    const clazzTextColor = this.configuration.applicationColors.clazzText;
-    const componentTextColor = this.configuration.applicationColors
-      .componentText;
-    const foundationTextColor = this.configuration.applicationColors
-      .foundationText;
+    const {
+      clazzTextColor,
+      componentTextColor,
+      foundationTextColor,
+    } = this.configuration.applicationColors;
 
     applicationObject3D.getBoxMeshes().forEach((mesh) => {
       if (!this.assetRepo.font) return;

@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import Controller from '@ember/controller';
 import {
   action,
@@ -17,6 +16,7 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
 import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -40,6 +40,8 @@ export default class VisualizationController extends Controller {
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
+  @service('heatmap-configuration') heatmapConf!: HeatmapConfiguration;
+
   @service('landscape-token') landscapeTokenService!: LandscapeTokenService;
 
   @service('reload-handler') reloadHandler!: ReloadHandler;
@@ -48,6 +50,9 @@ export default class VisualizationController extends Controller {
 
   @tracked
   selectedTimestampRecords: Timestamp[] = [];
+
+  @tracked
+  font!: THREE.Font; // set by the route
 
   @tracked
   showDataSelection = false;
@@ -62,7 +67,7 @@ export default class VisualizationController extends Controller {
   showTimeline: boolean = true;
 
   @tracked
-  landscapeData: LandscapeData|null = null;
+  landscapeData: LandscapeData | null = null;
 
   @tracked
   visualizationPaused = false;
@@ -102,6 +107,7 @@ export default class VisualizationController extends Controller {
   receiveNewLandscapeData(structureData: StructureLandscapeData,
     dynamicData: DynamicLandscapeData) {
     if (!this.visualizationPaused) {
+      this.heatmapConf.latestClazzMetricScores = [];
       this.updateLandscape(structureData, dynamicData);
     }
   }
@@ -112,8 +118,8 @@ export default class VisualizationController extends Controller {
     if (this.landscapeData !== null) {
       application = this.landscapeData.application;
       if (application !== undefined) {
-        const newApplication = VisualizationController.getApplicationFromLandscapeByInstanceId(
-          application.instanceId, structureData,
+        const newApplication = VisualizationController.getApplicationFromLandscapeById(
+          application.id, structureData,
         );
 
         if (newApplication) {
@@ -128,12 +134,12 @@ export default class VisualizationController extends Controller {
     };
   }
 
-  private static getApplicationFromLandscapeByInstanceId(instanceId: string,
+  private static getApplicationFromLandscapeById(id: string,
     structureData: StructureLandscapeData) {
-    let foundApplication: Application|undefined;
+    let foundApplication: Application | undefined;
     structureData.nodes.forEach((node) => {
       node.applications.forEach((application) => {
-        if (application.instanceId === instanceId) {
+        if (application.id === id) {
           foundApplication = application;
         }
       });
@@ -168,7 +174,7 @@ export default class VisualizationController extends Controller {
         ...this.landscapeData,
         application: app,
       };
-      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.instanceId });
+      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.id });
     }
   }
 

@@ -9,6 +9,20 @@
   box-shadow: 0px 0px 25px 10px rgb(0 0 0 / 50%);
 }
 
+.auth0-lock-content-wrapper {
+  overflow: hidden;
+}
+
+.auth0-lock.auth0-lock .auth0-lock-cred-pane-internal-wrapper {
+  height: auto!important;
+}
+
+.auth0-lock.auth0-lock.auth0-lock-opened-in-frame {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .fade-in {
   opacity: 100%;
   transition: opacity 0.8s

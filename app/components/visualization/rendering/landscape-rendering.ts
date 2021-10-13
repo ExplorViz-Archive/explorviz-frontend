@@ -27,6 +27,7 @@ import { perform } from 'ember-concurrency-ts';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 
 interface Args {
   readonly id: string;
@@ -85,6 +86,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @service()
   worker!: any;
 
+  @service('user-settings')
+  userSettings!: UserSettings;
+
   scene!: THREE.Scene;
 
   webglrenderer!: THREE.WebGLRenderer;
@@ -119,7 +123,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
-  hoveredObject: BaseMesh|null = null;
+  hoveredObject: BaseMesh | null = null;
 
   get rightClickMenuItems() {
     const pauseItemtitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
@@ -143,6 +147,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   get font() {
     return this.args.font;
+  }
+
+  get landSettings() {
+    return this.userSettings.landscapeSettings;
   }
 
   // #endregion CLASS FIELDS AND GETTERS
@@ -198,14 +206,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
-
-    /*
-    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
-      'showFpsCounter');
-
-    if (showFpsCounter) {
-      this.threePerformance = new THREEPerformance();
-    } */
   }
 
   /**
@@ -213,7 +213,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = this.configuration.landscapeColors.background;
+    this.scene.background = this.configuration.landscapeColors.backgroundColor;
 
     this.scene.add(this.landscapeObject3D);
 
@@ -248,9 +248,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    * Creates a DirectionalLight and adds it to the scene
    */
   initLights() {
-    const dirLight = new THREE.DirectionalLight();
-    dirLight.position.set(30, 10, 20);
-    this.scene.add(dirLight);
     this.debug('Lights added');
   }
 
@@ -275,6 +272,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     const animationId = requestAnimationFrame(this.render);
     this.animationFrameId = animationId;
+
+    const { value: showFpsCounter } = this.userSettings.landscapeSettings.showFpsCounter;
+
+    if (showFpsCounter && !this.threePerformance) {
+      this.threePerformance = new THREEPerformance();
+    } else if (!showFpsCounter && this.threePerformance) {
+      this.threePerformance.removePerformanceMeasurement();
+      this.threePerformance = undefined;
+    }
 
     if (this.threePerformance) {
       this.threePerformance.threexStats.update(this.webglrenderer);
@@ -481,20 +487,20 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       // Draw boxes for nodes
       nodes.forEach((node) => {
-        this.renderNode(node, modelIdToPlaneLayout.get(node.ipAddress), centerPoint);
+        this.renderNode(node, modelIdToPlaneLayout.get(node.id), centerPoint);
 
         const { applications } = node;
 
         // Draw boxes for applications
         applications.forEach((application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.instanceId),
+          this.renderApplication(application, modelIdToPlaneLayout.get(application.id),
             centerPoint);
         });
       });
 
       // Render application communication
 
-      const color = this.configuration.landscapeColors.communication;
+      const color = this.configuration.landscapeColors.communicationColor;
 
       const tiles = CommunicationRendering.computeCommunicationTiles(applicationCommunications,
         modelIdToPointsComplete, color);
@@ -521,7 +527,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (!layout) { return; }
 
     // Create node mesh
-    const nodeMesh = new NodeMesh(layout, node, this.configuration.landscapeColors.node);
+    const nodeMesh = new NodeMesh(layout, node, this.configuration.landscapeColors.nodeColor);
 
     // Create and add label + icon
     nodeMesh.setToDefaultPosition(centerPoint);
@@ -530,7 +536,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const labelText = nodeMesh.getDisplayName();
 
     this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font,
-      this.configuration.landscapeColors.nodeText);
+      this.configuration.landscapeColors.nodeTextColor);
 
     // Add to scene
     this.landscapeObject3D.add(nodeMesh);
@@ -550,12 +556,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create application mesh
     const applicationMesh = new ApplicationMesh(layout, application,
-      this.configuration.landscapeColors.application);
+      this.configuration.landscapeColors.applicationColor);
     applicationMesh.setToDefaultPosition(centerPoint);
 
     // Create and add label + icon
     this.labeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
-      this.configuration.landscapeColors.applicationText);
+      this.configuration.landscapeColors.applicationTextColor);
     Labeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
@@ -638,8 +644,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   mouseMoveOnMesh(mesh: THREE.Object3D) {
-    const enableHoverEffects = true;
-    // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
+    const { value: enableHoverEffects } = this.landSettings.enableHoverEffects;
 
     // Update hover effect
     if (mesh === undefined && this.hoveredObject) {

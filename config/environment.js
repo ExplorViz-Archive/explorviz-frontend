@@ -2,11 +2,30 @@
 
 /* eslint no-console: 0 */
 
+const DOTENV = require('dotenv');
 var colors = require('colors'); // eslint-disable-line
-const AUTH_CONFIG = require('./auth0-variables');
-const BACKEND_CONFIG = require('./backend-addresses');
 
 module.exports = function initEnvironment(environment) {
+  const path = { path: process.env.DOTENV };
+
+  const P_ENV = process.env;
+
+  if (P_ENV.DOTENV) {
+    DOTENV.config(path);
+  } else if (environment === 'production') {
+    console.log('EXPL-WARNING: This is production mode. You must override the following variables via Docker environment variables in a Docker Compose file:'.yellow);
+    console.log('- LANDSCAPE_URL'.yellow);
+    console.log('- TRACE_URL'.yellow);
+    console.log('- USER_URL'.yellow);
+    console.log('- COLLAB_URL'.yellow);
+    console.log('- FRONTEND_HOST_NAME'.yellow);
+    console.log('... depending on your deployment, e.g., reverse proxy in use.'.yellow);
+
+    DOTENV.config({ path: '.env-prod' });
+  } else {
+    DOTENV.config();
+  }
+
   const ENV = {
     modulePrefix: 'explorviz-frontend',
     environment,
@@ -23,21 +42,25 @@ module.exports = function initEnvironment(environment) {
       },
     },
     auth0: {
-      clientId: AUTH_CONFIG.clientId,
-      domain: AUTH_CONFIG.domain,
-      logoUrl: AUTH_CONFIG.logoUrl,
-      callbackUrl: AUTH_CONFIG.callbackUrl,
-      logoutReturnUrl: AUTH_CONFIG.logoutReturnUrl,
-      routeAfterLogin: AUTH_CONFIG.routeAfterLogin,
-      accessToken: AUTH_CONFIG.accessToken,
-      profile: AUTH_CONFIG.profile,
+      clientId: P_ENV.AUTH0_CLIENT_ID,
+      domain: P_ENV.AUTH0_DOMAIN,
+      logoUrl: P_ENV.AUTH0_LOGO_URL,
+      callbackUrl: P_ENV.AUTH0_CALLBACK_URL,
+      logoutReturnUrl: P_ENV.AUTH0_LOGOUT_URL,
+      routeAfterLogin: P_ENV.AUTH0_ROUTE_AFTER_LOGIN,
+      accessToken: P_ENV.AUTH0_DISABLED_ACCESS_TOKEN,
+      profile: {
+        name: P_ENV.AUTH0_DISABLED_PROFILE_NAME,
+        nickname: P_ENV.AUTH0_DISABLED_NICKNAME,
+        sub: P_ENV.AUTH0_DISABLED_SUB,
+      },
     },
     backendAddresses: {
-      landscapeService: BACKEND_CONFIG.landscapeService,
-      traceService: BACKEND_CONFIG.traceService,
-      userService: BACKEND_CONFIG.userService,
-      collaborativeService: BACKEND_CONFIG.collaborativeService,
-      vrService: BACKEND_CONFIG.vrService,
+      landscapeService: P_ENV.LANDSCAPE_SERV_URL,
+      traceService: P_ENV.TRACE_SERV_URL,
+      userService: P_ENV.USER_SERV_URL,
+      collaborativeService: P_ENV.COLLAB_SERV_URL,
+      vrService: P_ENV.VR_SERV_URL,
     },
 
     APP: {
@@ -45,43 +68,6 @@ module.exports = function initEnvironment(environment) {
       // when it is created
     },
   };
-
-  let API_ROOT;
-
-  if (environment === 'development' || environment === 'noauth') {
-    API_ROOT = 'http://localhost:8080';
-
-    if (process.env.API_ROOT) {
-      API_ROOT = process.env.API_ROOT;
-    }
-
-    ENV.APP.API_ROOT = API_ROOT;
-
-    console.log('');
-    console.log(`EXPL-INFO: Development mode: Using ${API_ROOT} as API_ROOT`.blue);
-  }
-
-  if (environment === 'production') {
-    console.log('');
-
-    // var rootURL = 'change-rootURL';
-    API_ROOT = 'change-API_ROOT';
-
-    if (process.env.API_ROOT) {
-      console.log('EXPL-INFO: Using environment variable as API_ROOT'.blue);
-      API_ROOT = process.env.API_ROOT;
-    }
-
-    ENV.APP.API_ROOT = API_ROOT;
-
-    console.log('');
-    console.log(`EXPL-INFO: Production mode: Using ${API_ROOT} as API_ROOT`.blue);
-
-    if (API_ROOT === 'change-API_ROOT') {
-      console.log(`EXPL-WARNING: This is prodution mode. You must override the 'API_ROOT' variable with its current value: ${API_ROOT}`.yellow);
-      console.log('EXPL-WARNING: Set the environment variable API_ROOT=XXX'.yellow);
-    }
-  }
 
   if (environment === 'test') {
     // Testem prefers this...

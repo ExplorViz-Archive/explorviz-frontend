@@ -1,41 +1,12 @@
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import { tracked } from '@glimmer/tracking';
+import { ApplicationColorSettingId, LandscapeColorSettingId } from 'explorviz-frontend/utils/settings/settings-schemas';
+import UserSettings from './user-settings';
 
-export type LandscapeColors = {
-  system: THREE.Color,
-  nodegroup: THREE.Color,
-  node: THREE.Color,
-  application: THREE.Color,
-  communication: THREE.Color,
-  systemText: THREE.Color,
-  nodeText: THREE.Color,
-  applicationText: THREE.Color,
-  collapseSymbol: THREE.Color,
-  background: THREE.Color
-};
+export type LandscapeColors = Record<LandscapeColorSettingId, THREE.Color>;
 
-export type ApplicationColors = {
-  foundation: THREE.Color,
-  componentOdd: THREE.Color,
-  componentEven: THREE.Color,
-  clazz: THREE.Color,
-  highlightedEntity: THREE.Color,
-  componentText: THREE.Color,
-  clazzText: THREE.Color,
-  foundationText: THREE.Color,
-  communication: THREE.Color,
-  communicationArrow: THREE.Color,
-  background: THREE.Color
-};
-
-export type ExtensionDescription = {
-  id: string,
-  title: string,
-  link: string,
-  nestedRoute: string,
-  paneName: string
-};
+export type ApplicationColors = Record<ApplicationColorSettingId, THREE.Color>;
 
 /**
  * The Configuration Service handles color settings for the
@@ -44,15 +15,8 @@ export type ExtensionDescription = {
  * @extends Ember.Service
  */
 export default class Configuration extends Service {
-  /**
-  * Array for component-based settings dialogs. Any extension may push an object
-  * with the name of it's settings-component and it's title in this array. See
-  * the extension "colorpicker"" for exemplary usage.
-  *
-  * @property configurationExtensions
-  * @type Array
-  */
-  configurationExtensions: ExtensionDescription[] = [];
+  @service('user-settings')
+  userSettings!: UserSettings;
 
   /**
   * Colors for landscape visualization
@@ -61,7 +25,7 @@ export default class Configuration extends Service {
   * @type LandscapeColors
   */
   @tracked
-  landscapeColors: LandscapeColors;
+  landscapeColors!: LandscapeColors;
 
   /**
   * Colors for application visualization
@@ -70,7 +34,16 @@ export default class Configuration extends Service {
   * @type ApplicationColors
   */
   @tracked
-  applicationColors: ApplicationColors;
+  applicationColors!: ApplicationColors;
+
+  // #region APPLICATION LAYOUT
+
+  @tracked
+  isCommRendered = true;
+
+  commCurveHeightDependsOnDistance = true;
+
+  // #endregion APPLICATION LAYOUT
 
   /**
    * Sets default colors
@@ -78,31 +51,31 @@ export default class Configuration extends Service {
   constructor() {
     super(...arguments);
 
+    const { landscapeSettings, applicationSettings } = this.userSettings;
+
     this.landscapeColors = {
-      system: new THREE.Color('#c7c7c7'), // grey
-      nodegroup: new THREE.Color('#169e2b'), // dark green
-      node: new THREE.Color('#00bb41'), // green
-      application: new THREE.Color('#3e14a0'), // purple-blue
-      communication: new THREE.Color('#f49100'), // orange
-      systemText: new THREE.Color('#000000'), // black
-      nodeText: new THREE.Color('#ffffff'), // white
-      applicationText: new THREE.Color('#ffffff'), // white
-      collapseSymbol: new THREE.Color('#000000'), // black
-      background: new THREE.Color('#ffffff'), // white
+      nodeColor: new THREE.Color(landscapeSettings.nodeColor.value),
+      applicationColor: new THREE.Color(landscapeSettings.applicationColor.value),
+      communicationColor: new THREE.Color(landscapeSettings.communicationColor.value),
+      nodeTextColor: new THREE.Color(landscapeSettings.nodeTextColor.value),
+      applicationTextColor: new THREE.Color(landscapeSettings.applicationTextColor.value),
+      backgroundColor: new THREE.Color(landscapeSettings.backgroundColor.value),
     };
 
     this.applicationColors = {
-      foundation: new THREE.Color('#c7c7c7'), // grey
-      componentOdd: new THREE.Color('#169e2b'), // dark green
-      componentEven: new THREE.Color('#00bb41'), // light green
-      clazz: new THREE.Color('#3e14a0'), // purple-blue
-      highlightedEntity: new THREE.Color('#ff0000'), // red
-      componentText: new THREE.Color('#ffffff'), // white
-      clazzText: new THREE.Color('#ffffff'), // white
-      foundationText: new THREE.Color('#000000'), // black
-      communication: new THREE.Color('#f49100'), // orange
-      communicationArrow: new THREE.Color('#000000'), // black
-      background: new THREE.Color('#ffffff'), // white
+      foundationColor: new THREE.Color(applicationSettings.foundationColor.value),
+      componentOddColor: new THREE.Color(applicationSettings.componentOddColor.value),
+      componentEvenColor: new THREE.Color(applicationSettings.componentEvenColor.value),
+      clazzColor: new THREE.Color(applicationSettings.clazzColor.value),
+      highlightedEntityColor:
+      new THREE.Color(applicationSettings.highlightedEntityColor.value),
+      componentTextColor: new THREE.Color(applicationSettings.componentTextColor.value),
+      clazzTextColor: new THREE.Color(applicationSettings.clazzTextColor.value),
+      foundationTextColor: new THREE.Color(applicationSettings.foundationTextColor.value),
+      communicationColor: new THREE.Color(applicationSettings.communicationColor.value),
+      communicationArrowColor:
+      new THREE.Color(applicationSettings.communicationArrowColor.value),
+      backgroundColor: new THREE.Color(applicationSettings.backgroundColor.value),
     };
   }
 }

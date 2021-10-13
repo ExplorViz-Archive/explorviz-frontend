@@ -13,7 +13,7 @@ import {
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 interface Args {
-  moveCameraTo(emberModel: Class|Span): void;
+  moveCameraTo(emberModel: Class | Span): void;
   selectTrace(trace: Trace): void;
   readonly structureData: StructureLandscapeData;
   readonly application: Application;

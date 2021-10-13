@@ -171,7 +171,7 @@ export default class VrRoomSerializer extends Service {
     return this.vrApplicationRenderer
       .getOpenApplications()
       .map((application) => ({
-        id: application.dataModel.instanceId,
+        id: application.dataModel.id,
         position: application.getWorldPosition(new THREE.Vector3()).toArray(),
         quaternion: application
           .getWorldQuaternion(new THREE.Quaternion())

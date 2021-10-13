@@ -2,11 +2,13 @@ import Modifier from 'ember-modifier';
 import { action } from '@ember/object';
 import { assert } from '@ember/debug';
 import Raycaster from 'explorviz-frontend/utils/raycaster';
-import { Mesh } from 'three';
+import THREE, { Object3D, Mesh } from 'three';
 import { inject as service } from '@ember/service';
 import CollaborativeService from 'explorviz-frontend/services/collaborative-service';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
+import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 
 export type Position2D = {
   x: number,
@@ -22,8 +24,8 @@ interface InteractionModifierArgs {
   named: {
     mousePositionX: number,
     camera: THREE.Camera,
-    raycastObject: THREE.Object3D,
-    raycastFilter?: (intersection: THREE.Intersection) => boolean,
+    raycastObjects: Object3D | Object3D[],
+    raycastFilter?: ((intersection: THREE.Intersection) => boolean) | null,
     hammerInteraction: HammerInteraction,
     mouseEnter?(): void,
     mouseOut?(): void,
@@ -39,9 +41,6 @@ interface InteractionModifierArgs {
 export default class InteractionModifierModifier extends Modifier<InteractionModifierArgs> {
   // Used to determine if and which object was hit
   raycaster: Raycaster;
-
-  // Function to filter raycast results as desired
-  raycastFilter: ((intersection: THREE.Intersection) => boolean) | undefined;
 
   @service('collaborative-service')
   collaborativeService!: CollaborativeService;
@@ -80,11 +79,11 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   }
 
   willDestroy() {
-    if (this.args.named.doubleClick) { this.hammerInteraction.hammerManager.off('doubletap'); }
+    if (this.args.named.doubleClick) { this.hammerInteraction.hammerManager?.off('doubletap'); }
 
-    if (this.args.named.panning) { this.hammerInteraction.hammerManager.off('panning'); }
+    if (this.args.named.panning) { this.hammerInteraction.hammerManager?.off('panning'); }
 
-    if (this.args.named.singleClick) { this.hammerInteraction.hammerManager.off('singletap'); }
+    if (this.args.named.singleClick) { this.hammerInteraction.hammerManager?.off('singletap'); }
 
     if (this.args.named.mouseOut) { this.canvas.removeEventListener('mouseout', this.onMouseOut); }
 
@@ -105,8 +104,22 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     return this.element;
   }
 
-  get raycastObject(): THREE.Object3D {
-    return this.args.named.raycastObject;
+  get raycastObjects(): Object3D | Object3D[] {
+    return this.args.named.raycastObjects;
+  }
+
+  get raycastFilter(): ((intersection: THREE.Intersection) => boolean) | undefined {
+    const filter = this.args.named.raycastFilter;
+
+    // Use default filter if no one is passed
+    if (filter === undefined) {
+      return (intersection: THREE.Intersection) => !(intersection.object instanceof LabelMesh
+        || intersection.object instanceof LogoMesh);
+    // Use no filter if null is passed explicitly
+    } if (filter === null) {
+      return undefined;
+    }
+    return filter;
   }
 
   get camera(): THREE.Camera {
@@ -151,10 +164,10 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
 
     this.args.named.mouseMove(intersectedViewObj);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof Mesh
-      && this.collaborativeSettings.meeting) {
+    if (this.raycastObjects instanceof Object3D && intersectedViewObj
+    && intersectedViewObj.object instanceof Mesh && this.collaborativeSettings.meeting) {
       this.collaborativeService.sendMouseMove(intersectedViewObj.point,
-        this.raycastObject.quaternion, intersectedViewObj.object);
+        this.raycastObjects.quaternion, intersectedViewObj.object);
     }
   }
 
@@ -169,10 +182,10 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     const intersectedViewObj = this.raycast(mouse);
     this.args.named.mouseStop(intersectedViewObj, mouse);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof Mesh
-      && this.collaborativeSettings.meeting) {
+    if (this.raycastObjects instanceof Object3D && intersectedViewObj
+      && intersectedViewObj.object instanceof Mesh && this.collaborativeSettings.meeting) {
       this.collaborativeService.sendMouseStop(intersectedViewObj.point,
-        this.raycastObject.quaternion, intersectedViewObj.object);
+        this.raycastObjects.quaternion, intersectedViewObj.object);
     }
   }
 
@@ -224,10 +237,10 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   }
 
   sendPerspective() {
-    if (this.collaborativeSettings.meeting) {
+    if (this.collaborativeSettings.meeting && this.raycastObjects instanceof Object3D) {
       this.collaborativeService.sendPerspective({
         position: this.camera.position.toArray(),
-        rotation: this.raycastObject.rotation?.toArray().slice(0, 3),
+        rotation: this.raycastObjects.rotation?.toArray().slice(0, 3),
         requested: false,
       });
     }
@@ -236,8 +249,11 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   raycast(mouseOnCanvas: Position2D) {
     const origin = this.calculatePositionInScene(mouseOnCanvas);
 
+    const possibleObjects = this.raycastObjects instanceof Object3D
+      ? [this.raycastObjects] : this.raycastObjects;
+
     const intersectedViewObj = this.raycaster.raycasting(origin, this.args.named.camera,
-      [this.raycastObject], this.raycastFilter);
+      possibleObjects, this.raycastFilter);
 
     return intersectedViewObj;
   }
@@ -272,11 +288,19 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     }(300));
   }
 
-  static getMousePos(canvas: HTMLCanvasElement, evt: MouseEvent) {
+  static getMousePos(canvas: HTMLCanvasElement, evt: MouseEvent): Position2D {
     const rect = canvas.getBoundingClientRect();
     return {
       x: evt.clientX - rect.left,
       y: evt.clientY - rect.top,
+    };
+  }
+
+  static getTouchPos(canvas: HTMLCanvasElement, evt: TouchEvent): Position2D {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.targetTouches[0].clientX - rect.left,
+      y: evt.targetTouches[0].clientY - rect.top,
     };
   }
 }

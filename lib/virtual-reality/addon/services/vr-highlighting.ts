@@ -6,6 +6,7 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 import VrApplicationRenderer from './vr-application-renderer';
 import LocalVrUser from './local-vr-user';
 import VrMessageSender from './vr-message-sender';
@@ -32,6 +33,9 @@ export default class VrHighlightingService extends Service {
   @service('configuration')
   private configuration!: Configuration;
 
+  @service('user-settings')
+  private userSettings!: UserSettings;
+
   @service('local-vr-user')
   private localUser!: LocalVrUser;
 
@@ -45,7 +49,7 @@ export default class VrHighlightingService extends Service {
     if (isHightlightableMesh(object)) {
       this.hightlightMesh(application, object, this.localUser.color);
 
-      const appId = application.dataModel.instanceId;
+      const appId = application.dataModel.id;
       const entityType = this.getEntityType(object);
       const entityId = this.getEntityId(object);
       this.sender.sendHighlightingUpdate(
@@ -75,14 +79,15 @@ export default class VrHighlightingService extends Service {
 
   updateHighlightingLocally(application: ApplicationObject3D) {
     const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(
-      application.dataModel.instanceId,
+      application.dataModel.id,
     );
     if (drawableComm) {
       this.vrApplicationRenderer.appCommRendering.addCommunication(
         application,
         drawableComm,
       );
-      Highlighting.updateHighlighting(application, drawableComm);
+      const { value } = this.userSettings.applicationSettings.transparencyIntensity;
+      Highlighting.updateHighlighting(application, drawableComm, value);
     }
   }
 
@@ -92,13 +97,14 @@ export default class VrHighlightingService extends Service {
     color?: THREE.Color,
   ) {
     const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(
-      application.dataModel.instanceId,
+      application.dataModel.id,
     );
     if (drawableComm) {
       application.setHighlightingColor(
-        color || this.configuration.applicationColors.highlightedEntity,
+        color || this.configuration.applicationColors.highlightedEntityColor,
       );
-      Highlighting.highlight(mesh, application, drawableComm);
+      const { value } = this.userSettings.applicationSettings.transparencyIntensity;
+      Highlighting.highlight(mesh, application, drawableComm, value);
     }
   }
 

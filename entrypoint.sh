@@ -1,7 +1,11 @@
 #!/bin/sh
 set -eu
 
-sed -i "s#change-API_ROOT#$FRONTEND_IP#g" /usr/share/nginx/html/index.html
-sed -i "s#API_ROOT#$API_ROOT#g" /etc/nginx/conf.d/explorviz-nginx.conf
+sed -i "s#change-landscape-url#$LANDSCAPE_URL#g" /usr/share/nginx/html/index.html
+sed -i "s#change-trace-url#$TRACE_URL#g" /usr/share/nginx/html/index.html
+sed -i "s#change-user-url#$USER_URL#g" /usr/share/nginx/html/index.html
+sed -i "s#change-collab-url#$COLLAB_URL#g" /usr/share/nginx/html/index.html
+sed -i "s#change-vr-url#$VR_URL#g" /usr/share/nginx/html/index.html
+sed -i "s#change-frontend-host-name#$FRONTEND_HOST_NAME#g" /usr/share/nginx/html/index.html
 
 exec "$@"

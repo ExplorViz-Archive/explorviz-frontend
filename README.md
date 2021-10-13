@@ -45,7 +45,7 @@ You will need the following things properly installed on your computer.
 
 ### Installation (Generic)
 * `git clone <repository-url>` this repository
-* `cd explorviz-frontend`
+* `cd frontend`
 * `npm install -g ember-cli`
 * `npm install`
 
@@ -54,6 +54,16 @@ You will need the following things properly installed on your computer.
 * Unless the backend is running on `localhost`, specify the backend's base URL in the `API_ROOT` environment variable.
 * `ember serve` or `ember s`
 * Visit the frontend at [https://localhost:4200](https://localhost:4200).
+
+#### Code Analysis
+For development, we suggest using VSCode. Installing the following extensions will help you stick to our code-styling rules and other best practices.
+* [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+* [Unstable Ember Language Server](https://marketplace.visualstudio.com/items?itemName=lifeart.vscode-ember-unstable)
+
+You can also run the code analysis within you terminal with:
+* `npm run lint` (.js, .ts, .hbs),
+* `npm run lint:eslint` (.js, .ts), or
+* `npm run lint:template` (.hbs)
 
 #### Testing
 * `npm test` or `ember test` / `ember test --server`

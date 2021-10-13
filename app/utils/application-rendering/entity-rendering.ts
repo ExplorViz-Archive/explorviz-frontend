@@ -62,13 +62,12 @@ export function addComponentAndChildrenToScene(component: Package, applicationOb
 ApplicationObject3D, applicationColors: ApplicationColors, componentLevel = 1) {
   const application = applicationObject3D.dataModel;
   const componentLayout = applicationObject3D.getBoxLayout(component.id);
-  const applicationLayout = applicationObject3D.getBoxLayout(application.instanceId);
+  const applicationLayout = applicationObject3D.getBoxLayout(application.id);
 
   if (componentLayout === undefined || applicationLayout === undefined) { return; }
 
   const {
-    componentOdd: componentOddColor, componentEven: componentEvenColor,
-    clazz: clazzColor, highlightedEntity: highlightedEntityColor,
+    componentOddColor, componentEvenColor, clazzColor, highlightedEntityColor,
   } = applicationColors;
 
   // Set color alternating (e.g. light and dark green) according to component level
@@ -116,13 +115,14 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
 
   if (!applicationLayout) { return; }
 
-  const {
-    foundation: foundationColor,
-    highlightedEntity: highlightedEntityColor,
-  } = applicationColors;
+  const { foundationColor, highlightedEntityColor } = applicationColors;
+
+  const segmentScalar = 0.45;
+  const widthSegments = Math.floor(applicationLayout.width * segmentScalar);
+  const depthSegments = Math.floor(applicationLayout.depth * segmentScalar);
 
   const mesh = new FoundationMesh(applicationLayout,
-    application, foundationColor, highlightedEntityColor);
+    application, foundationColor, highlightedEntityColor, widthSegments, depthSegments);
 
   addMeshToApplication(mesh, applicationObject3D);
 
@@ -131,4 +131,39 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
   children.forEach((child: Package) => {
     addComponentAndChildrenToScene(child, applicationObject3D, applicationColors);
   });
+}
+
+/**
+ * Creates a GlobeMesh and adds it to the given application object.
+ * Communication that come from the outside
+ *
+ * @param applicationObject3D Object which shall contain all application meshes
+ * @param applicationColors Object which defines the colors for different application entities
+ */
+export function addGlobeToApplication(appObject3D: ApplicationObject3D): THREE.Mesh {
+  const geometry = new THREE.SphereGeometry(2.5, 15, 15);
+  const texture = new THREE.TextureLoader().load('images/earth-map.jpg');
+  const material = new THREE.MeshPhongMaterial({ map: texture });
+  const mesh = new THREE.Mesh(geometry, material);
+  const applicationCenter = appObject3D.layout.center;
+
+  const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+  centerPoint.sub(applicationCenter);
+
+  mesh.position.copy(centerPoint);
+  // mesh.rotateY(-2.45);
+
+  appObject3D.add(mesh);
+
+  return mesh;
+}
+
+export function repositionGlobeToApplication(appObject3D: ApplicationObject3D, globe: THREE.Mesh) {
+  const applicationCenter = appObject3D.layout.center;
+  const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+  centerPoint.sub(applicationCenter);
+
+  globe.position.copy(centerPoint);
 }

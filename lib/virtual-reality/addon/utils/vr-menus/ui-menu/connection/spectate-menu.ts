@@ -46,7 +46,7 @@ export default class SpectateMenu extends UiMenu {
   /**
    * Creates the geometry of the background mesh.
    */
-  makeBackgroundGeometry(): THREE.Geometry {
+  makeBackgroundGeometry(): THREE.BufferGeometry {
     const geometry = super.makeBackgroundGeometry();
     geometry.translate(
       0,

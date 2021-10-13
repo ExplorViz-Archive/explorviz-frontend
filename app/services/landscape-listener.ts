@@ -19,13 +19,13 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   @service('landscape-token') tokenService!: LandscapeTokenService;
 
-  latestStructureData: StructureLandscapeData|null = null;
+  latestStructureData: StructureLandscapeData | null = null;
 
-  latestDynamicData: DynamicLandscapeData|null = null;
+  latestDynamicData: DynamicLandscapeData | null = null;
 
   debug = debugLogger();
 
-  timer: NodeJS.Timeout|null = null;
+  timer: NodeJS.Timeout | null = null;
 
   async initLandscapePolling(intervalInSeconds: number = 10) {
     function setIntervalImmediately(func: () => void, interval: number) {

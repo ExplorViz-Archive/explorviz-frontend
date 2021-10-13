@@ -230,7 +230,7 @@ export default class VrMessageSender extends Service {
   sendAppOpened(application: ApplicationObject3D) {
     this.webSocket.send<AppOpenedMessage>({
       event: 'app_opened',
-      id: application.dataModel.instanceId,
+      id: application.dataModel.id,
       position: application.getWorldPosition(new THREE.Vector3()).toArray(),
       quaternion: application
         .getWorldQuaternion(new THREE.Quaternion())

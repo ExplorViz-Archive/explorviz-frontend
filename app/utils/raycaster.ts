@@ -9,7 +9,7 @@ export default class Raycaster extends THREE.Raycaster {
    * @param possibleObjects Objects to check for raycasting
    */
   raycasting(
-    coords: {x: number, y: number},
+    coords: { x: number, y: number },
     camera: THREE.Camera,
     possibleObjects: THREE.Object3D[],
     raycastFilter: ((object: THREE.Intersection) => boolean) | undefined,

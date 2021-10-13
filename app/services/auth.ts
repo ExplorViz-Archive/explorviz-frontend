@@ -11,14 +11,14 @@ export default class Auth extends Service {
   router!: any;
 
   // is initialized in the init()
-  private lock: Auth0LockStatic|null = null;
+  private lock: Auth0LockStatic | null = null;
 
-  user: Auth0UserProfile|undefined = undefined;
+  user: Auth0UserProfile | undefined = undefined;
 
-  accessToken: string|undefined = undefined;
+  accessToken: string | undefined = undefined;
 
-  init() {
-    super.init();
+  constructor() {
+    super(...arguments);
 
     if (config.environment === 'noauth') { // no-auth
       this.set('user', config.auth0.profile);
@@ -108,13 +108,15 @@ export default class Auth extends Service {
         this.lock.checkSession({}, async (err, authResult) => {
           this.debug(authResult);
           if (err || authResult === undefined) {
-            this.set('user', undefined);
-            this.set('accessToken', undefined);
             reject(err);
           } else {
-            this.set('accessToken', authResult.accessToken);
-            await this.setUser(authResult.accessToken);
-            resolve(authResult);
+            try {
+              await this.setUser(authResult.accessToken);
+              this.set('accessToken', authResult.accessToken);
+              resolve(authResult);
+            } catch (e) {
+              reject(e);
+            }
           }
         });
       } else { // no-auth
@@ -132,7 +134,7 @@ export default class Auth extends Service {
     this.set('user', undefined);
     this.set('accessToken', undefined);
     if (this.lock) {
-      this.lock?.logout({
+      this.lock.logout({
         clientID: config.auth0.clientId,
         returnTo: config.auth0.logoutReturnUrl,
       });

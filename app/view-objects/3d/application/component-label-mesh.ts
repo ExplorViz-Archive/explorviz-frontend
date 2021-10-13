@@ -13,6 +13,9 @@ export default class ComponentLabelMesh extends LabelMesh {
     const labelText = componentMesh.dataModel.name;
     super(font, labelText, textColor);
 
+    this.renderOrder = 1;
+    this.receiveShadow = true;
+
     this.minHeight = minHeight;
     this.minLength = minLength;
   }
@@ -28,7 +31,7 @@ export default class ComponentLabelMesh extends LabelMesh {
     /**
      * Updates bounding box of geometry and returns respective dimensions
      */
-    function computeBoxSize(geometry: THREE.Geometry | THREE.BufferGeometry) {
+    function computeBoxSize(geometry: THREE.BufferGeometry) {
       geometry.computeBoundingBox();
       const boxDimensions = new THREE.Vector3();
       geometry.boundingBox?.getSize(boxDimensions);
@@ -51,28 +54,28 @@ export default class ComponentLabelMesh extends LabelMesh {
       curveSegments: 1,
     });
 
-    this.material = new THREE.MeshBasicMaterial({ color: this.defaultColor });
+    this.material = new THREE.MeshBasicMaterial({
+      color: this.defaultColor,
+      depthTest: false,
+    });
 
-    let textDimensions = computeBoxSize(this.geometry);
+    const textDimensions = computeBoxSize(this.geometry);
     const textWidth = textDimensions.x;
 
     let scaleFactor = 1;
 
     // Handle too long labels, expect labels to be (at most) 90% the width of the parent's mesh
-    const desiredWith = componentMesh.geometry.parameters.depth * 0.90;
-    if (textWidth > desiredWith) {
-      scaleFactor = desiredWith / textWidth;
+    const desiredWidth = componentMesh.geometry.parameters.depth * 0.90;
+    if (textWidth > desiredWidth) {
+      scaleFactor = desiredWidth / textWidth;
       this.geometry.scale(scaleFactor, scaleFactor, scaleFactor);
-
-      // Update text dimensions
-      textDimensions = computeBoxSize(this.geometry);
     }
 
     // Avoid distorted text due to parent scaling
     this.scale.y /= componentMesh.scale.x / componentMesh.scale.z;
 
     // Text height as percepted by the user
-    const absoluteTextHeight = textSize * parentScale.x * scaleFactor;
+    const absoluteTextHeight = textDimensions.y * parentScale.x * scaleFactor;
 
     // Shorten label string if scaling obliterated label
     if (absoluteTextHeight < this.minHeight && labelText.length > this.minLength && !labelText.includes('...')) {
@@ -83,10 +86,13 @@ export default class ComponentLabelMesh extends LabelMesh {
 
       // Calculate theoretical label length based on height mismatch
       const desiredLength = (absoluteTextHeight / this.minHeight) * Math.floor(labelText.length);
-      const shortenedLabel = `${labelText.substring(0, desiredLength - 1)}...`;
 
-      // Recursive call to reuse existing code
-      this.computeLabel(componentMesh, shortenedLabel);
+      if (labelText.length - desiredLength > 3) {
+        const shortenedLabel = `${labelText.substring(0, desiredLength - 1)}...`;
+
+        // Recursive call to reuse existing code
+        this.computeLabel(componentMesh, shortenedLabel);
+      }
     }
   }
 }

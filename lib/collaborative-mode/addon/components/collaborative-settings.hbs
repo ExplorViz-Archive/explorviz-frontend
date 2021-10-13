@@ -1,5 +1,5 @@
 <div class="sidebar-component-close" {{on "click" this.close}}>
-  {{svg-jar "x" class="octicon"}}
+  {{svg-jar "x-16" class="octicon"}}
 </div>
 <div id="collaborativeSettings">
   {{#if (and this.settings.connected (not this.settings.meeting))}}
@@ -110,7 +110,7 @@
                   title="Give Control"
                   {{on "click" (fn this.giveControl user.name)}}
                 >
-                  {{svg-jar "device-camera-video" class="octicon align-middle"}}
+                  {{svg-jar "device-camera-video-16" class="octicon align-middle"}}
                 </div>
               {{/if}}
             </td>
@@ -121,7 +121,7 @@
                   title="Jump to perspective"
                   {{on "click" (fn this.jumpToPerspective user.name)}}
                 >
-                  {{svg-jar "eye" class="octicon align-middle"}}
+                  {{svg-jar "eye-16" class="octicon align-middle"}}
                 </div>
               {{/if}}
             </td>

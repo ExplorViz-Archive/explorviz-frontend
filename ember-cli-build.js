@@ -3,21 +3,16 @@ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
 module.exports = (defaults) => {
   const app = new EmberApp(defaults, {
-    octicons: {
-      // load selected icons for popup-handler since it does not (yet) use components / templates
-      icons: ['arrow-right', 'arrow-both', 'code', 'list-ordered', 'clock', 'tools'],
-    },
-
     // Default implementation for ember-cli-sass
     sassOptions: {
       implementation: sass,
-      includePaths: ['lib/virtual-reality/addon/styles'],
+      includePaths: ['lib/virtual-reality/addon/styles', 'lib/heatmap/addon/styles'],
     },
 
     svgJar: {
       sourceDirs: [
         'public', // default SVGJar lookup directory
-        'node_modules/octicons/build/svg',
+        'node_modules/@primer/octicons/build/svg',
       ],
     },
     babel: {

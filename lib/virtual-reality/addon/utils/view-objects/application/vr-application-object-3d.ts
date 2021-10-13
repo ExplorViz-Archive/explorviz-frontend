@@ -14,6 +14,6 @@ export default class VrApplicationObject3D extends ApplicationObject3D implement
   }
 
   getGrabId(): string {
-    return this.dataModel.instanceId;
+    return this.dataModel.id;
   }
 }

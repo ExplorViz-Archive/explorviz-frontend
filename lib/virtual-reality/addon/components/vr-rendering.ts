@@ -638,7 +638,7 @@ export default class VrRendering
     }
 
     if (
-      this.vrApplicationRenderer.isApplicationOpen(applicationModel.instanceId)
+      this.vrApplicationRenderer.isApplicationOpen(applicationModel.id)
     ) {
       this.showHint('Application already opened');
       return Promise.resolve(null);
@@ -909,7 +909,7 @@ export default class VrRendering
     // Reset highlighting colors.
     this.vrApplicationRenderer.getOpenApplications().forEach((application) => {
       application.setHighlightingColor(
-        this.configuration.applicationColors.highlightedEntity,
+        this.configuration.applicationColors.highlightedEntityColor,
       );
     });
 
