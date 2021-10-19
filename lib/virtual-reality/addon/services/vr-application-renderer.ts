@@ -308,7 +308,8 @@ export default class VrApplicationRenderer extends Service {
 
       const drawableComm = this.drawableClassCommunications.get(
         applicationObject3D.dataModel.id,
-      )!;
+      ) ?? [];
+
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
       // Add labels to application
