@@ -196,7 +196,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
 
       let mousePosition: Position2D;
 
-      if (evt.srcEvent instanceof TouchEvent) {
+      if (window.TouchEvent && evt.srcEvent instanceof TouchEvent) {
         mousePosition = InteractionModifierModifier.getTouchPos(canvas, evt.srcEvent);
       } else {
         mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
@@ -215,7 +215,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
 
       let mousePosition: Position2D;
 
-      if (evt.srcEvent instanceof TouchEvent) {
+      if (window.TouchEvent && evt.srcEvent instanceof TouchEvent) {
         mousePosition = InteractionModifierModifier.getTouchPos(canvas, evt.srcEvent);
       } else {
         mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
