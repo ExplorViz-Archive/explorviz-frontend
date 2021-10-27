@@ -1,4 +1,5 @@
 import Service, { inject as service } from '@ember/service';
+import { tracked } from '@glimmer/tracking';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
 import SpectateUserService from './spectate-user';
@@ -27,6 +28,7 @@ export default class LocalVrUser extends Service {
 
   color: THREE.Color | undefined;
 
+  @tracked
   renderer!: THREE.WebGLRenderer;
 
   private userGroup!: THREE.Group;
