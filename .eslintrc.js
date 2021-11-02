@@ -23,6 +23,7 @@ module.exports = {
   },
   rules: {
     'linebreak-style': 'off',
+    'class-methods-use-this': 'off',
     'import/no-unresolved': 'off',
     'require-yield': 'off',
     'no-plusplus': 'off',

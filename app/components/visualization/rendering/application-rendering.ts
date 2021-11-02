@@ -47,6 +47,9 @@ import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import UserSettings from 'explorviz-frontend/services/user-settings';
+import RenderingLoop from 'explorviz-frontend/rendering/application/rendering-loop';
+import { getOwner } from '@ember/application';
+import AnimationMesh from 'explorviz-frontend/view-objects/3d/animation-mesh';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -105,11 +108,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
-  animationMixers!: Array<THREE.AnimationMixer>;
-
-  globeMesh!: THREE.Mesh;
-
-  clock!: THREE.Clock;
+  globeMesh!: AnimationMesh;
 
   // Used to display performance and memory usage information
   threePerformance: THREEPerformance | undefined;
@@ -121,6 +120,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   hoveredObject: BaseMesh | null;
 
   drawableClassCommunications: DrawableClassCommunication[] = [];
+
+  renderingLoop!: RenderingLoop;
 
   // Extended Object3D which manages application meshes
   readonly applicationObject3D: ApplicationObject3D;
@@ -167,7 +168,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     super(owner, args);
     this.debug('Constructor called');
 
-    this.render = this.render.bind(this);
+    // this.render = this.render.bind(this);
     this.hammerInteraction = HammerInteraction.create();
 
     const { application, dynamicLandscapeData } = this.args.landscapeData;
@@ -201,7 +202,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
-    this.render();
+    // this.render();
 
     this.resize(outerDiv);
 
@@ -223,11 +224,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    const { value: showFpsCounter } = this.userSettings.applicationSettings.showFpsCounter;
-
-    if (showFpsCounter) {
-      this.threePerformance = new THREEPerformance();
-    }
+    this.renderingLoop = RenderingLoop.create(getOwner(this).ownerInjection(),
+      {
+        camera: this.camera,
+        scene: this.scene,
+        renderer: this.renderer,
+      });
+    this.renderingLoop.start();
   }
 
   /**
@@ -263,9 +266,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
 
-    this.animationMixers = new Array<THREE.AnimationMixer>();
-
-    this.clock = new THREE.Clock();
     this.debug('Renderer set up');
   }
 
@@ -491,7 +491,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
         const clipAction = animationMixer.clipAction(clip);
         clipAction.play();
-        this.animationMixers.push(animationMixer);
+        this.globeMesh.tick = (delta) => animationMixer.update(delta);
+        this.renderingLoop.updatables.push(this.globeMesh);
+        // this.animationMixers.push(animationMixer);
       } else {
         // reposition
         EntityRendering.repositionGlobeToApplication(this.applicationObject3D, this.globeMesh);
@@ -760,41 +762,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #endregion HEATMAP
 
   // #region RENDERING LOOP
-
-  /**
-   * Main rendering function
-   */
-  render() {
-    if (this.isDestroyed) { return; }
-
-    const animationId = requestAnimationFrame(this.render);
-    this.animationFrameId = animationId;
-
-    const { value: showFpsCounter } = this.userSettings.applicationSettings.showFpsCounter;
-
-    if (showFpsCounter && !this.threePerformance) {
-      this.threePerformance = new THREEPerformance();
-    } else if (!showFpsCounter && this.threePerformance) {
-      this.threePerformance.removePerformanceMeasurement();
-      this.threePerformance = undefined;
-    }
-
-    if (this.threePerformance) {
-      this.threePerformance.threexStats.update(this.renderer);
-      this.threePerformance.stats.begin();
-    }
-
-    if (this.animationMixers) {
-      this.animationMixers.forEach((mixer) => mixer.update(this.clock.getDelta()));
-    }
-
-    this.renderer.render(this.scene, this.camera);
-
-    this.scaleSpheres();
-    if (this.threePerformance) {
-      this.threePerformance.stats.end();
-    }
-  }
 
   scaleSpheres() {
     this.spheres.forEach((sphereArray) => {
@@ -1101,7 +1068,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   willDestroy() {
     super.willDestroy();
 
-    cancelAnimationFrame(this.animationFrameId);
+    this.renderingLoop.stop();
+
     this.cleanUpApplication();
     // this.scene.dispose();
     this.renderer.dispose();
@@ -1110,9 +1078,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.heatmapConf.cleanup();
     this.configuration.isCommRendered = true;
 
-    if (this.threePerformance) {
-      this.threePerformance.removePerformanceMeasurement();
-    }
+    this.renderingLoop.stop();
 
     this.debug('Cleaned up application rendering');
   }
