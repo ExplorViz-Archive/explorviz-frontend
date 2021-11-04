@@ -166,9 +166,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   constructor(owner: any, args: Args) {
     super(owner, args);
-    this.debug('Constructor called');
 
-    // this.render = this.render.bind(this);
     this.hammerInteraction = HammerInteraction.create();
 
     const { application, dynamicLandscapeData } = this.args.landscapeData;
@@ -202,7 +200,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
-    // this.render();
 
     this.resize(outerDiv);
 
@@ -231,6 +228,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         renderer: this.renderer,
       });
     this.renderingLoop.start();
+
+    this.initVisualization();
   }
 
   /**
@@ -288,6 +287,52 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
     this.debug('Lights added');
+  }
+
+  initVisualization() {
+    const applicationAnimation = () => {
+      // applicationObject3D animation
+      const period = 1000;
+      const times = [0, period];
+      const values = [0, 360];
+
+      const trackName = '.rotation[y]';
+
+      const track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+      const clip = new THREE.AnimationClip('default', period, [track]);
+
+      const animationMixerA = new THREE.AnimationMixer(this.applicationObject3D);
+
+      const clipAction = animationMixerA.clipAction(clip);
+      clipAction.play();
+      this.applicationObject3D.tick = (delta: any) => animationMixerA.update(delta);
+      this.renderingLoop.updatables.push(this.applicationObject3D);
+    };
+
+    const addGlobe = () => {
+      // Add globe for communication that comes from the outside
+      this.globeMesh = EntityRendering.addGlobeToApplication(this.applicationObject3D);
+
+      const period = 1000;
+      const times = [0, period];
+      const values = [0, 360];
+
+      const trackName = '.rotation[y]';
+      const track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+      const clip = new THREE.AnimationClip('default', period, [track]);
+
+      const animationMixer = new THREE.AnimationMixer(this.globeMesh);
+
+      const clipAction = animationMixer.clipAction(clip);
+      clipAction.play();
+      this.globeMesh.tick = (delta: any) => animationMixer.update(delta);
+      this.renderingLoop.updatables.push(this.globeMesh);
+    };
+
+    applicationAnimation();
+    addGlobe();
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -474,27 +519,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
 
-      if (!this.globeMesh) {
-        // Add globe for communication that comes from the outside
-        this.globeMesh = EntityRendering.addGlobeToApplication(this.applicationObject3D);
-
-        const period = 1000;
-        const times = [0, period];
-        const values = [0, 360];
-
-        const trackName = '.rotation[y]';
-        const track = new THREE.NumberKeyframeTrack(trackName, times, values);
-
-        const clip = new THREE.AnimationClip('default', period, [track]);
-
-        const animationMixer = new THREE.AnimationMixer(this.globeMesh);
-
-        const clipAction = animationMixer.clipAction(clip);
-        clipAction.play();
-        this.globeMesh.tick = (delta) => animationMixer.update(delta);
-        this.renderingLoop.updatables.push(this.globeMesh);
-        // this.animationMixers.push(animationMixer);
-      } else {
+      if (this.globeMesh) {
         // reposition
         EntityRendering.repositionGlobeToApplication(this.applicationObject3D, this.globeMesh);
       }

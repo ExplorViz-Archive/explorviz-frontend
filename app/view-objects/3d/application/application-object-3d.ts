@@ -61,6 +61,9 @@ export default class ApplicationObject3D extends THREE.Object3D {
     return new BoxLayout();
   }
 
+  /* eslint @typescript-eslint/no-unused-vars: 'off' */
+  tick(delta: number): void {}
+
   /**
    * Resets this object's rotation to default
    * (x = 0.65, y = 0.80)
