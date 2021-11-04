@@ -110,6 +110,16 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   globeMesh!: AnimationMesh;
 
+  timer!: any;
+
+  mouseMovementActive: boolean = true;
+
+  oldRotationApplicationObject3D!: THREE.Euler;
+
+  animationStartCoordinateApplicationObject3D: number = 0;
+
+  isAnimationApplicationObject3DDone: boolean = false;
+
   // Used to display performance and memory usage information
   threePerformance: THREEPerformance | undefined;
 
@@ -292,21 +302,43 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   initVisualization() {
     const applicationAnimation = () => {
       // applicationObject3D animation
-      const period = 1000;
+      const period = 4000;
       const times = [0, period];
-      const values = [0, 360];
+      let values = [this.animationStartCoordinateApplicationObject3D, 360];
 
-      const trackName = '.rotation[y]';
+      let trackName = '.rotation[y]';
 
-      const track = new THREE.NumberKeyframeTrack(trackName, times, values);
+      let track = new THREE.NumberKeyframeTrack(trackName, times, values);
 
-      const clip = new THREE.AnimationClip('default', period, [track]);
+      let clip = new THREE.AnimationClip('default', period, [track]);
 
-      const animationMixerA = new THREE.AnimationMixer(this.applicationObject3D);
+      let animationMixer = new THREE.AnimationMixer(this.applicationObject3D);
 
-      const clipAction = animationMixerA.clipAction(clip);
-      clipAction.play();
-      this.applicationObject3D.tick = (delta: any) => animationMixerA.update(delta);
+      let clipAction = animationMixer.clipAction(clip);
+
+      this.applicationObject3D.tick = (delta: any) => {
+        if (!this.mouseMovementActive) {
+          if (!this.isAnimationApplicationObject3DDone) {
+            values = [this.animationStartCoordinateApplicationObject3D, 360];
+
+            trackName = '.rotation[y]';
+
+            track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+            clip = new THREE.AnimationClip('default', period, [track]);
+
+            animationMixer = new THREE.AnimationMixer(this.applicationObject3D);
+            clipAction = animationMixer.clipAction(clip);
+            clipAction.play();
+            this.isAnimationApplicationObject3DDone = true;
+          }
+
+          animationMixer.update(delta);
+        } else {
+          clipAction.stop();
+          this.isAnimationApplicationObject3DDone = false;
+        }
+      };
       this.renderingLoop.updatables.push(this.applicationObject3D);
     };
 
@@ -401,9 +433,28 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseMove(intersection: THREE.Intersection | null) {
+    this.runOrRestartMouseMovementTimer();
     if (!intersection) return;
     const mesh = intersection.object;
     this.mouseMoveOnMesh(mesh);
+  }
+
+  runOrRestartMouseMovementTimer() {
+    if (!this.mouseMovementActive) {
+      this.mouseMovementActive = true;
+      this.applicationObject3D.rotation.copy(this.oldRotationApplicationObject3D);
+    } else {
+      this.animationStartCoordinateApplicationObject3D = this.applicationObject3D.rotation.y;
+    }
+
+    clearTimeout(this.timer);
+    this.timer = setTimeout(
+      () => {
+        this.oldRotationApplicationObject3D = new THREE.Euler()
+          .copy(this.applicationObject3D.rotation);
+        this.mouseMovementActive = false;
+      }, 25000,
+    );
   }
 
   @action
