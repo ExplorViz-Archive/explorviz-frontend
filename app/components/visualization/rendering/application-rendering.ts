@@ -105,11 +105,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
-  animationMixers!: Array<THREE.AnimationMixer>;
+  animationMixers = new Array<THREE.AnimationMixer>();
 
-  globeMesh!: THREE.Mesh;
-
-  clock!: THREE.Clock;
+  clock = new THREE.Clock();
 
   // Used to display performance and memory usage information
   threePerformance: THREEPerformance | undefined;
@@ -174,6 +172,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.applicationObject3D = new ApplicationObject3D(application!,
       new Map(), dynamicLandscapeData);
+
+    this.addGlobeAnimation();
 
     this.communicationRendering = new CommunicationRendering(
       this.configuration,
@@ -263,9 +263,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
 
-    this.animationMixers = new Array<THREE.AnimationMixer>();
-
-    this.clock = new THREE.Clock();
     this.debug('Renderer set up');
   }
 
@@ -474,27 +471,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
 
-      if (!this.globeMesh) {
-        // Add globe for communication that comes from the outside
-        this.globeMesh = EntityRendering.addGlobeToApplication(this.applicationObject3D);
-
-        const period = 1000;
-        const times = [0, period];
-        const values = [0, 360];
-
-        const trackName = '.rotation[y]';
-        const track = new THREE.NumberKeyframeTrack(trackName, times, values);
-
-        const clip = new THREE.AnimationClip('default', period, [track]);
-
-        const animationMixer = new THREE.AnimationMixer(this.globeMesh);
-
-        const clipAction = animationMixer.clipAction(clip);
-        clipAction.play();
-        this.animationMixers.push(animationMixer);
-      } else {
+      if (this.applicationObject3D.globeMesh) {
         // reposition
-        EntityRendering.repositionGlobeToApplication(this.applicationObject3D, this.globeMesh);
+        this.applicationObject3D.repositionGlobeToApplication();
       }
 
       // Restore old state of components
@@ -536,6 +515,23 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         Labeler.addBoxTextLabel(mesh, this.font, foundationTextColor);
       }
     });
+  }
+
+  addGlobeAnimation() {
+    const period = 1000;
+    const times = [0, period];
+    const values = [0, 360];
+
+    const trackName = '.rotation[y]';
+    const track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+    const clip = new THREE.AnimationClip('default', period, [track]);
+
+    const animationMixer = new THREE.AnimationMixer(this.applicationObject3D.globeMesh);
+
+    const clipAction = animationMixer.clipAction(clip);
+    clipAction.play();
+    this.animationMixers.push(animationMixer);
   }
 
   updateDrawableClassCommunications() {

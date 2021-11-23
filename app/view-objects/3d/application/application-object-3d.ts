@@ -10,6 +10,8 @@ import ClazzCommunicationMesh from './clazz-communication-mesh';
 import BaseMesh from '../base-mesh';
 import BoxMesh from './box-mesh';
 
+const earthTexture = new THREE.TextureLoader().load('images/earth-map.jpg');
+
 /**
  * This extended Object3D adds additional functionality to
  * add and retrieve application regarded meshes efficiently and
@@ -41,6 +43,8 @@ export default class ApplicationObject3D extends THREE.Object3D {
    */
   componentMeshes: Set<ComponentMesh> = new Set();
 
+  globeMesh!: THREE.Mesh;
+
   @tracked
   highlightedEntity: BaseMesh | Trace | null = null;
 
@@ -50,6 +54,8 @@ export default class ApplicationObject3D extends THREE.Object3D {
     this.dataModel = application;
     this.boxLayoutMap = boxLayoutMap;
     this.traces = traces;
+
+    this.addGlobeToApplication();
   }
 
   get layout() {
@@ -99,6 +105,39 @@ export default class ApplicationObject3D extends THREE.Object3D {
     }
 
     return this;
+  }
+
+  /**
+   * Creates a GlobeMesh and adds it to the given application object.
+   * Communication that come from the outside
+   *
+   */
+  private addGlobeToApplication(): THREE.Mesh {
+    const geometry = new THREE.SphereGeometry(2.5, 15, 15);
+    const material = new THREE.MeshPhongMaterial({ map: earthTexture });
+    const mesh = new THREE.Mesh(geometry, material);
+    const applicationCenter = this.layout.center;
+
+    const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+    centerPoint.sub(applicationCenter);
+
+    mesh.position.copy(centerPoint);
+
+    this.add(mesh);
+
+    this.globeMesh = mesh;
+
+    return mesh;
+  }
+
+  repositionGlobeToApplication() {
+    const applicationCenter = this.layout.center;
+    const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+    centerPoint.sub(applicationCenter);
+
+    this.globeMesh?.position.copy(centerPoint);
   }
 
   getBoxLayout(id: string) {
