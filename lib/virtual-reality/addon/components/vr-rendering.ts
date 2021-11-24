@@ -590,6 +590,7 @@ export default class VrRendering
     const delta = this.deltaTimeService.getDeltaTime();
 
     this.update(delta);
+
     this.render();
 
     // Send position update to backend. This must happen after the scene has
@@ -612,6 +613,9 @@ export default class VrRendering
     this.spectateUserService.update();
     this.grabbedObjectService.sendObjectPositions();
     this.remoteUsers.updateRemoteUsers(delta);
+
+    // update applications' globe animation
+    this.vrApplicationRenderer.updateAllApplicationGlobes(this.deltaTimeService.getDeltaTime());
   }
 
   /**
@@ -822,7 +826,7 @@ export default class VrRendering
   @action
   handleMouseWheel(delta: number) {
     if (this.vrSessionActive) return;
-    this.localUser.cameraHeight += delta * 0.2;
+    this.localUser.cameraHeight += delta * 0.05;
   }
 
   @action

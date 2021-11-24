@@ -105,8 +105,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
-  animationMixers = new Array<THREE.AnimationMixer>();
-
   clock = new THREE.Clock();
 
   // Used to display performance and memory usage information
@@ -172,8 +170,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.applicationObject3D = new ApplicationObject3D(application!,
       new Map(), dynamicLandscapeData);
-
-    this.addGlobeAnimation();
 
     this.communicationRendering = new CommunicationRendering(
       this.configuration,
@@ -471,8 +467,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
 
-      if (this.applicationObject3D.globeMesh) {
+      if (!this.applicationObject3D.globeMesh) {
         // reposition
+        this.applicationObject3D.addGlobeToApplication();
+        this.applicationObject3D.initializeGlobeAnimation();
+      } else {
         this.applicationObject3D.repositionGlobeToApplication();
       }
 
@@ -515,23 +514,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         Labeler.addBoxTextLabel(mesh, this.font, foundationTextColor);
       }
     });
-  }
-
-  addGlobeAnimation() {
-    const period = 1000;
-    const times = [0, period];
-    const values = [0, 360];
-
-    const trackName = '.rotation[y]';
-    const track = new THREE.NumberKeyframeTrack(trackName, times, values);
-
-    const clip = new THREE.AnimationClip('default', period, [track]);
-
-    const animationMixer = new THREE.AnimationMixer(this.applicationObject3D.globeMesh);
-
-    const clipAction = animationMixer.clipAction(clip);
-    clipAction.play();
-    this.animationMixers.push(animationMixer);
   }
 
   updateDrawableClassCommunications() {
@@ -780,9 +762,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.threePerformance.stats.begin();
     }
 
-    if (this.animationMixers) {
-      this.animationMixers.forEach((mixer) => mixer.update(this.clock.getDelta()));
-    }
+    this.applicationObject3D.animationMixer?.update(this.clock.getDelta());
 
     this.renderer.render(this.scene, this.camera);
 

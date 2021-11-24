@@ -135,6 +135,12 @@ export default class VrApplicationRenderer extends Service {
     return this.openApplications.has(id);
   }
 
+  updateAllApplicationGlobes(deltaTime: number) {
+    this.getOpenApplications().forEach((application) => {
+      application.animationMixer?.update(deltaTime);
+    });
+  }
+
   async addApplication(
     applicationModel: Application,
     args: AddApplicationArgs = {},
@@ -303,6 +309,9 @@ export default class VrApplicationRenderer extends Service {
         applicationObject3D,
         this.configuration.applicationColors,
       );
+
+      applicationObject3D.addGlobeToApplication();
+      applicationObject3D.initializeGlobeAnimation();
 
       this.createDrawableClassCommunications(applicationObject3D);
 
