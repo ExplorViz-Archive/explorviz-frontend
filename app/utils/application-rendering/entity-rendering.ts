@@ -110,8 +110,6 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
   applicationColors: ApplicationColors) {
   const application = applicationObject3D.dataModel;
   const applicationLayout = applicationObject3D.layout;
-  // Height of foundation is always the same
-  applicationLayout.height = 1.5;
 
   if (!applicationLayout) { return; }
 
