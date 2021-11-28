@@ -1,4 +1,4 @@
-import { isApplication, isNode, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { getAncestorPackages, getClassesInPackage } from 'explorviz-frontend/utils/package-helpers';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';

@@ -172,7 +172,7 @@ export default class LocalVrUser extends Service {
     const localDirection = worldDirection
       .normalize()
       .transformDirection(
-        this.userGroup.matrix.getInverse(new THREE.Matrix4()),
+        this.userGroup.matrix.clone().invert(),
       );
     this.userGroup.translateOnAxis(localDirection, distance);
   }
