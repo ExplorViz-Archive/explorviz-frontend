@@ -3,14 +3,13 @@ import { Application } from 'explorviz-frontend/utils/landscape-schemes/structur
 import { Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import { tracked } from '@glimmer/tracking';
+import { earthTexture } from 'explorviz-frontend/controllers/visualization';
 import FoundationMesh from './foundation-mesh';
 import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';
 import ClazzCommunicationMesh from './clazz-communication-mesh';
 import BaseMesh from '../base-mesh';
 import BoxMesh from './box-mesh';
-
-const earthTexture = new THREE.TextureLoader().load('images/earth-map.jpg');
 
 /**
  * This extended Object3D adds additional functionality to

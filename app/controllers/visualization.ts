@@ -17,12 +17,15 @@ import debugLogger from 'ember-debug-logger';
 import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
+import THREE from 'three';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
   dynamicLandscapeData: DynamicLandscapeData;
   application?: Application;
 }
+
+export const earthTexture = new THREE.TextureLoader().load('images/earth-map.jpg');
 
 /**
  * TODO
