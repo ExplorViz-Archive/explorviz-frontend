@@ -145,6 +145,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @tracked
   popupData: PopupData | null = null;
 
+  isFirstRendering = true;
+
   // these spheres represent the cursor of the other users
   // and are only visible in collaborative mode
   spheres: Map<string, Array<THREE.Mesh>> = new Map();
@@ -205,18 +207,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.resize(outerDiv);
 
-    await perform(this.loadNewApplication);
-
-    // Display application nicely for first rendering
-    applyDefaultApplicationLayout(this.applicationObject3D);
-    this.addCommunication();
-    this.applicationObject3D.resetRotation();
-
     if (this.configuration.popupPosition) {
       this.popupData = {
         mouseX: this.configuration.popupPosition.x,
         mouseY: this.configuration.popupPosition.y,
       };
+    }
+
+    try {
+      await perform(this.loadApplication);
+    } catch (e) {
+      // console.log(e);
     }
   }
 
@@ -457,10 +458,23 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #region SCENE POPULATION
 
   @task*
-  loadNewApplication() {
+  loadApplication() {
     this.applicationObject3D.dataModel = this.args.landscapeData.application!;
     this.applicationObject3D.traces = this.args.landscapeData.dynamicLandscapeData;
-    yield perform(this.populateScene);
+    try {
+      yield perform(this.populateScene);
+
+      if (this.isFirstRendering) {
+        // Display application nicely for first rendering
+        applyDefaultApplicationLayout(this.applicationObject3D);
+        this.addCommunication();
+        this.applicationObject3D.resetRotation();
+
+        this.isFirstRendering = false;
+      }
+    } catch (e) {
+      // console.log(e);
+    }
   }
 
   @restartableTask*
@@ -1032,7 +1046,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   onLandscapeUpdated() {
-    perform(this.loadNewApplication);
+    perform(this.loadApplication);
   }
 
   /**
