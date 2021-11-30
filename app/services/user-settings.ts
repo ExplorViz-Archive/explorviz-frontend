@@ -1,5 +1,6 @@
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import isObject, { objectsHaveSameKeys } from 'explorviz-frontend/utils/object-helpers';
 import {
   classicApplicationColors, classicLandscapeColors, ColorScheme,
   darkApplicationColors, darkLandscapeColors, defaultApplicationColors,
@@ -27,29 +28,57 @@ export default class UserSettings extends Service {
     super(...arguments);
 
     try {
-      this.restoreSettings();
+      this.restoreLandscapeSettings();
     } catch (e) {
-      this.applyDefaultSettings();
+      this.applyDefaultLandscapeSettings();
+    }
+
+    try {
+      this.restoreApplicationSettings();
+    } catch (e) {
+      this.applyDefaultApplicationSettings();
     }
   }
 
-  private restoreSettings() {
+  private restoreLandscapeSettings() {
     const userLandscapeSettingsJSON = localStorage.getItem('userLandscapeSettings');
-    const userApplicationSettingsJSON = localStorage.getItem('userApplicationSettings');
 
-    if (userLandscapeSettingsJSON === null || userApplicationSettingsJSON === null) {
-      throw new Error('There are no settings to restore');
+    if (userLandscapeSettingsJSON === null) {
+      throw new Error('There are no landscape settings to restore');
     }
 
     const parsedLandscapeSettings = JSON.parse(userLandscapeSettingsJSON);
-    const parsedApplicationSettings = JSON.parse(userApplicationSettingsJSON);
 
-    this.set('landscapeSettings', parsedLandscapeSettings);
-    this.set('applicationSettings', parsedApplicationSettings);
+    if (this.areValidLandscapeSettings(parsedLandscapeSettings)) {
+      this.set('landscapeSettings', parsedLandscapeSettings);
+    } else {
+      localStorage.removeItem('userLandscapeSettings');
+      throw new Error('Landscape settings are invalid');
+    }
   }
 
-  applyDefaultSettings() {
+  private restoreApplicationSettings() {
+    const userApplicationSettingsJSON = localStorage.getItem('userApplicationSettings');
+
+    if (userApplicationSettingsJSON === null) {
+      throw new Error('There are no landscape settings to restore');
+    }
+
+    const parsedApplicationSettings = JSON.parse(userApplicationSettingsJSON);
+
+    if (this.areValidApplicationSettings(parsedApplicationSettings)) {
+      this.set('applicationSettings', parsedApplicationSettings);
+    } else {
+      localStorage.removeItem('userApplicationSettings');
+      throw new Error('Application settings are invalid');
+    }
+  }
+
+  applyDefaultLandscapeSettings() {
     this.set('landscapeSettings', JSON.parse(JSON.stringify(defaultLanscapeSettings)));
+  }
+
+  applyDefaultApplicationSettings() {
     this.set('applicationSettings', JSON.parse(JSON.stringify(defaultApplicationSettings)));
   }
 
@@ -152,6 +181,20 @@ export default class UserSettings extends Service {
 
     this.updateSettings();
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  private areValidLandscapeSettings(maybeSettings: unknown) {
+    return isObject(maybeSettings)
+      && objectsHaveSameKeys(maybeSettings, defaultLanscapeSettings);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private areValidApplicationSettings(maybeSettings: unknown) {
+    return isObject(maybeSettings)
+      && objectsHaveSameKeys(maybeSettings, defaultApplicationSettings);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your services.
