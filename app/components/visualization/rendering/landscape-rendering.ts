@@ -34,7 +34,7 @@ interface Args {
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
-  showApplication(application: Application): void;
+  showApplication(applicationId: string): void;
   openDataSelection(): void;
   toggleVisualizationUpdating(): void;
   switchToVR(): void;
@@ -710,7 +710,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     } else {
       // data available => open application-rendering
       AlertifyHandler.closeAlertifyMessages();
-      this.args.showApplication(application);
+      this.args.showApplication(application.id);
     }
   }
 
