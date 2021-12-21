@@ -1,16 +1,15 @@
 import GlimmerComponent from '@glimmer/component';
 import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getApplicationFromClass } from 'explorviz-frontend/utils/landscape-structure-helpers';
-import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
-import { inject as service } from '@ember/service';
+import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 interface Args {
   communication: DrawableClassCommunication
+  application: Application
+  structureData: StructureLandscapeData
 }
 
 export default class CommunicationPopup extends GlimmerComponent<Args> {
-  @service('landscape-listener') landscapeListener!: LandscapeListener;
-
   get isBidirectional() {
     return this.args.communication.bidirectional;
   }
@@ -31,12 +30,28 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
     return this.args.communication.operationName;
   }
 
-  get sourceApplication() {
-    if (this.landscapeListener.latestStructureData) {
-      return getApplicationFromClass(
-        this.landscapeListener.latestStructureData, this.args.communication.sourceClass,
-      );
+  get isCommuDistributed() {
+    const currentVisualizedApplication = this.args.application;
+
+    const sourceApp = getApplicationFromClass(
+      this.args.structureData,
+      this.args.communication.sourceClass,
+    );
+
+    const targetApp = getApplicationFromClass(
+      this.args.structureData,
+      this.args.communication.targetClass,
+    );
+
+    const isSourceAppDistributed = sourceApp !== currentVisualizedApplication;
+    const isTargetAppDistributed = targetApp !== currentVisualizedApplication;
+
+    if (isSourceAppDistributed) {
+      return { descr: 'Source App Name', app: sourceApp };
+    } if (isTargetAppDistributed) {
+      return { descr: 'Target App Name', app: targetApp };
     }
-    return 'UNKNOWN';
+    // source and target are in same app
+    return null;
   }
 }
