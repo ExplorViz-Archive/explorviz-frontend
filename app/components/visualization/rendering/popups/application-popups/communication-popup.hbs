@@ -24,6 +24,15 @@
           {{this.requests}}
         </td>
       </tr>
+      {{#each this.args.communication.sourceApplications as | sourceApp | }}
+        <tr>
+          <td class="text-nowrap align-top">{{svg-jar "container-16" class="octicon align-middle mr-1"}}Source App Name:</td>
+          <td class="text-right text-break pl-1">
+            {{this.isCommuDistributed.app.name}}
+          </td>
+        </tr>
+      {{/each}}
+      {{!--
       {{#if this.isCommuDistributed}}
         <tr>
           <td class="text-nowrap align-top">{{svg-jar "code-16" class="octicon align-middle mr-1"}}{{this.isCommuDistributed.descr}}:</td>
@@ -32,6 +41,7 @@
           </td>
         </tr>
       {{/if}}
+      --}}
     </tbody>
   </table>
 </div>

@@ -43,6 +43,8 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
       this.args.communication.targetClass,
     );
 
+    console.log(this.args.communication.sourceApplications);
+
     const isSourceAppDistributed = sourceApp !== currentVisualizedApplication;
     const isTargetAppDistributed = targetApp !== currentVisualizedApplication;
 
