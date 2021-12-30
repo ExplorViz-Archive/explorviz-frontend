@@ -24,11 +24,21 @@
           {{this.requests}}
         </td>
       </tr>
-      {{#each this.args.communication.sourceApplications as | sourceApp | }}
+      <hr>
+      {{#each @communication.sourceApplications as | sourceApp | }}
         <tr>
-          <td class="text-nowrap align-top">{{svg-jar "container-16" class="octicon align-middle mr-1"}}Source App Name:</td>
+          <td class="text-nowrap align-top">{{svg-jar "package-dependencies-16" class="octicon align-middle mr-1"}}Source App Name:</td>
           <td class="text-right text-break pl-1">
-            {{this.isCommuDistributed.app.name}}
+            <button type="button" {{on "click" (fn this.loadApplication sourceApp)}}>{{sourceApp.name}}</button>
+          </td>
+        </tr>
+      {{/each}}
+      <hr>
+      {{#each @communication.targetApplications as | targetApp | }}
+        <tr>
+          <td class="text-nowrap align-top">{{svg-jar "package-dependents-16" class="octicon align-middle mr-1"}}Target App Name:</td>
+          <td class="text-right text-break pl-1">
+            {{targetApp.name}}
           </td>
         </tr>
       {{/each}}

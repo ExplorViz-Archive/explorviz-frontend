@@ -87,6 +87,7 @@ export default function computeDrawableClassCommunication(
         targetClass,
         operationName,
         sourceApplications: [sourceApp],
+        targetApplications: [targetApp],
       });
     } else {
       aggregatedClassCommunication.totalRequests++;
@@ -96,13 +97,19 @@ export default function computeDrawableClassCommunication(
       if (!sourceApplications.includes(sourceApp)) {
         aggregatedClassCommunication.sourceApplications.push(sourceApp);
       }
+
+      const { targetApplications } = aggregatedClassCommunication;
+
+      if (!targetApplications.includes(targetApp)) {
+        aggregatedClassCommunication.targetApplications.push(targetApp);
+      }
     }
   });
 
   const sourceTargetClassIdToDrawable = new Map<string, DrawableClassCommunication>();
 
   classIdsToAggregated.forEach(({
-    sourceClass, targetClass, totalRequests, operationName, sourceApplications,
+    sourceClass, targetClass, totalRequests, operationName, sourceApplications, targetApplications,
   }) => {
     const targetSourceClassId = `${targetClass.id}_${sourceClass.id}`;
 
@@ -115,6 +122,7 @@ export default function computeDrawableClassCommunication(
         bidirectional: true,
         operationName,
         sourceApplications,
+        targetApplications,
       });
     } else {
       const drawableClassCommunication = sourceTargetClassIdToDrawable.get(targetSourceClassId);
@@ -132,6 +140,7 @@ export default function computeDrawableClassCommunication(
           bidirectional: false,
           operationName,
           sourceApplications,
+          targetApplications,
         });
       }
     }
@@ -158,6 +167,7 @@ interface AggregatedClassCommunication {
   targetClass: Class;
   operationName: string;
   sourceApplications: (Application | undefined)[];
+  targetApplications: (Application | undefined)[];
 }
 
 export interface DrawableClassCommunication {
@@ -168,4 +178,5 @@ export interface DrawableClassCommunication {
   bidirectional: boolean;
   operationName: string;
   sourceApplications: (Application | undefined)[];
+  targetApplications: (Application | undefined)[];
 }
