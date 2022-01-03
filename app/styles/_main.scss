@@ -159,3 +159,14 @@ svg.octicon {
   @extend .spinner-center-3;
   position: relative;
 }
+
+.buttonToLink{
+  background: none;
+  border: none;
+  color: #0000FF;
+}
+
+.buttonToLink:hover{
+  background: none;
+  text-decoration: underline;
+}

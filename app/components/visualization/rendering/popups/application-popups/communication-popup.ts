@@ -31,6 +31,28 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
     return this.args.communication.operationName;
   }
 
+  doAppsContainCurrentApp(apps: (Application | undefined)[]) {
+    if (!apps) {
+      return false;
+    }
+
+    const currentAppId = this.args.application.id;
+
+    const hasAtLeastOneDifferentApp = apps.some(
+      (app: Application) => currentAppId !== app.id,
+    );
+
+    return hasAtLeastOneDifferentApp;
+  }
+
+  get sourceAppsContainApp() {
+    return this.doAppsContainCurrentApp(this.args.communication.sourceApplications);
+  }
+
+  get targetAppsContainApp() {
+    return this.doAppsContainCurrentApp(this.args.communication.targetApplications);
+  }
+
   @action
   isCurrentVisualizedApp(app: Application) {
     return app.id === this.args.application.id;

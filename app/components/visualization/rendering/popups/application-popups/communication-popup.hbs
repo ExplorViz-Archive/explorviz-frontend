@@ -24,38 +24,32 @@
           {{this.requests}}
         </td>
       </tr>
-      <hr>
-      {{#each @communication.sourceApplications as | sourceApp | }}
-        {{#if (not-eq sourceApp.id @application.id)}}
-          <tr>
-            <td class="text-nowrap align-top">{{svg-jar "package-dependencies-16" class="octicon align-middle mr-1"}}Source App Name:</td>
-            <td class="text-right text-break pl-1">
-              <button type="button" {{on "click" (fn this.loadApplication sourceApp)}}>{{sourceApp.name}}</button>
-            </td>
-          </tr>
-        {{/if}}
-      {{/each}}
-      <hr>
-      {{#each @communication.targetApplications as | targetApp | }}
-        {{#if (not-eq targetApp.id @application.id)}}
-          <tr>
-            <td class="text-nowrap align-top">{{svg-jar "package-dependents-16" class="octicon align-middle mr-1"}}Target App Name:</td>
-            <td class="text-right text-break pl-1">
-              <button type="button" {{on "click" (fn this.loadApplication targetApp)}}>{{targetApp.name}}</button>
-            </td>
-          </tr>
-        {{/if}}
-      {{/each}}
-      {{!--
-      {{#if this.isCommuDistributed}}
-        <tr>
-          <td class="text-nowrap align-top">{{svg-jar "code-16" class="octicon align-middle mr-1"}}{{this.isCommuDistributed.descr}}:</td>
-          <td class="text-right text-break pl-1">
-            {{this.isCommuDistributed.app.name}}
-          </td>
-        </tr>
+      {{#if this.sourceAppsContainApp}}
+        <hr>
+        {{#each @communication.sourceApplications as | sourceApp | }}
+          {{#if (not-eq sourceApp.id @application.id)}}
+            <tr>
+              <td class="text-nowrap align-top">{{svg-jar "package-dependencies-16" class="octicon align-middle mr-1"}}Source App Name:</td>
+              <td class="text-right text-break pl-1">
+                <button type="button" class="buttonToLink" {{on "click" (fn this.loadApplication sourceApp)}}>{{sourceApp.name}}</button>
+              </td>
+            </tr>
+          {{/if}}
+        {{/each}}
       {{/if}}
-      --}}
+      {{#if this.targetAppsContainApp}}
+        <hr>
+        {{#each @communication.targetApplications as | targetApp | }}
+          {{#if (not-eq targetApp.id @application.id)}}
+            <tr>
+              <td class="text-nowrap align-top">{{svg-jar "package-dependents-16" class="octicon align-middle mr-1"}}Target App Name:</td>
+              <td class="text-right text-break pl-1">
+                <button type="button" class="buttonToLink" {{on "click" (fn this.loadApplication targetApp)}}>{{targetApp.name}}</button>
+              </td>
+            </tr>
+          {{/if}}
+        {{/each}}
+      {{/if}}
     </tbody>
   </table>
 </div>
