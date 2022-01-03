@@ -1,8 +1,9 @@
 import { DynamicLandscapeData, Span } from '../landscape-schemes/dynamic-data';
 import {
+  Application,
   Class, StructureLandscapeData,
 } from '../landscape-schemes/structure-data';
-import { getHashCodeToClassMap } from '../landscape-structure-helpers';
+import { getHashCodeToClassMap, getApplicationFromClass } from '../landscape-structure-helpers';
 import isObject from '../object-helpers';
 import { getTraceIdToSpanTreeMap } from '../trace-helpers';
 
@@ -71,6 +72,12 @@ export default function computeDrawableClassCommunication(
   totalClassCommunications.forEach(({ sourceClass, targetClass, operationName }) => {
     const sourceAndTargetClassId = `${sourceClass.id}_${targetClass.id}`;
 
+    // get source app
+    const sourceApp = getApplicationFromClass(landscapeStructureData, sourceClass);
+
+    // get target app
+    const targetApp = getApplicationFromClass(landscapeStructureData, targetClass);
+
     const aggregatedClassCommunication = classIdsToAggregated.get(sourceAndTargetClassId);
 
     if (!aggregatedClassCommunication) {
@@ -79,16 +86,30 @@ export default function computeDrawableClassCommunication(
         sourceClass,
         targetClass,
         operationName,
+        sourceApplications: [sourceApp],
+        targetApplications: [targetApp],
       });
     } else {
       aggregatedClassCommunication.totalRequests++;
+
+      const { sourceApplications } = aggregatedClassCommunication;
+
+      if (!sourceApplications.includes(sourceApp)) {
+        aggregatedClassCommunication.sourceApplications.push(sourceApp);
+      }
+
+      const { targetApplications } = aggregatedClassCommunication;
+
+      if (!targetApplications.includes(targetApp)) {
+        aggregatedClassCommunication.targetApplications.push(targetApp);
+      }
     }
   });
 
   const sourceTargetClassIdToDrawable = new Map<string, DrawableClassCommunication>();
 
   classIdsToAggregated.forEach(({
-    sourceClass, targetClass, totalRequests, operationName,
+    sourceClass, targetClass, totalRequests, operationName, sourceApplications, targetApplications,
   }) => {
     const targetSourceClassId = `${targetClass.id}_${sourceClass.id}`;
 
@@ -100,6 +121,8 @@ export default function computeDrawableClassCommunication(
         targetClass,
         bidirectional: true,
         operationName,
+        sourceApplications,
+        targetApplications,
       });
     } else {
       const drawableClassCommunication = sourceTargetClassIdToDrawable.get(targetSourceClassId);
@@ -116,6 +139,8 @@ export default function computeDrawableClassCommunication(
           targetClass,
           bidirectional: false,
           operationName,
+          sourceApplications,
+          targetApplications,
         });
       }
     }
@@ -141,6 +166,8 @@ interface AggregatedClassCommunication {
   sourceClass: Class;
   targetClass: Class;
   operationName: string;
+  sourceApplications: (Application | undefined)[];
+  targetApplications: (Application | undefined)[];
 }
 
 export interface DrawableClassCommunication {
@@ -150,4 +177,6 @@ export interface DrawableClassCommunication {
   targetClass: Class;
   bidirectional: boolean;
   operationName: string;
+  sourceApplications: (Application | undefined)[];
+  targetApplications: (Application | undefined)[];
 }

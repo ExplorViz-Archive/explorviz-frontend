@@ -30,6 +30,9 @@
   {{#if (eq this.entityType "drawableClassCommunication")}}
     <Visualization::Rendering::Popups::ApplicationPopups::CommunicationPopup
       @communication={{@popupData.entity}}
+      @structureData={{@structureData}}
+      @application={{@application}}
+      @showApplication={{@showApplication}}
     />
   {{/if}}
 </div>

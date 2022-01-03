@@ -68,6 +68,9 @@
         <Visualization::Rendering::Popups::PopupCoordinator
           @isMovable={{this.appSettings.enableCustomPopupPosition.value}}
           @popupData={{this.popupData}}
+          @structureData={{@landscapeData.structureLandscapeData}}
+          @application={{@landscapeData.application}}
+          @showApplication={{@showApplication}}
         />
       {{/if}}
     </div>
