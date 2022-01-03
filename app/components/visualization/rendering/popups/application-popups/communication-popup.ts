@@ -32,6 +32,11 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
   }
 
   @action
+  isCurrentVisualizedApp(app: Application) {
+    return app.id === this.args.application.id;
+  }
+
+  @action
   loadApplication(app: Application) {
     this.args.showApplication(app.id);
   }
