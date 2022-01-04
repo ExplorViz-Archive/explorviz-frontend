@@ -50,10 +50,13 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
       if (maybeCommunicationLayout) {
         // normalize request count to [0, 1] interval
         let range = maximumRequests - minRequests;
-        let normalizedRequests = (clazzCommunication.totalRequests - minRequests) / range;
-        // normalize request count to [0.2, 1] interval
-        range = 1 - 0.2;
-        normalizedRequests = normalizedRequests * range + 0.2;
+        let normalizedRequests = 1;
+        if (range !== 0) {
+          normalizedRequests = (clazzCommunication.totalRequests - minRequests) / range;
+          // normalize request count to [0.2, 1] interval
+          range = 1 - 0.2;
+          normalizedRequests = normalizedRequests * range + 0.2;
+        }
 
         // Apply line thickness depending on calculated request category
         maybeCommunicationLayout.lineThickness = (normalizedRequests * LINE_THICKNESS_FACTOR);
