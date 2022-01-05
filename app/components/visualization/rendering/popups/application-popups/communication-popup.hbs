@@ -1,12 +1,12 @@
 <h3 class="popover-header">
   <div class="text-center text-break font-weight-bold pl-1">
-    {{this.sourceClazz}}
-    {{#if this.isBidirectional}}
+    {{@communication.sourceClass.name}}
+    {{#if @communication.bidirectional}}
       {{svg-jar "arrow-both-16" class="octicon align-middle"}}
     {{else}}
       {{svg-jar "arrow-right-16" class="octicon align-middle"}}
     {{/if}}
-    {{this.targetClazz}}
+    {{@communication.targetClass.name}}
   </div>
 </h3>
 <div class="popover-body">
@@ -15,13 +15,13 @@
       <tr>
         <td class="text-nowrap align-top">{{svg-jar "comment-16" class="octicon align-middle mr-1"}}Name:</td>
         <td class="text-right text-break pl-1">
-          {{this.operationName}}
+          {{@communication.operationName}}
         </td>
       </tr>
       <tr>
         <td class="text-nowrap align-top">{{svg-jar "code-16" class="octicon align-middle mr-1"}}Requests:</td>
         <td class="text-right text-break pl-1">
-          {{this.requests}}
+          {{@communication.totalRequests}}
         </td>
       </tr>
       {{#if this.sourceAppsContainApp}}

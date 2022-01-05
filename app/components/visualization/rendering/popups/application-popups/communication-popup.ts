@@ -11,26 +11,6 @@ interface Args {
 }
 
 export default class CommunicationPopup extends GlimmerComponent<Args> {
-  get isBidirectional() {
-    return this.args.communication.bidirectional;
-  }
-
-  get sourceClazz() {
-    return this.args.communication.sourceClass.name;
-  }
-
-  get targetClazz() {
-    return this.args.communication.targetClass.name;
-  }
-
-  get requests() {
-    return this.args.communication.totalRequests;
-  }
-
-  get operationName() {
-    return this.args.communication.operationName;
-  }
-
   doAppsContainCurrentApp(apps: (Application | undefined)[]) {
     if (!apps) {
       return false;
