@@ -67,6 +67,7 @@
     "ember-export-application-global": "^2.0.1",
     "ember-file-upload": "^2.7.1",
     "ember-modal-dialog": "^3.0.1",
+    "ember-math-helpers": "2.18.0",
     "ember-power-select": "^3.0.6",
     "ember-power-select-blockless": "^0.5.0",
     "ember-print-this": "^2.0.0",

@@ -4,12 +4,17 @@ import CommunicationLayout from '../../layout-models/communication-layout';
 import BaseMesh from '../base-mesh';
 import CommunicationArrowMesh from './communication-arrow-mesh';
 
+export type ClazzCommuMeshDataModel = {
+  drawableClassCommus: DrawableClassCommunication[];
+  bidirectional: boolean;
+};
+
 export default class ClazzCommunicationMesh extends BaseMesh {
-  dataModel: DrawableClassCommunication;
+  dataModel: ClazzCommuMeshDataModel;
 
   layout: CommunicationLayout;
 
-  constructor(layout: CommunicationLayout, dataModel: DrawableClassCommunication,
+  constructor(layout: CommunicationLayout, dataModel: ClazzCommuMeshDataModel,
     defaultColor: THREE.Color, highlightingColor: THREE.Color) {
     super(defaultColor, highlightingColor);
     this.layout = layout;
@@ -174,8 +179,12 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     const headLength = Math.min(2 * headWidth, 0.3 * len);
     const length = headLength + 0.00001; // body of arrow not visible
 
-    const arrow = new CommunicationArrowMesh(this.dataModel, dir, origin, length,
-      color, headLength, headWidth);
-    this.add(arrow);
+    if (this.dataModel.drawableClassCommus.firstObject) {
+      const arrow = new CommunicationArrowMesh(
+        this.dataModel.drawableClassCommus.firstObject, dir, origin, length,
+        color, headLength, headWidth,
+      );
+      this.add(arrow);
+    }
   }
 }

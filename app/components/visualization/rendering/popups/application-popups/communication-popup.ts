@@ -1,10 +1,10 @@
 import GlimmerComponent from '@glimmer/component';
-import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { action } from '@ember/object';
+import { ClazzCommuMeshDataModel } from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 
 interface Args {
-  communication: DrawableClassCommunication
+  communication: ClazzCommuMeshDataModel
   application: Application
   structureData: StructureLandscapeData
   showApplication(applicationId: string): void;
@@ -23,14 +23,6 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
     );
 
     return hasAtLeastOneDifferentApp;
-  }
-
-  get sourceAppsContainApp() {
-    return this.doAppsContainCurrentApp(this.args.communication.sourceApplications);
-  }
-
-  get targetAppsContainApp() {
-    return this.doAppsContainCurrentApp(this.args.communication.targetApplications);
   }
 
   @action

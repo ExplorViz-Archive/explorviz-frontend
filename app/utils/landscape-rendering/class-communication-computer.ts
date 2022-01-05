@@ -86,30 +86,18 @@ export default function computeDrawableClassCommunication(
         sourceClass,
         targetClass,
         operationName,
-        sourceApplications: [sourceApp],
-        targetApplications: [targetApp],
+        sourceApp,
+        targetApp,
       });
     } else {
       aggregatedClassCommunication.totalRequests++;
-
-      const { sourceApplications } = aggregatedClassCommunication;
-
-      if (!sourceApplications.includes(sourceApp)) {
-        aggregatedClassCommunication.sourceApplications.push(sourceApp);
-      }
-
-      const { targetApplications } = aggregatedClassCommunication;
-
-      if (!targetApplications.includes(targetApp)) {
-        aggregatedClassCommunication.targetApplications.push(targetApp);
-      }
     }
   });
 
   const sourceTargetClassIdToDrawable = new Map<string, DrawableClassCommunication>();
 
   classIdsToAggregated.forEach(({
-    sourceClass, targetClass, totalRequests, operationName, sourceApplications, targetApplications,
+    sourceClass, targetClass, totalRequests, operationName, sourceApp, targetApp,
   }) => {
     const targetSourceClassId = `${targetClass.id}_${sourceClass.id}`;
 
@@ -121,8 +109,8 @@ export default function computeDrawableClassCommunication(
         targetClass,
         bidirectional: true,
         operationName,
-        sourceApplications,
-        targetApplications,
+        sourceApp,
+        targetApp,
       });
     } else {
       const drawableClassCommunication = sourceTargetClassIdToDrawable.get(targetSourceClassId);
@@ -139,8 +127,8 @@ export default function computeDrawableClassCommunication(
           targetClass,
           bidirectional: false,
           operationName,
-          sourceApplications,
-          targetApplications,
+          sourceApp,
+          targetApp,
         });
       }
     }
@@ -166,8 +154,8 @@ interface AggregatedClassCommunication {
   sourceClass: Class;
   targetClass: Class;
   operationName: string;
-  sourceApplications: (Application | undefined)[];
-  targetApplications: (Application | undefined)[];
+  sourceApp: Application | undefined;
+  targetApp: Application | undefined;
 }
 
 export interface DrawableClassCommunication {
@@ -177,6 +165,6 @@ export interface DrawableClassCommunication {
   targetClass: Class;
   bidirectional: boolean;
   operationName: string;
-  sourceApplications: (Application | undefined)[];
-  targetApplications: (Application | undefined)[];
+  sourceApp: Application | undefined;
+  targetApp: Application | undefined;
 }

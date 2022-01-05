@@ -104,16 +104,23 @@ export default class CommunicationRendering {
       // Check if pipe already exists for another method call
       if (positionToClazzCommMeshMap.get(combinedCoordsAsString)) {
         // exists, therefore update pipe with additional information
-        const existingDrawableClazzComm = positionToClazzCommMeshMap
+        const existingClazzCommuDataModel = positionToClazzCommMeshMap
           .get(combinedCoordsAsString)?.dataModel;
 
-        if (existingDrawableClazzComm) {
-          // update existing clazz commu
-          existingDrawableClazzComm.operationName = 'test';
+        if (existingClazzCommuDataModel) {
+          // update existing clazz commu data model
+
+          existingClazzCommuDataModel.drawableClassCommus.push(drawableClazzComm);
         }
       } else {
         // does not exist, therefore create pipe
-        const pipe = new ClazzCommunicationMesh(commLayout, drawableClazzComm,
+
+        const clazzCommuMeshData = {
+          drawableClassCommus: [drawableClazzComm],
+          bidirectional: false,
+        };
+
+        const pipe = new ClazzCommunicationMesh(commLayout, clazzCommuMeshData,
           communicationColor, highlightedEntityColor);
 
         const curveHeight = this.computeCurveHeight(commLayout);

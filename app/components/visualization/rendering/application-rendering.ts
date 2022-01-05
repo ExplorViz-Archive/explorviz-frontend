@@ -8,7 +8,7 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
-import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
+import ClazzCommunicationMesh, { ClazzCommuMeshDataModel } from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import { tracked } from '@glimmer/tracking';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
@@ -64,7 +64,7 @@ interface Args {
 type PopupData = {
   mouseX: number,
   mouseY: number,
-  entity?: Package | Class | DrawableClassCommunication
+  entity?: Package | Class | ClazzCommuMeshDataModel
 };
 
 type LayoutData = {
