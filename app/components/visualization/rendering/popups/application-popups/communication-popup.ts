@@ -11,20 +11,6 @@ interface Args {
 }
 
 export default class CommunicationPopup extends GlimmerComponent<Args> {
-  doAppsContainCurrentApp(apps: (Application | undefined)[]) {
-    if (!apps) {
-      return false;
-    }
-
-    const currentAppId = this.args.application.id;
-
-    const hasAtLeastOneDifferentApp = apps.some(
-      (app: Application) => currentAppId !== app.id,
-    );
-
-    return hasAtLeastOneDifferentApp;
-  }
-
   get calculateAggregatedRequestCount() {
     let aggregatedReqCount = 0;
 
@@ -32,11 +18,6 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
       aggregatedReqCount += drawableClassComm.totalRequests;
     });
     return aggregatedReqCount;
-  }
-
-  @action
-  isCurrentVisualizedApp(app: Application) {
-    return app.id === this.args.application.id;
   }
 
   @action

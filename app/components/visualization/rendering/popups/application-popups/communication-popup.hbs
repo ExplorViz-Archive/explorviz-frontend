@@ -29,9 +29,19 @@
         <tr>
           <td class="text-nowrap align-top">{{svg-jar "arrow-switch-16" class="octicon align-middle mr-1"}}</td>
           <td class="text-right text-break pl-1">
-            {{drawableClassCommu.sourceClass.name}}           
-            {{svg-jar "arrow-right-16" class="octicon align-middle"}}           
+            {{drawableClassCommu.sourceClass.name}}
+            {{#if (not (eq drawableClassCommu.sourceApp.id @application.id))}}
+              (<button type="button" class="buttonToLink" {{on "click" (fn this.loadApplication drawableClassCommu.sourceApp)}}>
+                 {{drawableClassCommu.sourceApp.name}}
+               </button>)
+            {{/if}}
+            {{svg-jar "arrow-right-16" class="octicon align-middle"}}
             {{drawableClassCommu.targetClass.name}}
+            {{#if (not (eq drawableClassCommu.targetApp.id @application.id))}}
+              (<button type="button" class="buttonToLink" {{on "click" (fn this.loadApplication drawableClassCommu.targetApp)}}>
+                 {{drawableClassCommu.targetApp.name}}
+               </button>)
+            {{/if}}
           </td>
         </tr>
         {{!-- Name --}}
@@ -46,20 +56,6 @@
           <td class="text-nowrap align-top">{{svg-jar "code-16" class="octicon align-middle mr-1"}}</td>
           <td class="text-right text-break pl-1">
             {{drawableClassCommu.totalRequests}}
-          </td>
-        </tr>
-        {{!-- Source App Name --}}
-        <tr>
-          <td class="text-nowrap align-top">{{svg-jar "package-dependencies-16" class="octicon align-middle mr-1"}}</td>
-          <td class="text-right text-break pl-1">
-            <button type="button" class="buttonToLink" {{on "click" (fn this.loadApplication drawableClassCommu.sourceApp)}}>{{drawableClassCommu.sourceApp.name}}</button>
-          </td>
-        </tr>
-        {{!-- Target App Name --}}
-        <tr>
-          <td class="text-nowrap align-top">{{svg-jar "package-dependents-16" class="octicon align-middle mr-1"}}</td>
-          <td class="text-right text-break pl-1">
-            <button type="button" class="buttonToLink" {{on "click" (fn this.loadApplication drawableClassCommu.targetApp)}}>{{drawableClassCommu.targetApp.name}}</button>
           </td>
         </tr>
         {{#if (lt index (sub @communication.drawableClassCommus.length 1))}}
