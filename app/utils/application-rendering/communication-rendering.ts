@@ -6,6 +6,7 @@ import CommunicationLayout from 'explorviz-frontend/view-objects/layout-models/c
 import UserSettings from 'explorviz-frontend/services/user-settings';
 import { Vector3 } from 'three';
 import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
+import ClazzCommuMeshDataModel from 'explorviz-frontend/view-objects/3d/application/utils/clazz-communication-mesh-data-model';
 import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 
 export default class CommunicationRendering {
@@ -115,11 +116,11 @@ export default class CommunicationRendering {
       } else {
         // does not exist, therefore create pipe
 
-        const clazzCommuMeshData = {
-          drawableClassCommus: [drawableClazzComm],
-          bidirectional: false,
-          id: drawableClazzComm.id,
-        };
+        const clazzCommuMeshData = new ClazzCommuMeshDataModel(
+          [drawableClazzComm],
+          false,
+          drawableClazzComm.id,
+        );
 
         const pipe = new ClazzCommunicationMesh(commLayout, clazzCommuMeshData,
           communicationColor, highlightedEntityColor);

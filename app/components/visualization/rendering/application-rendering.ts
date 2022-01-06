@@ -8,7 +8,7 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
-import ClazzCommunicationMesh, { ClazzCommuMeshDataModel } from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
+import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import { tracked } from '@glimmer/tracking';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
@@ -47,6 +47,7 @@ import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import UserSettings from 'explorviz-frontend/services/user-settings';
+import ClazzCommuMeshDataModel from 'explorviz-frontend/view-objects/3d/application/utils/clazz-communication-mesh-data-model';
 
 interface Args {
   readonly landscapeData: LandscapeData;

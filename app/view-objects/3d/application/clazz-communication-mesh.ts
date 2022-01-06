@@ -1,14 +1,8 @@
 import THREE from 'three';
-import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import CommunicationLayout from '../../layout-models/communication-layout';
 import BaseMesh from '../base-mesh';
 import CommunicationArrowMesh from './communication-arrow-mesh';
-
-export type ClazzCommuMeshDataModel = {
-  drawableClassCommus: DrawableClassCommunication[];
-  bidirectional: boolean;
-  id: string;
-};
+import ClazzCommuMeshDataModel from './utils/clazz-communication-mesh-data-model';
 
 export default class ClazzCommunicationMesh extends BaseMesh {
   dataModel: ClazzCommuMeshDataModel;
