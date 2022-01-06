@@ -15,6 +15,7 @@ interface IArgs {
     mouseY: number,
     entity: Node | Application | Package | Class | ClazzCommuMeshDataModel
   };
+  removePopup(): void;
 }
 
 export default class PopupCoordinator extends Component<IArgs> {
@@ -95,6 +96,10 @@ export default class PopupCoordinator extends Component<IArgs> {
     this.element = popoverDiv;
     const { popupData } = this.args;
 
+    if (!popupData) {
+      return;
+    }
+
     // Sorrounding div for position calculations
     const containerDiv = popoverDiv.parentElement as HTMLElement;
 
@@ -140,6 +145,9 @@ export default class PopupCoordinator extends Component<IArgs> {
   }
 
   get entityType() {
+    if (!this.args.popupData) {
+      return '';
+    }
     if (isNode(this.args.popupData.entity)) {
       return 'node';
     }

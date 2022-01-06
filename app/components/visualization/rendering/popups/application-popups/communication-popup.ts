@@ -8,6 +8,7 @@ interface Args {
   application: Application
   structureData: StructureLandscapeData
   showApplication(applicationId: string): void;
+  removePopup(): void;
 }
 
 export default class CommunicationPopup extends GlimmerComponent<Args> {
@@ -22,6 +23,7 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
 
   @action
   loadApplication(app: Application) {
+    this.args.removePopup();
     this.args.showApplication(app.id);
   }
 }

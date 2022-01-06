@@ -392,6 +392,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
+  removePopup() {
+    this.popupData = null;
+  }
+
+  @action
   handleMouseWheel(delta: number) {
     // Do not show popups while zooming
     if (!this.appSettings.enableCustomPopupPosition.value) {
