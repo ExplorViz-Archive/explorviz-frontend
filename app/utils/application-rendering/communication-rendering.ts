@@ -118,6 +118,7 @@ export default class CommunicationRendering {
         const clazzCommuMeshData = {
           drawableClassCommus: [drawableClazzComm],
           bidirectional: false,
+          id: drawableClazzComm.id,
         };
 
         const pipe = new ClazzCommunicationMesh(commLayout, clazzCommuMeshData,

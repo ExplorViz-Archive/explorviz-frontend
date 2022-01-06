@@ -7,6 +7,7 @@ import CommunicationArrowMesh from './communication-arrow-mesh';
 export type ClazzCommuMeshDataModel = {
   drawableClassCommus: DrawableClassCommunication[];
   bidirectional: boolean;
+  id: string;
 };
 
 export default class ClazzCommunicationMesh extends BaseMesh {
