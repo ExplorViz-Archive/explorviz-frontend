@@ -125,7 +125,7 @@ export default class CommunicationRendering {
           .get(reversedCombinedCoordsAsString);
         const existingClazzCommuDataModel = existingPipe?.dataModel;
 
-        if (existingClazzCommuDataModel) {
+        if (existingPipe && existingClazzCommuDataModel) {
           // update existing clazz commu data model
           existingClazzCommuDataModel.bidirectional = true;
           existingClazzCommuDataModel.drawableClassCommus.push(drawableClazzComm);

@@ -6,17 +6,31 @@
 <div class="popover-body">
   <table class="w-100">
     <tbody>
+      {{!-- Aggregated Information --}}
+      {{#if (gt @communication.drawableClassCommus.length 1)}}
+        {{!-- Aggregated request count --}}
+        <tr>
+          <td class="text-nowrap align-top">{{svg-jar "code-16" class="octicon align-middle mr-1"}}</td>
+          <td class="text-right text-break pl-1">
+            {{this.calculateAggregatedRequestCount}}
+          </td>
+        </tr>
+        {{!-- # of unique method calls --}}
+        <tr>
+          <td class="text-nowrap align-top">#{{svg-jar "hash-16" class="octicon align-middle mr-1"}}</td>
+          <td class="text-right text-break pl-1">
+            {{@communication.drawableClassCommus.length}}
+          </td>
+        </tr>
+        <hr>
+      {{/if}}
       {{#each @communication.drawableClassCommus as | drawableClassCommu  index |}}
         {{!-- Relationship --}}
         <tr>
           <td class="text-nowrap align-top">{{svg-jar "arrow-switch-16" class="octicon align-middle mr-1"}}</td>
           <td class="text-right text-break pl-1">
-            {{drawableClassCommu.sourceClass.name}}
-            {{#if drawableClassCommu.bidirectional}}
-              {{svg-jar "arrow-both-16" class="octicon align-middle"}}
-            {{else}}
-              {{svg-jar "arrow-right-16" class="octicon align-middle"}}
-            {{/if}}
+            {{drawableClassCommu.sourceClass.name}}           
+            {{svg-jar "arrow-right-16" class="octicon align-middle"}}           
             {{drawableClassCommu.targetClass.name}}
           </td>
         </tr>

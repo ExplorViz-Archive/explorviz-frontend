@@ -25,6 +25,15 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
     return hasAtLeastOneDifferentApp;
   }
 
+  get calculateAggregatedRequestCount() {
+    let aggregatedReqCount = 0;
+
+    this.args.communication.drawableClassCommus.forEach((drawableClassComm) => {
+      aggregatedReqCount += drawableClassComm.totalRequests;
+    });
+    return aggregatedReqCount;
+  }
+
   @action
   isCurrentVisualizedApp(app: Application) {
     return app.id === this.args.application.id;
