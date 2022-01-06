@@ -53,6 +53,11 @@ export default class CommunicationRendering {
     }
   }
 
+  // Update arrow indicators for drawable class communication
+  addBidirectionalArrow = (pipe: ClazzCommunicationMesh) => {
+    pipe.addBidirectionalArrow();
+  };
+
   /**
    * Computes communication and communication arrows and adds them to the
    * applicationObject3D
@@ -81,7 +86,7 @@ export default class CommunicationRendering {
     // Retrieve color preferences
     const { communicationColor, highlightedEntityColor } = this.configuration.applicationColors;
 
-    const positionToClazzCommMeshMap = new Map<String, ClazzCommunicationMesh>();
+    const positionToClazzCommMesh = new Map<String, ClazzCommunicationMesh>();
 
     // Render all drawable communications
     drawableClassCommunications.forEach((drawableClazzComm) => {
@@ -101,21 +106,33 @@ export default class CommunicationRendering {
       const endCoordsAsString = `${end.x}.${end.y}.${end.z}`;
 
       const combinedCoordsAsString = startCoordsAsString + endCoordsAsString;
+      const reversedCombinedCoordsAsString = endCoordsAsString + startCoordsAsString;
 
-      // Check if pipe already exists for another method call
-      if (positionToClazzCommMeshMap.get(combinedCoordsAsString)) {
+      // Check if pipe already exists for another method call (same direction)
+      if (positionToClazzCommMesh.get(combinedCoordsAsString)) {
         // exists, therefore update pipe with additional information
-        const existingClazzCommuDataModel = positionToClazzCommMeshMap
+        const existingClazzCommuDataModel = positionToClazzCommMesh
           .get(combinedCoordsAsString)?.dataModel;
 
         if (existingClazzCommuDataModel) {
           // update existing clazz commu data model
-
+          // existingClazzCommuDataModel.bidirectional = true;
           existingClazzCommuDataModel.drawableClassCommus.push(drawableClazzComm);
+        }
+      } else if (positionToClazzCommMesh.get(reversedCombinedCoordsAsString)) {
+        // Check if pipe already exists for another method call (reverse direction)
+        const existingPipe = positionToClazzCommMesh
+          .get(reversedCombinedCoordsAsString);
+        const existingClazzCommuDataModel = existingPipe?.dataModel;
+
+        if (existingClazzCommuDataModel) {
+          // update existing clazz commu data model
+          existingClazzCommuDataModel.bidirectional = true;
+          existingClazzCommuDataModel.drawableClassCommus.push(drawableClazzComm);
+          this.addBidirectionalArrow(existingPipe);
         }
       } else {
         // does not exist, therefore create pipe
-
         const clazzCommuMeshData = new ClazzCommuMeshDataModel(
           [drawableClazzComm],
           false,
@@ -133,7 +150,7 @@ export default class CommunicationRendering {
 
         this.addArrows(pipe, curveHeight, viewCenterPoint);
 
-        positionToClazzCommMeshMap.set(combinedCoordsAsString, pipe);
+        positionToClazzCommMesh.set(combinedCoordsAsString, pipe);
 
         if (this.heatmapConf.heatmapActive) {
           pipe.turnTransparent(0.1);

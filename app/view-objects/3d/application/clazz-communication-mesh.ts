@@ -9,6 +9,8 @@ export default class ClazzCommunicationMesh extends BaseMesh {
 
   layout: CommunicationLayout;
 
+  potentialBidirectionalArrow!: CommunicationArrowMesh | undefined;
+
   constructor(layout: CommunicationLayout, dataModel: ClazzCommuMeshDataModel,
     defaultColor: THREE.Color, highlightingColor: THREE.Color) {
     super(defaultColor, highlightingColor);
@@ -144,6 +146,15 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     // Add 2nd arrow to visualize bidirectional communication
     if (this.dataModel.bidirectional) {
       this.addArrow(end, start, arrowWidth, yOffset, color);
+    } else {
+      // save arrow for potential upcoming use
+      this.potentialBidirectionalArrow = this.getArrow(end, start, arrowWidth, yOffset, color);
+    }
+  }
+
+  addBidirectionalArrow() {
+    if (this.dataModel.bidirectional && this.potentialBidirectionalArrow) {
+      this.add(this.potentialBidirectionalArrow);
     }
   }
 
@@ -181,5 +192,32 @@ export default class ClazzCommunicationMesh extends BaseMesh {
       );
       this.add(arrow);
     }
+  }
+
+  private getArrow(start: THREE.Vector3, end: THREE.Vector3,
+    width: number, yOffset: number, color: number) {
+    const dir = new THREE.Vector3().subVectors(end, start);
+    const len = dir.length();
+    // Do not draw precisely in the middle to leave a
+    // small gap in case of bidirectional communication
+    const halfVector = dir.normalize().multiplyScalar(len * 0.51);
+    const middle = start.clone().add(halfVector);
+
+    // Normalize the direction vector (convert to vector of length 1)
+    dir.normalize();
+
+    // Arrow properties
+    const origin = new THREE.Vector3(middle.x, middle.y + yOffset, middle.z);
+    const headWidth = Math.max(0.5, width);
+    const headLength = Math.min(2 * headWidth, 0.3 * len);
+    const length = headLength + 0.00001; // body of arrow not visible
+
+    if (this.dataModel.drawableClassCommus.firstObject) {
+      return new CommunicationArrowMesh(
+        this.dataModel.drawableClassCommus.firstObject, dir, origin, length,
+        color, headLength, headWidth,
+      );
+    }
+    return undefined;
   }
 }

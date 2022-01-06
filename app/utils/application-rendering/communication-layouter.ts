@@ -185,7 +185,8 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
         const targetLayout = boxLayoutMap.get(targetEntity.id);
         if (targetLayout) {
           commLayout.endX = targetLayout.positionX + targetLayout.width / 2.0;
-          commLayout.endY = targetLayout.positionY + 0.05;
+          // commLayout.endY = targetLayout.positionY + 0.05;
+          commLayout.endY = targetLayout.positionY;
           commLayout.endZ = targetLayout.positionZ + targetLayout.depth / 2.0;
         }
       }

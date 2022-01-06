@@ -67,10 +67,10 @@ export default function computeDrawableClassCommunication(
     }
   });
 
-  const classIdsToAggregated = new Map<string, AggregatedClassCommunication>();
+  const aggregatedMethodCalls = new Map<string, AggregatedClassCommunication>();
 
   totalClassCommunications.forEach(({ sourceClass, targetClass, operationName }) => {
-    const sourceAndTargetClassId = `${sourceClass.id}_${targetClass.id}`;
+    const sourceTargetClassMethodId = `${sourceClass.id}_${targetClass.id}_${operationName}`;
 
     // get source app
     const sourceApp = getApplicationFromClass(landscapeStructureData, sourceClass);
@@ -78,10 +78,14 @@ export default function computeDrawableClassCommunication(
     // get target app
     const targetApp = getApplicationFromClass(landscapeStructureData, targetClass);
 
-    const aggregatedClassCommunication = classIdsToAggregated.get(sourceAndTargetClassId);
+    // Find all identical method calls based on their source
+    // and target app / class
+    // and aggregate identical method calls with exactly same source
+    // and target app / class within a single representative
+    const aggregatedClassCommunication = aggregatedMethodCalls.get(sourceTargetClassMethodId);
 
     if (!aggregatedClassCommunication) {
-      classIdsToAggregated.set(sourceAndTargetClassId, {
+      aggregatedMethodCalls.set(sourceTargetClassMethodId, {
         totalRequests: 1,
         sourceClass,
         targetClass,
@@ -94,16 +98,17 @@ export default function computeDrawableClassCommunication(
     }
   });
 
-  const sourceTargetClassIdToDrawable = new Map<string, DrawableClassCommunication>();
+  // Find bidirectional and self-directed method calls
+  const sourceTargetClassMethodIdToDrawable = new Map<string, DrawableClassCommunication>();
 
-  classIdsToAggregated.forEach(({
+  aggregatedMethodCalls.forEach(({
     sourceClass, targetClass, totalRequests, operationName, sourceApp, targetApp,
   }) => {
-    const targetSourceClassId = `${targetClass.id}_${sourceClass.id}`;
+    const targetSourceClassMethodId = `${targetClass.id}_${sourceClass.id}_${operationName}`;
 
     if (sourceClass === targetClass) {
-      sourceTargetClassIdToDrawable.set(targetSourceClassId, {
-        id: targetSourceClassId,
+      sourceTargetClassMethodIdToDrawable.set(targetSourceClassMethodId, {
+        id: targetSourceClassMethodId,
         totalRequests,
         sourceClass,
         targetClass,
@@ -113,14 +118,21 @@ export default function computeDrawableClassCommunication(
         targetApp,
       });
     } else {
-      const drawableClassCommunication = sourceTargetClassIdToDrawable.get(targetSourceClassId);
+      const drawableClassCommunication = sourceTargetClassMethodIdToDrawable
+        .get(targetSourceClassMethodId);
 
       if (drawableClassCommunication) {
+        // if true, this indicates that we have found a "reversed" method
+        // call for a previously processed method call.
+        // This is a bidirectional communication line.
         drawableClassCommunication.bidirectional = true;
-        drawableClassCommunication.totalRequests += totalRequests;
+        // drawableClassCommunication.totalRequests += totalRequests;
+        // TODO the line above cannot be true right? The comm line is
+        // bidirectional, but the underlying method calls are different,
+        // therefore should be counted seperately?
       } else {
-        const sourceAndTargetClassId = `${sourceClass.id}_${targetClass.id}`;
-        sourceTargetClassIdToDrawable.set(sourceAndTargetClassId, {
+        const sourceAndTargetClassId = `${sourceClass.id}_${targetClass.id}_${operationName}`;
+        sourceTargetClassMethodIdToDrawable.set(sourceAndTargetClassId, {
           id: sourceAndTargetClassId,
           totalRequests,
           sourceClass,
@@ -134,7 +146,7 @@ export default function computeDrawableClassCommunication(
     }
   });
 
-  const drawableClassCommunications = [...sourceTargetClassIdToDrawable.values()];
+  const drawableClassCommunications = [...sourceTargetClassMethodIdToDrawable.values()];
 
   return drawableClassCommunications;
 }
