@@ -1,4 +1,4 @@
-import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import { DrawableClassCommunication } from 'explorviz-frontend/utils/application-rendering/class-communication-computer';
 
 // TODO might need to refactor as simple type
 

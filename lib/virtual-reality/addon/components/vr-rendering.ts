@@ -46,7 +46,7 @@ import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/application-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import { tracked } from '@glimmer/tracking';
 import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';

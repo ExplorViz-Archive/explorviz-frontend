@@ -21,7 +21,7 @@ import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/applicati
 import {
   Class, isClass, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/application-rendering/class-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';

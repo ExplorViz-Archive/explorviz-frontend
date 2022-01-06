@@ -6,7 +6,7 @@ import ClazzCommuMeshDataModel from 'explorviz-frontend/view-objects/3d/applicat
 import {
   Class, isClass, isPackage, Package, StructureLandscapeData,
 } from '../landscape-schemes/structure-data';
-import { DrawableClassCommunication, isDrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
+import { DrawableClassCommunication, isDrawableClassCommunication } from './class-communication-computer';
 import { Span, Trace } from '../landscape-schemes/dynamic-data';
 import { getHashCodeToClassMap } from '../landscape-structure-helpers';
 import { getAllClassesInApplication } from '../application-helpers';

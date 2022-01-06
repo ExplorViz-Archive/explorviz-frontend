@@ -67,7 +67,7 @@ export default function computeDrawableClassCommunication(
     }
   });
 
-  const aggregatedMethodCalls = new Map<string, AggregatedClassCommunication>();
+  const aggregatedDrawableClassCommunications = new Map<string, DrawableClassCommunication>();
 
   totalClassCommunications.forEach(({ sourceClass, targetClass, operationName }) => {
     const sourceTargetClassMethodId = `${sourceClass.id}_${targetClass.id}_${operationName}`;
@@ -82,10 +82,12 @@ export default function computeDrawableClassCommunication(
     // and target app / class
     // and aggregate identical method calls with exactly same source
     // and target app / class within a single representative
-    const aggregatedClassCommunication = aggregatedMethodCalls.get(sourceTargetClassMethodId);
+    const drawableClassCommunication = aggregatedDrawableClassCommunications
+      .get(sourceTargetClassMethodId);
 
-    if (!aggregatedClassCommunication) {
-      aggregatedMethodCalls.set(sourceTargetClassMethodId, {
+    if (!drawableClassCommunication) {
+      aggregatedDrawableClassCommunications.set(sourceTargetClassMethodId, {
+        id: sourceTargetClassMethodId,
         totalRequests: 1,
         sourceClass,
         targetClass,
@@ -94,65 +96,17 @@ export default function computeDrawableClassCommunication(
         targetApp,
       });
     } else {
-      aggregatedClassCommunication.totalRequests++;
+      drawableClassCommunication.totalRequests++;
     }
   });
 
-  // Find bidirectional and self-directed method calls
-  const sourceTargetClassMethodIdToDrawable = new Map<string, DrawableClassCommunication>();
-
-  aggregatedMethodCalls.forEach(({
-    sourceClass, targetClass, totalRequests, operationName, sourceApp, targetApp,
-  }) => {
-    const targetSourceClassMethodId = `${targetClass.id}_${sourceClass.id}_${operationName}`;
-
-    if (sourceClass === targetClass) {
-      sourceTargetClassMethodIdToDrawable.set(targetSourceClassMethodId, {
-        id: targetSourceClassMethodId,
-        totalRequests,
-        sourceClass,
-        targetClass,
-        bidirectional: true,
-        operationName,
-        sourceApp,
-        targetApp,
-      });
-    } else {
-      const drawableClassCommunication = sourceTargetClassMethodIdToDrawable
-        .get(targetSourceClassMethodId);
-
-      if (drawableClassCommunication) {
-        // if true, this indicates that we have found a "reversed" method
-        // call for a previously processed method call.
-        // This is a bidirectional communication line.
-        drawableClassCommunication.bidirectional = true;
-        // drawableClassCommunication.totalRequests += totalRequests;
-        // TODO the line above cannot be true right? The comm line is
-        // bidirectional, but the underlying method calls are different,
-        // therefore should be counted seperately?
-      } else {
-        const sourceAndTargetClassId = `${sourceClass.id}_${targetClass.id}_${operationName}`;
-        sourceTargetClassMethodIdToDrawable.set(sourceAndTargetClassId, {
-          id: sourceAndTargetClassId,
-          totalRequests,
-          sourceClass,
-          targetClass,
-          bidirectional: false,
-          operationName,
-          sourceApp,
-          targetApp,
-        });
-      }
-    }
-  });
-
-  const drawableClassCommunications = [...sourceTargetClassMethodIdToDrawable.values()];
+  const drawableClassCommunications = [...aggregatedDrawableClassCommunications.values()];
 
   return drawableClassCommunications;
 }
 
 export function isDrawableClassCommunication(x: any): x is DrawableClassCommunication {
-  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'bidirectional');
+  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'totalRequests');
 }
 
 interface ClassCommunication {
@@ -161,21 +115,11 @@ interface ClassCommunication {
   operationName: string;
 }
 
-interface AggregatedClassCommunication {
-  totalRequests: number;
-  sourceClass: Class;
-  targetClass: Class;
-  operationName: string;
-  sourceApp: Application | undefined;
-  targetApp: Application | undefined;
-}
-
 export interface DrawableClassCommunication {
   id: string;
   totalRequests: number;
   sourceClass: Class;
   targetClass: Class;
-  bidirectional: boolean;
   operationName: string;
   sourceApp: Application | undefined;
   targetApp: Application | undefined;

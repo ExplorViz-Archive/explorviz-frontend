@@ -4,7 +4,7 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import ComponentMesh from '../../view-objects/3d/application/component-mesh';
 import FoundationMesh from '../../view-objects/3d/application/foundation-mesh';
 import CommunicationLayout from '../../view-objects/layout-models/communication-layout';
-import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
+import { DrawableClassCommunication } from './class-communication-computer';
 import { Application, Class, Package } from '../landscape-schemes/structure-data';
 
 // Communication Layouting //

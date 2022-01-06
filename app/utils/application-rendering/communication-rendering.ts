@@ -7,7 +7,7 @@ import UserSettings from 'explorviz-frontend/services/user-settings';
 import { Vector3 } from 'three';
 import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 import ClazzCommuMeshDataModel from 'explorviz-frontend/view-objects/3d/application/utils/clazz-communication-mesh-data-model';
-import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
+import { DrawableClassCommunication } from './class-communication-computer';
 
 export default class CommunicationRendering {
   // Service to access preferences
