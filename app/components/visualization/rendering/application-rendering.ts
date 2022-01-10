@@ -48,6 +48,9 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import UserSettings from 'explorviz-frontend/services/user-settings';
 import ClazzCommuMeshDataModel from 'explorviz-frontend/view-objects/3d/application/utils/clazz-communication-mesh-data-model';
+import RenderingLoop from 'explorviz-frontend/rendering/application/rendering-loop';
+import { getOwner } from '@ember/application';
+import AnimationMesh from 'explorviz-frontend/view-objects/3d/animation-mesh';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -106,11 +109,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
-  animationMixers!: Array<THREE.AnimationMixer>;
+  globeMesh!: AnimationMesh;
 
-  globeMesh!: THREE.Mesh;
+  timer!: any;
 
-  clock!: THREE.Clock;
+  mouseMovementActive: boolean = true;
+
+  oldRotationApplicationObject3D!: THREE.Euler;
+
+  animationStartCoordinateApplicationObject3D: number = 0;
+
+  isAnimationApplicationObject3DDone: boolean = false;
 
   // Used to display performance and memory usage information
   threePerformance: THREEPerformance | undefined;
@@ -122,6 +131,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   hoveredObject: BaseMesh | null;
 
   drawableClassCommunications: DrawableClassCommunication[] = [];
+
+  renderingLoop!: RenderingLoop;
 
   // Extended Object3D which manages application meshes
   readonly applicationObject3D: ApplicationObject3D;
@@ -168,9 +179,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   constructor(owner: any, args: Args) {
     super(owner, args);
-    this.debug('Constructor called');
 
-    this.render = this.render.bind(this);
     this.hammerInteraction = HammerInteraction.create();
 
     const { application, dynamicLandscapeData } = this.args.landscapeData;
@@ -204,7 +213,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
-    this.render();
 
     this.resize(outerDiv);
 
@@ -232,11 +240,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    const { value: showFpsCounter } = this.userSettings.applicationSettings.showFpsCounter;
+    this.renderingLoop = RenderingLoop.create(getOwner(this).ownerInjection(),
+      {
+        camera: this.camera,
+        scene: this.scene,
+        renderer: this.renderer,
+      });
+    this.renderingLoop.start();
 
-    if (showFpsCounter) {
-      this.threePerformance = new THREEPerformance();
-    }
+    this.initVisualization();
   }
 
   /**
@@ -272,9 +284,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
 
-    this.animationMixers = new Array<THREE.AnimationMixer>();
-
-    this.clock = new THREE.Clock();
     this.debug('Renderer set up');
   }
 
@@ -297,6 +306,74 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
     this.debug('Lights added');
+  }
+
+  initVisualization() {
+    const applicationAnimation = () => {
+      // applicationObject3D animation
+      const period = 4000;
+      const times = [0, period];
+      let values = [this.animationStartCoordinateApplicationObject3D, 360];
+
+      let trackName = '.rotation[y]';
+
+      let track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+      let clip = new THREE.AnimationClip('default', period, [track]);
+
+      let animationMixer = new THREE.AnimationMixer(this.applicationObject3D);
+
+      let clipAction = animationMixer.clipAction(clip);
+
+      this.applicationObject3D.tick = (delta: any) => {
+        if (!this.mouseMovementActive) {
+          if (!this.isAnimationApplicationObject3DDone) {
+            values = [this.animationStartCoordinateApplicationObject3D, 360];
+
+            trackName = '.rotation[y]';
+
+            track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+            clip = new THREE.AnimationClip('default', period, [track]);
+
+            animationMixer = new THREE.AnimationMixer(this.applicationObject3D);
+            clipAction = animationMixer.clipAction(clip);
+            clipAction.play();
+            this.isAnimationApplicationObject3DDone = true;
+          }
+
+          animationMixer.update(delta);
+        } else {
+          clipAction.stop();
+          this.isAnimationApplicationObject3DDone = false;
+        }
+      };
+      this.renderingLoop.updatables.push(this.applicationObject3D);
+    };
+
+    const addGlobe = () => {
+      // Add globe for communication that comes from the outside
+      this.globeMesh = EntityRendering.addGlobeToApplication(this.applicationObject3D);
+
+      const period = 1000;
+      const times = [0, period];
+      const values = [0, 360];
+
+      const trackName = '.rotation[y]';
+      const track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+      const clip = new THREE.AnimationClip('default', period, [track]);
+
+      const animationMixer = new THREE.AnimationMixer(this.globeMesh);
+
+      const clipAction = animationMixer.clipAction(clip);
+      clipAction.play();
+      this.globeMesh.tick = (delta: any) => animationMixer.update(delta);
+      this.renderingLoop.updatables.push(this.globeMesh);
+    };
+
+    applicationAnimation();
+    addGlobe();
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -365,9 +442,28 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseMove(intersection: THREE.Intersection | null) {
+    this.runOrRestartMouseMovementTimer();
     if (!intersection) return;
     const mesh = intersection.object;
     this.mouseMoveOnMesh(mesh);
+  }
+
+  runOrRestartMouseMovementTimer() {
+    if (!this.mouseMovementActive) {
+      this.mouseMovementActive = true;
+      this.applicationObject3D.rotation.copy(this.oldRotationApplicationObject3D);
+    } else {
+      this.animationStartCoordinateApplicationObject3D = this.applicationObject3D.rotation.y;
+    }
+
+    clearTimeout(this.timer);
+    this.timer = setTimeout(
+      () => {
+        this.oldRotationApplicationObject3D = new THREE.Euler()
+          .copy(this.applicationObject3D.rotation);
+        this.mouseMovementActive = false;
+      }, 25000,
+    );
   }
 
   @action
@@ -507,25 +603,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
 
-      if (!this.globeMesh) {
-        // Add globe for communication that comes from the outside
-        this.globeMesh = EntityRendering.addGlobeToApplication(this.applicationObject3D);
-
-        const period = 1000;
-        const times = [0, period];
-        const values = [0, 360];
-
-        const trackName = '.rotation[y]';
-        const track = new THREE.NumberKeyframeTrack(trackName, times, values);
-
-        const clip = new THREE.AnimationClip('default', period, [track]);
-
-        const animationMixer = new THREE.AnimationMixer(this.globeMesh);
-
-        const clipAction = animationMixer.clipAction(clip);
-        clipAction.play();
-        this.animationMixers.push(animationMixer);
-      } else {
+      if (this.globeMesh) {
         // reposition
         EntityRendering.repositionGlobeToApplication(this.applicationObject3D, this.globeMesh);
       }
@@ -793,41 +871,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #endregion HEATMAP
 
   // #region RENDERING LOOP
-
-  /**
-   * Main rendering function
-   */
-  render() {
-    if (this.isDestroyed) { return; }
-
-    const animationId = requestAnimationFrame(this.render);
-    this.animationFrameId = animationId;
-
-    const { value: showFpsCounter } = this.userSettings.applicationSettings.showFpsCounter;
-
-    if (showFpsCounter && !this.threePerformance) {
-      this.threePerformance = new THREEPerformance();
-    } else if (!showFpsCounter && this.threePerformance) {
-      this.threePerformance.removePerformanceMeasurement();
-      this.threePerformance = undefined;
-    }
-
-    if (this.threePerformance) {
-      this.threePerformance.threexStats.update(this.renderer);
-      this.threePerformance.stats.begin();
-    }
-
-    if (this.animationMixers) {
-      this.animationMixers.forEach((mixer) => mixer.update(this.clock.getDelta()));
-    }
-
-    this.renderer.render(this.scene, this.camera);
-
-    this.scaleSpheres();
-    if (this.threePerformance) {
-      this.threePerformance.stats.end();
-    }
-  }
 
   scaleSpheres() {
     this.spheres.forEach((sphereArray) => {
@@ -1134,7 +1177,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   willDestroy() {
     super.willDestroy();
 
-    cancelAnimationFrame(this.animationFrameId);
+    this.renderingLoop.stop();
+
     this.cleanUpApplication();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
@@ -1142,9 +1186,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.heatmapConf.cleanup();
     this.configuration.isCommRendered = true;
 
-    if (this.threePerformance) {
-      this.threePerformance.removePerformanceMeasurement();
-    }
+    this.renderingLoop.stop();
 
     this.debug('Cleaned up application rendering');
   }
