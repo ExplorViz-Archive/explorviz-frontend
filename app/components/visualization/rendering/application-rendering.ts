@@ -63,6 +63,7 @@ interface Args {
   openDataSelection(): void;
   closeDataSelection(): void;
   toggleVisualizationUpdating(): void;
+  showApplication(applicationId: string): void;
 }
 
 type PopupData = {
@@ -483,6 +484,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (!this.appSettings.enableCustomPopupPosition.value) {
       this.popupData = null;
     }
+  }
+
+  @action
+  showApplication(appId: string) {
+    this.removePopup();
+    this.args.showApplication(appId);
   }
 
   @action

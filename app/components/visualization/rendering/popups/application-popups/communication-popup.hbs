@@ -31,14 +31,14 @@
           <td class="text-right text-break pl-1">
             {{drawableClassCommu.sourceClass.name}}
             {{#if (not (eq drawableClassCommu.sourceApp.id @application.id))}}
-              (<button type="button" class="buttonToLink" {{on "click" (fn this.loadApplication drawableClassCommu.sourceApp)}}>
+              (<button type="button" class="buttonToLink" {{on "click" (fn @showApplication drawableClassCommu.sourceApp.id)}}>
                  {{drawableClassCommu.sourceApp.name}}
                </button>)
             {{/if}}
             {{svg-jar "arrow-right-16" class="octicon align-middle"}}
             {{drawableClassCommu.targetClass.name}}
             {{#if (not (eq drawableClassCommu.targetApp.id @application.id))}}
-              (<button type="button" class="buttonToLink" {{on "click" (fn this.loadApplication drawableClassCommu.targetApp)}}>
+              (<button type="button" class="buttonToLink" {{on "click" (fn @showApplication drawableClassCommu.targetApp.id)}}>
                  {{drawableClassCommu.targetApp.name}}
                </button>)
             {{/if}}

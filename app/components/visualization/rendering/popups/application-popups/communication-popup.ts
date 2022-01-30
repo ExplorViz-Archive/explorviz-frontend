@@ -1,6 +1,5 @@
 import GlimmerComponent from '@glimmer/component';
 import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { action } from '@ember/object';
 import ClazzCommuMeshDataModel from 'explorviz-frontend/view-objects/3d/application/utils/clazz-communication-mesh-data-model';
 
 interface Args {
@@ -8,7 +7,6 @@ interface Args {
   application: Application
   structureData: StructureLandscapeData
   showApplication(applicationId: string): void;
-  removePopup(): void;
 }
 
 export default class CommunicationPopup extends GlimmerComponent<Args> {
@@ -19,11 +17,5 @@ export default class CommunicationPopup extends GlimmerComponent<Args> {
       aggregatedReqCount += drawableClassComm.totalRequests;
     });
     return aggregatedReqCount;
-  }
-
-  @action
-  loadApplication(app: Application) {
-    this.args.removePopup();
-    this.args.showApplication(app.id);
   }
 }
