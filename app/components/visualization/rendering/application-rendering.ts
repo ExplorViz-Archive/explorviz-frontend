@@ -63,6 +63,7 @@ interface Args {
   openDataSelection(): void;
   closeDataSelection(): void;
   toggleVisualizationUpdating(): void;
+  showApplication(applicationId: string): void;
 }
 
 type PopupData = {
@@ -443,9 +444,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   handleMouseMove(intersection: THREE.Intersection | null) {
     this.runOrRestartMouseMovementTimer();
-    if (!intersection) return;
-    const mesh = intersection.object;
-    this.mouseMoveOnMesh(mesh);
+    this.mouseMoveOnMesh(intersection?.object);
   }
 
   runOrRestartMouseMovementTimer() {
@@ -467,7 +466,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  mouseMoveOnMesh(mesh: THREE.Object3D) {
+  mouseMoveOnMesh(mesh: THREE.Object3D | undefined) {
     const { value: enableHoverEffects } = this.appSettings.enableHoverEffects;
 
     // Update hover effect
@@ -485,6 +484,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (!this.appSettings.enableCustomPopupPosition.value) {
       this.popupData = null;
     }
+  }
+
+  @action
+  showApplication(appId: string) {
+    this.removePopup();
+    this.args.showApplication(appId);
   }
 
   @action
