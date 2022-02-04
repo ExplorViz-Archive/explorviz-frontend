@@ -55,7 +55,6 @@ import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
 import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPos, removeHeatmapHelperLines } from 'heatmap/utils/heatmap-helper';
-import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import { updateHighlighting } from 'explorviz-frontend/utils/application-rendering/highlighting';
 import { perform } from 'ember-concurrency-ts';
@@ -1010,24 +1009,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       return;
     }
 
-    let colorMap: number[];
-    let simpleHeatMap: any;
-    let canvas: any;
-
-    if (!this.heatmapConf.useSimpleHeat) {
-      const { depthSegments, widthSegments } = foundationMesh.geometry.parameters;
-      // Compute face numbers of top side of the cube
-      const size = widthSegments * depthSegments * 2;
-      // Prepare color map with same size as the surface of the foundation topside
-      colorMap = new Array(size).fill(0);
-    } else {
-      canvas = document.createElement('canvas');
-      canvas.width = foundationMesh.width;
-      canvas.height = foundationMesh.depth;
-      simpleHeatMap = simpleHeatmap(selectedMetric.max, canvas,
-        this.heatmapConf.getSimpleHeatGradient(),
-        this.heatmapConf.heatmapRadius, this.heatmapConf.blurRadius);
-    }
+    const canvas = document.createElement('canvas');
+    canvas.width = foundationMesh.width;
+    canvas.height = foundationMesh.depth;
+    const simpleHeatMap = simpleHeatmap(selectedMetric.max, canvas,
+      this.heatmapConf.getSimpleHeatGradient(),
+      this.heatmapConf.heatmapRadius, this.heatmapConf.blurRadius);
 
     const foundationWorldPosition = new THREE.Vector3();
 
@@ -1040,24 +1027,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     boxMeshes.forEach((boxMesh) => {
       if (boxMesh instanceof ClazzMesh) {
         this.heatmapClazzUpdate(applicationObject3D, boxMesh.dataModel, foundationMesh,
-          simpleHeatMap, colorMap);
+          simpleHeatMap);
       }
     });
 
-    if (!this.heatmapConf.useSimpleHeat) {
-      const color = 'rgb(255, 255, 255)';
-      foundationMesh.material = new THREE.MeshLambertMaterial({
-        color: new THREE.Color(color),
-        vertexColors: true,
-      });
-
-      invokeRecoloring(colorMap!, foundationMesh, selectedMetric.max,
-        this.heatmapConf.getArrayHeatGradient());
-    } else {
-      simpleHeatMap.draw(0.0);
-
-      applySimpleHeatOnFoundation(foundationMesh, canvas);
-    }
+    simpleHeatMap.draw(0.0);
+    applySimpleHeatOnFoundation(foundationMesh, canvas);
 
     this.heatmapConf.heatmapActive = true;
     this.heatmapConf.currentApplication = applicationObject3D;
@@ -1091,8 +1066,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   heatmapClazzUpdate(applicationObject3D: ApplicationObject3D,
-    clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any,
-    colorMap: number[]) {
+    clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any) {
     // Calculate center point of the clazz floor. This is used for computing the corresponding
     // face on the foundation box.
     const clazzMesh = applicationObject3D.getBoxMeshbyModelId(clazz.id) as
@@ -1133,31 +1107,14 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     }
 
     // Compute color only for the first intersection point for consistency if one was found.
-    if (firstIntersection) {
-      if (!this.heatmapConf.useSimpleHeat && firstIntersection.faceIndex) {
-        // The number of faces at front and back of the foundation mesh,
-        // i.e. the starting index for the faces on top.
-        const depthOffset = foundationMesh.geometry.parameters.depthSegments * 4;
-        if (selectedMode === 'aggregatedHeatmap') {
-          setColorValues(firstIntersection.faceIndex - depthOffset,
-            heatmapValue - (this.heatmapConf.largestValue / 2),
-            colorMap,
-            foundationMesh);
-        } else {
-          setColorValues(firstIntersection.faceIndex - depthOffset,
-            heatmapValue,
-            colorMap,
-            foundationMesh);
-        }
-      } else if (this.heatmapConf.useSimpleHeat && firstIntersection.uv) {
-        const xPos = firstIntersection.uv.x * foundationMesh.width;
-        const zPos = (1 - firstIntersection.uv.y) * foundationMesh.depth;
-        if (selectedMode === 'aggregatedHeatmap') {
-          simpleHeatMap.add([xPos, zPos, heatmapValues.get(clazz.id)]);
-        } else {
-          simpleHeatMap.add([xPos, zPos,
-            heatmapValue + (this.heatmapConf.largestValue / 2)]);
-        }
+    if (firstIntersection && firstIntersection.uv) {
+      const xPos = firstIntersection.uv.x * foundationMesh.width;
+      const zPos = (1 - firstIntersection.uv.y) * foundationMesh.depth;
+      if (selectedMode === 'aggregatedHeatmap') {
+        simpleHeatMap.add([xPos, zPos, heatmapValues.get(clazz.id)]);
+      } else {
+        simpleHeatMap.add([xPos, zPos,
+          heatmapValue + (this.heatmapConf.largestValue / 2)]);
       }
     }
   }
