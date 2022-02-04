@@ -5,6 +5,7 @@ import debugLogger from 'ember-debug-logger';
 import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
 import ArSettings from 'explorviz-frontend/services/ar-settings';
 import Configuration from 'explorviz-frontend/services/configuration';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
@@ -60,6 +61,9 @@ export default class VrApplicationRenderer extends Service {
   @service('configuration')
   private configuration!: Configuration;
 
+  @service('user-settings')
+  private userSettings!: UserSettings;
+
   @service('heatmap-configuration')
   heatmapConf!: HeatmapConfiguration;
 
@@ -96,6 +100,10 @@ export default class VrApplicationRenderer extends Service {
   DrawableClassCommunication[]
   >;
 
+  get opacity() {
+    return this.userSettings.applicationSettings.transparencyIntensity.value;
+  }
+
   constructor(properties?: object) {
     super(properties);
     this.openApplications = new Map();
@@ -103,7 +111,8 @@ export default class VrApplicationRenderer extends Service {
     this.applicationGroup = new THREE.Group();
     this.sceneService.scene.add(this.applicationGroup);
 
-    this.appCommRendering = new AppCommunicationRendering(this.configuration);
+    this.appCommRendering = new AppCommunicationRendering(this.configuration,
+      this.userSettings, this.heatmapConf);
     this.drawableClassCommunications = new Map();
   }
 
@@ -182,7 +191,7 @@ export default class VrApplicationRenderer extends Service {
     );
     if (drawableComm && this.arSettings.renderCommunication) {
       this.appCommRendering.addCommunication(application, drawableComm);
-      Highlighting.updateHighlighting(application, drawableComm);
+      Highlighting.updateHighlighting(application, drawableComm, this.opacity);
     }
 
     // Hightlight components.
@@ -336,13 +345,13 @@ export default class VrApplicationRenderer extends Service {
 
       this.heatmapConf.currentApplication = applicationObject3D;
       this.heatmapConf.applicationID = applicationObject3D.dataModel.id;
-      this.heatmapConf.latestClazzMetrics = metrics;
+      this.heatmapConf.latestClazzMetricScores = metrics;
 
       const { selectedMetric } = this.heatmapConf;
 
       // Update currently viewed metric
       if (selectedMetric) {
-        const updatedMetric = this.heatmapConf.latestClazzMetrics.find(
+        const updatedMetric = this.heatmapConf.latestClazzMetricScores.find(
           (latestMetric) => latestMetric.name === selectedMetric.name,
         );
 
@@ -463,11 +472,9 @@ export default class VrApplicationRenderer extends Service {
    * Adds labels to all box meshes of a given application
    */
   private addLabels(applicationObject3D: ApplicationObject3D) {
-    const clazzTextColor = this.configuration.applicationColors.clazzText;
-    const componentTextColor = this.configuration.applicationColors
-      .componentText;
-    const foundationTextColor = this.configuration.applicationColors
-      .foundationText;
+    const { clazzTextColor } = this.configuration.applicationColors;
+    const { componentTextColor } = this.configuration.applicationColors;
+    const { foundationTextColor } = this.configuration.applicationColors;
 
     applicationObject3D.getBoxMeshes().forEach((mesh) => {
       if (!this.assetRepo.font) return;

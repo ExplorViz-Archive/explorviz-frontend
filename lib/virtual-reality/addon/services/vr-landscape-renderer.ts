@@ -242,7 +242,7 @@ export default class VrLandscapeRenderer extends Service {
       });
 
       // Render application communication
-      const color = this.configuration.landscapeColors.communication;
+      const color = this.configuration.landscapeColors.communicationColor;
       const tiles = LandscapeCommunicationRendering.computeCommunicationTiles(
         applicationCommunications,
         modelIdToPointsComplete,
@@ -296,8 +296,8 @@ export default class VrLandscapeRenderer extends Service {
     const nodeMesh = new NodeMesh(
       layout,
       node,
-      this.configuration.landscapeColors.node,
-      this.configuration.applicationColors.highlightedEntity,
+      this.configuration.landscapeColors.nodeColor,
+      this.configuration.applicationColors.highlightedEntityColor,
       LANDSCAPE_DEPTH,
       0.2,
     );
@@ -313,7 +313,7 @@ export default class VrLandscapeRenderer extends Service {
         nodeMesh,
         labelText,
         this.assetRepo.font,
-        this.configuration.landscapeColors.nodeText,
+        this.configuration.landscapeColors.nodeTextColor,
       );
     }
 
@@ -342,8 +342,8 @@ export default class VrLandscapeRenderer extends Service {
     const applicationMesh = new ApplicationMesh(
       layout,
       application,
-      this.configuration.landscapeColors.application,
-      this.configuration.applicationColors.highlightedEntity,
+      this.configuration.landscapeColors.applicationColor,
+      this.configuration.applicationColors.highlightedEntityColor,
       LANDSCAPE_DEPTH,
       0.3,
     );
@@ -355,7 +355,7 @@ export default class VrLandscapeRenderer extends Service {
         applicationMesh,
         application.name,
         this.assetRepo.font,
-        this.configuration.landscapeColors.applicationText,
+        this.configuration.landscapeColors.applicationTextColor,
       );
     }
     this.landscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);

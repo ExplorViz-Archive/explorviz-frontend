@@ -661,7 +661,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     }
 
     const color = this.localUser.color ? this.localUser.color
-      : this.configuration.applicationColors.highlightedEntity;
+      : this.configuration.applicationColors.highlightedEntityColor;
 
     this.addPing(parentObj, pingPosition, color);
 
@@ -788,7 +788,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         object3D.updateColor();
         // Special case because communication arrow is no base mesh
       } else if (object3D instanceof CommunicationArrowMesh) {
-        object3D.updateColor(this.configuration.applicationColors.communicationArrow);
+        object3D.updateColor(this.configuration.applicationColors.communicationArrowColor);
       }
     });
   }
@@ -984,15 +984,15 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   applyHeatmap() {
     const applicationObject3D = this.heatmapConf.currentApplication;
 
-    if (!this.heatmapConf.latestClazzMetrics || !this.heatmapConf.latestClazzMetrics.firstObject
-      || !applicationObject3D) {
+    if (!this.heatmapConf.latestClazzMetricScores
+      || !this.heatmapConf.latestClazzMetricScores.firstObject || !applicationObject3D) {
       AlertifyHandler.showAlertifyError('No metrics available.');
       return;
     }
 
     // Selected first metric if none is selected yet
     if (!this.heatmapConf.selectedMetric) {
-      this.heatmapConf.selectedMetric = this.heatmapConf.latestClazzMetrics.firstObject;
+      this.heatmapConf.selectedMetric = this.heatmapConf.latestClazzMetricScores.firstObject;
     }
 
     const { selectedMetric } = this.heatmapConf;
@@ -1079,7 +1079,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     const comms = this.vrApplicationRenderer.drawableClassCommunications
       .get(applicationObject3D.dataModel.id);
     if (comms) {
-      updateHighlighting(applicationObject3D, comms);
+      updateHighlighting(applicationObject3D, comms, 1);
     }
 
     this.heatmapConf.heatmapActive = false;
@@ -1315,7 +1315,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // Reset highlighting colors.
     this.vrApplicationRenderer.getOpenApplications().forEach((application) => {
       application.setHighlightingColor(
-        this.configuration.applicationColors.highlightedEntity,
+        this.configuration.applicationColors.highlightedEntityColor,
       );
     });
 

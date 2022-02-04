@@ -4,9 +4,23 @@
       <span id="legend-header-content">Heatmap</span>
       {{#if (eq this.heatmapConfiguration.selectedMode "aggregatedHeatmap")}}
         <HelpTooltip @title={{this.descriptions.aggregatedHeatmap}} />
-      {{else}}
+      {{else if (eq this.heatmapConfiguration.selectedMode "windowedHeatmap")}}
         <HelpTooltip @title={{this.descriptions.windowedHeatmap}} />
+      {{else}}
+        <HelpTooltip @title={{this.descriptions.snapshotHeatmap}} />
       {{/if}}
+    </div>
+    <div>
+      <button
+        class="button-svg-with-hover"
+        type="button"
+        {{on "click" this.switchHeatMapMode}}
+      >
+        {{svg-jar "arrow-switch-16" class="octicon align-middle"}}
+        <BsTooltip @placement="bottom" @triggerEvents="hover">
+          Switch Heat Map Mode.
+        </BsTooltip>
+      </button>
     </div>
     <div>
       <input id="collapsible" class="heatmap-legend-toggle" type="checkbox" checked>
@@ -27,26 +41,11 @@
         >
         </canvas>
       </div>
-      <div id="heatmap-legend-label" {{did-insert this.didInsertLegendlabel}}>
-        <canvas
-          id="legend-canvas-label"
-          height="100%"
-          {{did-insert this.didInsertCanvaslabel}}
-        >
-        </canvas>
+      <div id="heatmap-legend-label">
+        <span class="heatmap-label">{{this.heatmapConfiguration.selectedMetric.max}}</span>
+        <span class="heatmap-label">{{divide-and-round this.heatmapConfiguration.selectedMetric.max 2 0}}</span>
+        <span class="heatmap-label">{{this.heatmapConfiguration.selectedMetric.min}}</span>
       </div>
     </div>
   </div>
 </div>
-
-{{add-listener
-  this.heatmapConfiguration
-  "updatedClazzMetrics"
-  this.updateLabel
-}}
-
-{{add-listener
-  this.heatmapConfiguration
-  "newSelectedMetric"
-  this.updateLabel
-}}

@@ -17,7 +17,9 @@ export function getApplicationInLandscapeById(landscapeStructure: StructureLands
     .filter((app) => app.id === id)[0];
 }
 
-export function getApplicationFromClass(structureData: StructureLandscapeData, clazz: Class) {
+export function getApplicationFromClass(
+  structureData: StructureLandscapeData, clazz: Class,
+): Application | undefined {
   let matchingApplication: Application | undefined;
 
   structureData.nodes.forEach((node) => {

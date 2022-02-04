@@ -61,7 +61,7 @@ export default class LocalVrUser extends Service {
     if (this.isOnline && this.color) {
       hexColor = this.color.getHexString();
     } else {
-      hexColor = this.configuration.applicationColors.highlightedEntity.getHexString();
+      hexColor = this.configuration.applicationColors.highlightedEntityColor.getHexString();
     }
 
     return `color:#${hexColor}`;

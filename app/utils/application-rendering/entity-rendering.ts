@@ -67,8 +67,7 @@ ApplicationObject3D, applicationColors: ApplicationColors, componentLevel = 1) {
   if (componentLayout === undefined || applicationLayout === undefined) { return; }
 
   const {
-    componentOdd: componentOddColor, componentEven: componentEvenColor,
-    clazz: clazzColor, highlightedEntity: highlightedEntityColor,
+    componentOddColor, componentEvenColor, clazzColor, highlightedEntityColor,
   } = applicationColors;
 
   // Set color alternating (e.g. light and dark green) according to component level
@@ -116,10 +115,7 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
 
   if (!applicationLayout) { return; }
 
-  const {
-    foundation: foundationColor,
-    highlightedEntity: highlightedEntityColor,
-  } = applicationColors;
+  const { foundationColor, highlightedEntityColor } = applicationColors;
 
   const segmentScalar = 0.45;
   const widthSegments = Math.floor(applicationLayout.width * segmentScalar);
@@ -161,4 +157,13 @@ export function addGlobeToApplication(appObject3D: ApplicationObject3D): THREE.M
   appObject3D.add(mesh);
 
   return mesh;
+}
+
+export function repositionGlobeToApplication(appObject3D: ApplicationObject3D, globe: THREE.Mesh) {
+  const applicationCenter = appObject3D.layout.center;
+  const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+  centerPoint.sub(applicationCenter);
+
+  globe.position.copy(centerPoint);
 }

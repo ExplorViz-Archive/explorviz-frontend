@@ -79,11 +79,11 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   }
 
   willDestroy() {
-    if (this.args.named.doubleClick) { this.hammerInteraction.hammerManager.off('doubletap'); }
+    if (this.args.named.doubleClick) { this.hammerInteraction.hammerManager?.off('doubletap'); }
 
-    if (this.args.named.panning) { this.hammerInteraction.hammerManager.off('panning'); }
+    if (this.args.named.panning) { this.hammerInteraction.hammerManager?.off('panning'); }
 
-    if (this.args.named.singleClick) { this.hammerInteraction.hammerManager.off('singletap'); }
+    if (this.args.named.singleClick) { this.hammerInteraction.hammerManager?.off('singletap'); }
 
     if (this.args.named.mouseOut) { this.canvas.removeEventListener('mouseout', this.onMouseOut); }
 
@@ -288,11 +288,19 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     }(300));
   }
 
-  static getMousePos(canvas: HTMLCanvasElement, evt: MouseEvent) {
+  static getMousePos(canvas: HTMLCanvasElement, evt: MouseEvent): Position2D {
     const rect = canvas.getBoundingClientRect();
     return {
       x: evt.clientX - rect.left,
       y: evt.clientY - rect.top,
+    };
+  }
+
+  static getTouchPos(canvas: HTMLCanvasElement, evt: TouchEvent): Position2D {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.targetTouches[0].clientX - rect.left,
+      y: evt.targetTouches[0].clientY - rect.top,
     };
   }
 }

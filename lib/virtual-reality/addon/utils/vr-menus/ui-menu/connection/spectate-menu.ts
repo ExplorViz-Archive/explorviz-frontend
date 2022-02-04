@@ -1,4 +1,3 @@
-import THREE from 'three';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import SpectateUserService from 'virtual-reality/services/spectate-user';
 import VRController from 'virtual-reality/utils/vr-controller';
@@ -46,7 +45,7 @@ export default class SpectateMenu extends UiMenu {
   /**
    * Creates the geometry of the background mesh.
    */
-  makeBackgroundGeometry(): THREE.Geometry {
+  makeBackgroundGeometry() {
     const geometry = super.makeBackgroundGeometry();
     geometry.translate(
       0,

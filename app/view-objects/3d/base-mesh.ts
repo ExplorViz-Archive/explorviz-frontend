@@ -1,12 +1,11 @@
 import THREE from 'three';
 import calculateColorBrightness from
   'explorviz-frontend/utils/helpers/threejs-helpers';
+import { MeshLineMaterial } from 'meshline';
 
 export default abstract class BaseMesh<
-  TGeometry extends THREE.Geometry | THREE.BufferGeometry =
-  THREE.Geometry | THREE.BufferGeometry,
-  TMaterial extends THREE.MeshBasicMaterial | THREE.MeshLambertMaterial =
-  THREE.MeshBasicMaterial | THREE.MeshLambertMaterial,
+  TGeometry extends THREE.BufferGeometry = THREE.BufferGeometry,
+  TMaterial extends THREE.Material=THREE.Material,
 > extends THREE.Mesh<TGeometry, TMaterial> {
   highlighted: boolean = false;
 
@@ -28,7 +27,8 @@ export default abstract class BaseMesh<
   highlight() {
     this.highlighted = true;
     if (this.material instanceof THREE.MeshLambertMaterial
-      || this.material instanceof THREE.MeshBasicMaterial) {
+      || this.material instanceof THREE.MeshBasicMaterial
+      || this.material instanceof MeshLineMaterial) {
       this.material.color = this.highlightingColor;
     }
   }
@@ -36,7 +36,8 @@ export default abstract class BaseMesh<
   unhighlight() {
     this.highlighted = false;
     if (this.material instanceof THREE.MeshLambertMaterial
-      || this.material instanceof THREE.MeshBasicMaterial) {
+      || this.material instanceof THREE.MeshBasicMaterial
+      || this.material instanceof MeshLineMaterial) {
       this.material.color = this.defaultColor;
       this.changeOpacity(this.defaultOpacity);
     }
@@ -52,8 +53,12 @@ export default abstract class BaseMesh<
     if (this.isHovered) return;
 
     // Calculate and apply brighter color to material ('hover effect')
-    const material = this.material as THREE.MeshBasicMaterial | THREE.MeshLambertMaterial;
-    material.color = calculateColorBrightness(material.color, colorShift);
+    if (this.material instanceof THREE.MeshLambertMaterial
+      || this.material instanceof THREE.MeshBasicMaterial
+      || this.material instanceof MeshLineMaterial) {
+      this.material.color = calculateColorBrightness(new THREE.Color(this.material.color),
+        colorShift);
+    }
     this.isHovered = true;
   }
 
@@ -61,17 +66,21 @@ export default abstract class BaseMesh<
    * Restores original color of mesh which had a hover effect
    */
   resetHoverEffect(): void {
-    const material = this.material as THREE.MeshBasicMaterial | THREE.MeshLambertMaterial;
-    const { highlighted, defaultColor, highlightingColor } = this;
+    if (this.material instanceof THREE.MeshLambertMaterial
+      || this.material instanceof THREE.MeshBasicMaterial
+      || this.material instanceof MeshLineMaterial) {
+      const { highlighted, defaultColor, highlightingColor } = this;
 
-    // Restore normal color (depends on highlighting status)
-    material.color = highlighted ? highlightingColor : defaultColor;
+      // Restore normal color (depends on highlighting status)
+      this.material.color = highlighted ? highlightingColor : defaultColor;
+    }
     this.isHovered = false;
   }
 
   updateColor() {
     if (this.material instanceof THREE.MeshLambertMaterial
-      || this.material instanceof THREE.MeshBasicMaterial) {
+      || this.material instanceof THREE.MeshBasicMaterial
+      || this.material instanceof MeshLineMaterial) {
       if (this.highlighted) {
         this.material.color = this.highlightingColor;
       } else {

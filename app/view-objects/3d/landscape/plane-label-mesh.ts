@@ -7,7 +7,7 @@ export default class PlaneLabelMesh extends LabelMesh {
   fontSize: number;
 
   constructor(font: THREE.Font, labelText: string, fontSize = 0.4,
-    textColor = new THREE.Color('black'), geometry?: THREE.Geometry | THREE.BufferGeometry) {
+    textColor = new THREE.Color('black'), geometry?: THREE.BufferGeometry) {
     super(font, labelText, textColor);
 
     this.text = labelText;
@@ -16,7 +16,7 @@ export default class PlaneLabelMesh extends LabelMesh {
     this.computeLabel(labelText, fontSize, geometry);
   }
 
-  computeLabel(text: string, fontSize: number, geometry?: THREE.Geometry | THREE.BufferGeometry) {
+  computeLabel(text: string, fontSize: number, geometry?: THREE.BufferGeometry) {
     // Use text geoemtry if it is passed
     if (geometry instanceof THREE.TextBufferGeometry) {
       this.geometry = geometry;

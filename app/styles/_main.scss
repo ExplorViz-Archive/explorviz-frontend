@@ -78,20 +78,6 @@ touch-action: pan-y;
   flex: 1;
 }
 
-.explorVizModal {
-  background-color: #8e8e8e;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  z-index: 1000;
-  width: 100%;
-  height: 100%;
-  opacity: 0.5;
-  cursor: wait;
-  box-shadow: 5px 10px #888888;
-  border-radius: 10px;
-}
-
 .mt-6 {
   margin-top: 4rem !important;
 }
@@ -107,6 +93,7 @@ touch-action: pan-y;
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -190,4 +177,15 @@ svg.octicon {
 .spinner-center-3-relative {
   @extend .spinner-center-3;
   position: relative;
+}
+
+.buttonToLink{
+  background: none;
+  border: none;
+  color: #0000FF;
+}
+
+.buttonToLink:hover{
+  background: none;
+  text-decoration: underline;
 }

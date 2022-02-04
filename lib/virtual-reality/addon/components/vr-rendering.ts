@@ -913,7 +913,7 @@ export default class VrRendering
     // Reset highlighting colors.
     this.vrApplicationRenderer.getOpenApplications().forEach((application) => {
       application.setHighlightingColor(
-        this.configuration.applicationColors.highlightedEntity,
+        this.configuration.applicationColors.highlightedEntityColor,
       );
     });
 

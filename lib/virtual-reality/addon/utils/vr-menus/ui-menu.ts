@@ -25,7 +25,7 @@ export default abstract class UiMenu extends InteractiveMenu {
   canvas!: HTMLCanvasElement;
 
   canvasMesh!: THREE.Mesh<
-  THREE.Geometry | THREE.BufferGeometry,
+  THREE.PlaneGeometry | THREE.BufferGeometry,
   THREE.MeshBasicMaterial
   >;
 
@@ -78,7 +78,7 @@ export default abstract class UiMenu extends InteractiveMenu {
   /**
    * Creates the geometry of the background mesh.
    */
-  makeBackgroundGeometry(): THREE.Geometry {
+  makeBackgroundGeometry(): THREE.BufferGeometry {
     return new THREE.PlaneGeometry(
       this.resolution.width * SIZE_RESOLUTION_FACTOR,
       this.resolution.height * SIZE_RESOLUTION_FACTOR,

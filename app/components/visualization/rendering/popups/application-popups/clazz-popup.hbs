@@ -1,19 +1,50 @@
 <h3 class="popover-header">
-  <div style="font-weight:bold;text-align:center;">{{this.name}}</div>
+  <div class="text-center text-break font-weight-bold pl-1">{{this.name}}</div>
 </h3>
-<div class="popover-body" style="white-space: nowrap;">
-  <table style="width:100%">
-    <tbody>
-      {{#each this.metrics as |metric|}}
+<div class="popover-body">
+  {{#if this.heatmapConf.heatmapActive}}
+    <table class="w-100">
+      <thead>
         <tr>
-          <td>{{metric.name}}:</td>
-          <td style="text-align:right;padding-left:10px;">
-            {{metric.value}}
-          </td>
+          <th>Metric Name</th>
+          <th class="pl-1 pr-1">Snapshot</th>
+          <th class="pl-1 pr-1">Aggregated</th>
+          <th>Windowed</th>
         </tr>
-      {{else}}
-        Activate heatmap to calculate metrics
-      {{/each}}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {{#each this.allMetrics as |metric|}}
+          {{#if (eq this.heatmapConf.selectedMetric.name metric.metricName)}}
+            <tr>
+              <td class="font-weight-bold text-primary">{{metric.metricName}}:</td>
+              <td class="text-center font-weight-bold text-primary">
+                {{metric.snapshotVal}}
+              </td>
+              <td class="text-center font-weight-bold text-primary">
+                {{metric.contAggVal}}
+              </td>
+              <td class="text-center font-weight-bold text-primary">
+                {{metric.winVal}}
+              </td>
+            </tr>
+          {{else}}
+            <tr class="d-none d-sm-table-row">
+              <td>{{metric.metricName}}:</td>
+              <td class="text-center">
+                {{metric.snapshotVal}}
+              </td>
+              <td class="text-center">
+                {{metric.contAggVal}}
+              </td>
+              <td class="text-center">
+                {{metric.winVal}}
+              </td>
+            </tr>
+          {{/if}}
+        {{/each}}
+      </tbody>
+    </table>
+  {{else}}
+    Activate heatmap to view metrics
+  {{/if}}
 </div>

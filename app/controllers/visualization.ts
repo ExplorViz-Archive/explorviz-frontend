@@ -116,7 +116,7 @@ export default class VisualizationController extends Controller {
   receiveNewLandscapeData(structureData: StructureLandscapeData,
     dynamicData: DynamicLandscapeData) {
     if (!this.visualizationPaused) {
-      this.heatmapConf.latestClazzMetrics = null;
+      this.heatmapConf.latestClazzMetricScores = [];
       this.updateLandscape(structureData, dynamicData);
     }
   }
@@ -177,14 +177,15 @@ export default class VisualizationController extends Controller {
   }
 
   @action
-  showApplication(app: Application) {
+  showApplication(appId: string) {
     this.closeDataSelection();
     if (this.landscapeData !== null) {
       this.landscapeData = {
         ...this.landscapeData,
-        application: app,
+        application: VisualizationController.getApplicationFromLandscapeById(appId,
+          this.landscapeData.structureLandscapeData),
       };
-      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.id });
+      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: appId });
     }
   }
 

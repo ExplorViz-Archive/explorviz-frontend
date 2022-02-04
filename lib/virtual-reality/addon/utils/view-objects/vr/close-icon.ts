@@ -15,6 +15,8 @@ export default class CloseIcon extends BaseMesh implements IntersectableObject {
 
   private textures: CloseIconTextures;
 
+  material: THREE.MeshPhongMaterial;
+
   constructor({
     onClose,
     textures,

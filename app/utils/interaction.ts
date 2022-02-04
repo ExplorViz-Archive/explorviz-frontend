@@ -246,11 +246,11 @@ export default class Interaction {
    * Removes all listeners for mouse and hammer events
    */
   removeHandlers() {
-    if (this.eventCallbackFunctions.doubleClick) { this.hammerHandler.hammerManager.off('doubletap'); }
+    if (this.eventCallbackFunctions.doubleClick) { this.hammerHandler.hammerManager?.off('doubletap'); }
 
-    if (this.eventCallbackFunctions.panning) { this.hammerHandler.hammerManager.off('panning'); }
+    if (this.eventCallbackFunctions.panning) { this.hammerHandler.hammerManager?.off('panning'); }
 
-    if (this.eventCallbackFunctions.singleClick) { this.hammerHandler.hammerManager.off('singletap'); }
+    if (this.eventCallbackFunctions.singleClick) { this.hammerHandler.hammerManager?.off('singletap'); }
 
     if (this.eventCallbackFunctions.mouseOut) { this.canvas.removeEventListener('mouseout', this.onMouseOut); }
 

@@ -16,6 +16,7 @@
     >
       {{#if this.heatmapConf.heatmapActive}}
         <HeatmapInfo
+          @triggerHeatmapVisualization={{this.triggerHeatmapVisualization}}
           @updateMetric={{this.updateMetric}}
         />
       {{/if}}
@@ -54,7 +55,7 @@
           />
         {{/if}}
       </canvas>
-      {{#if this.loadNewApplication.isRunning}}
+      {{#if this.loadApplication.isRunning}}
         <div
           class="position-absolute mt-6 pt-5 ml-3 pointer-events-none"
         >
@@ -63,28 +64,33 @@
       {{/if}}
 
       {{!-- popup(s) --}}
-      <Visualization::Rendering::Popups::PopupCoordinator
-        @popupData={{this.popupData}}
-      />
+      {{#if this.popupData}}
+        <Visualization::Rendering::Popups::PopupCoordinator
+          @isMovable={{this.appSettings.enableCustomPopupPosition.value}}
+          @popupData={{this.popupData}}
+          @structureData={{@landscapeData.structureLandscapeData}}
+          @application={{@landscapeData.application}}
+          @showApplication={{@showApplication}}
+        />
+      {{/if}}
     </div>
   </div>
   {{#if @showDataSelection}}
     <div class="col-4" id="dataselection">
-      <div class="mt-6 d-flex flex-row w-100">
+      <div class="mt-6 d-flex flex-row w-100" style="z-index: 90">
         <Visualization::PageSetup::Sidebar::DataSelection
           @closeDataSelection={{@closeDataSelection}}
         >
           <div class="explorviz-visualization-navbar">
             <ul class="nav justify-content-center">
-              <Visualization::PageSetup::Navbar::ColorPickerOpener
-                @addComponent={{@addComponent}}
-                @disableBackToLandscape={{false}}
-              />
               <Visualization::PageSetup::Navbar::TraceOverview
                 @addComponent={{@addComponent}}
                 @toggleVisualizationUpdating={{@toggleVisualizationUpdating}}
                 @visualizationPaused={{@visualizationPaused}}
                 @dynamicData={{@landscapeData.dynamicLandscapeData}}
+              />
+              <Visualization::PageSetup::Navbar::SettingsOpener
+                @addComponent={{@addComponent}}
               />
               <CollaborativeSettingsOpener
                 @addComponent={{@addComponent}}
@@ -92,7 +98,7 @@
             </ul>
           </div>
           {{#each @components as |componentName|}}
-            <div class="card mt-3 border-radius-0">
+            <div class="card sidebar-card mt-3 border-radius-0">
               <div class="card-body d-flex flex-column">
                 {{#if (eq componentName "trace-selection")}}
                   <h5 class="text-center">Trace Overview</h5>
@@ -106,20 +112,20 @@
                     @application={{@landscapeData.application}}
                   />
                 {{/if}}
-                {{#if (eq componentName "color-picker")}}
-                  <h5 class="text-center">Color Picker</h5>
-                  <Visualization::PageSetup::Sidebar::ColorPicker
-                    @isLandscapeView={{false}}
-                    @removeComponent={{@removeComponent}}
-                    @updateView={{this.updateColors}}
-                  />
-                {{/if}}
                 {{#if (eq componentName "collaborative-settings")}}
                   <h5 class="text-center">Collaborative Settings</h5>
                   <CollaborativeSettings
-                    @isLandscapeView={{true}}
                     @removeComponent={{@removeComponent}}
-                    @updateView={{this.updateColors}}
+                  />
+                {{/if}}
+                {{#if (eq componentName "settings")}}
+                  <h5 class="text-center">Settings</h5>
+                  <Visualization::PageSetup::Sidebar::Settings
+                    @isLandscapeView={{false}}
+                    @updateHighlighting={{this.updateHighlighting}}
+                    @redrawCommunication={{this.addCommunication}}
+                    @updateColors={{this.updateColors}}
+                    @removeComponent={{@removeComponent}}
                   />
                 {{/if}}
               </div>

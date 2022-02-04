@@ -7,6 +7,7 @@ import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/applicati
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ArSettings from 'explorviz-frontend/services/ar-settings';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 import VrApplicationRenderer from './vr-application-renderer';
 import LocalVrUser from './local-vr-user';
 import VrMessageSender from './vr-message-sender';
@@ -36,6 +37,9 @@ export default class VrHighlightingService extends Service {
   @service('configuration')
   private configuration!: Configuration;
 
+  @service('user-settings')
+  private userSettings!: UserSettings;
+
   @service('local-vr-user')
   private localUser!: LocalVrUser;
 
@@ -44,6 +48,10 @@ export default class VrHighlightingService extends Service {
 
   @service('vr-message-sender')
   private sender!: VrMessageSender;
+
+  get opacity() {
+    return this.userSettings.applicationSettings.transparencyIntensity.value;
+  }
 
   highlightComponent(application: ApplicationObject3D, object: THREE.Object3D) {
     if (isHightlightableMesh(object)) {
@@ -88,7 +96,7 @@ export default class VrHighlightingService extends Service {
         application,
         drawableComm,
       );
-      Highlighting.updateHighlighting(application, drawableComm);
+      Highlighting.updateHighlighting(application, drawableComm, this.opacity);
     }
   }
 
@@ -102,9 +110,9 @@ export default class VrHighlightingService extends Service {
     );
     if (drawableComm) {
       application.setHighlightingColor(
-        color || this.configuration.applicationColors.highlightedEntity,
+        color || this.configuration.applicationColors.highlightedEntityColor,
       );
-      Highlighting.highlight(mesh, application, drawableComm);
+      Highlighting.highlight(mesh, application, drawableComm, this.opacity);
     }
   }
 
