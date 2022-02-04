@@ -6,8 +6,8 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
-import ArSettings from 'explorviz-frontend/services/ar-settings';
 import UserSettings from 'explorviz-frontend/services/user-settings';
+import ArSettings from './ar-settings';
 import VrApplicationRenderer from './vr-application-renderer';
 import LocalVrUser from './local-vr-user';
 import VrMessageSender from './vr-message-sender';

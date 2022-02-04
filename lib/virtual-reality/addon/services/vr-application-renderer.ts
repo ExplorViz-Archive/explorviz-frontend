@@ -3,7 +3,6 @@ import { enqueueTask, restartableTask } from 'ember-concurrency-decorators';
 import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
-import ArSettings from 'explorviz-frontend/services/ar-settings';
 import Configuration from 'explorviz-frontend/services/configuration';
 import UserSettings from 'explorviz-frontend/services/user-settings';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
@@ -25,6 +24,7 @@ import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configura
 import THREE from 'three';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
+import ArSettings from './ar-settings';
 import { isObjectClosedResponse, ObjectClosedResponse } from '../utils/vr-message/receivable/response/object-closed';
 import VrAssetRepository from './vr-asset-repo';
 import VrHighlightingService, { HightlightComponentArgs } from './vr-highlighting';
@@ -65,7 +65,7 @@ export default class VrApplicationRenderer extends Service {
   private userSettings!: UserSettings;
 
   @service('heatmap-configuration')
-  heatmapConf!: HeatmapConfiguration;
+  private heatmapConf!: HeatmapConfiguration;
 
   @service('vr-asset-repo')
   private assetRepo!: VrAssetRepository;
@@ -141,6 +141,12 @@ export default class VrApplicationRenderer extends Service {
 
   isApplicationOpen(id: string): boolean {
     return this.openApplications.has(id);
+  }
+
+  updateAllApplicationGlobes(deltaTime: number) {
+    this.getOpenApplications().forEach((application) => {
+      application.animationMixer?.update(deltaTime);
+    });
   }
 
   async addApplication(
@@ -396,8 +402,8 @@ export default class VrApplicationRenderer extends Service {
         this.configuration.applicationColors,
       );
 
-      // Add globe for communication that comes from the outside
-      EntityRendering.addGlobeToApplication(applicationObject3D);
+      applicationObject3D.addGlobeToApplication();
+      applicationObject3D.initializeGlobeAnimation();
 
       this.createDrawableClassCommunications(applicationObject3D);
 
@@ -472,9 +478,11 @@ export default class VrApplicationRenderer extends Service {
    * Adds labels to all box meshes of a given application
    */
   private addLabels(applicationObject3D: ApplicationObject3D) {
-    const { clazzTextColor } = this.configuration.applicationColors;
-    const { componentTextColor } = this.configuration.applicationColors;
-    const { foundationTextColor } = this.configuration.applicationColors;
+    const {
+      clazzTextColor,
+      componentTextColor,
+      foundationTextColor,
+    } = this.configuration.applicationColors;
 
     applicationObject3D.getBoxMeshes().forEach((mesh) => {
       if (!this.assetRepo.font) return;

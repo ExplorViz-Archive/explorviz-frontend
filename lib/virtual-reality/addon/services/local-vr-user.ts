@@ -1,9 +1,10 @@
 import Service, { inject as service } from '@ember/service';
+import { tracked } from '@glimmer/tracking';
 import THREE from 'three';
 import Configuration from 'explorviz-frontend/services/configuration';
 import { computed } from '@ember/object';
 import VRController from 'virtual-reality/utils/vr-controller';
-import { tracked } from '@glimmer/tracking';
+
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import SpectateUserService from './spectate-user';
 import VrRoomService from './vr-room';
@@ -36,6 +37,7 @@ export default class LocalVrUser extends Service {
   @tracked
   color: THREE.Color | undefined;
 
+  @tracked
   renderer!: THREE.WebGLRenderer;
 
   private userGroup!: THREE.Group;
@@ -194,7 +196,7 @@ export default class LocalVrUser extends Service {
     const localDirection = worldDirection
       .normalize()
       .transformDirection(
-        this.userGroup.matrix.getInverse(new THREE.Matrix4()),
+        this.userGroup.matrix.clone().invert(),
       );
     this.userGroup.translateOnAxis(localDirection, distance);
   }

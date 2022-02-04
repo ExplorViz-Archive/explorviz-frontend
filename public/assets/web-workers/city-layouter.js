@@ -370,7 +370,7 @@ function applyBoxLayout(application, allLandscapeTraces) {
     });
 
     let componentData = layoutMap.get(application.id);
-    componentData.height = getHeightOfApplication(application);
+    componentData.height = OPENED_COMPONENT_HEIGHT;
     componentData.width = -1.0;
     componentData.depth = -1.0;
   }
@@ -416,24 +416,6 @@ function applyBoxLayout(application, allLandscapeTraces) {
     });
 
     children.forEach((child) => {
-      let childData = layoutMap.get(child.id);
-      if (childData.height > childrenHeight) {
-        childrenHeight = childData.height;
-      }
-    });
-
-    return childrenHeight + 0.1;
-  }
-
-
-  function getHeightOfApplication(application) {
-    const floorHeight = 0.75 * 4.0;
-
-    let childrenHeight = floorHeight;
-
-    const { packages } = application;
-
-    packages.forEach((child) => {
       let childData = layoutMap.get(child.id);
       if (childData.height > childrenHeight) {
         childrenHeight = childData.height;

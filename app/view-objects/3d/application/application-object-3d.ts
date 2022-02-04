@@ -3,6 +3,7 @@ import { Application } from 'explorviz-frontend/utils/landscape-schemes/structur
 import { Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import { tracked } from '@glimmer/tracking';
+import { earthTexture } from 'explorviz-frontend/controllers/visualization';
 import FoundationMesh from './foundation-mesh';
 import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';
@@ -40,6 +41,10 @@ export default class ApplicationObject3D extends THREE.Object3D {
    * Set to store all ComponentMeshes
    */
   componentMeshes: Set<ComponentMesh> = new Set();
+
+  globeMesh: THREE.Mesh | undefined;
+
+  animationMixer: THREE.AnimationMixer | undefined;
 
   @tracked
   highlightedEntity: BaseMesh | Trace | null = null;
@@ -99,6 +104,60 @@ export default class ApplicationObject3D extends THREE.Object3D {
     }
 
     return this;
+  }
+
+  /**
+   * Creates a GlobeMesh and adds it to the given application object.
+   * Communication that come from the outside
+   *
+   */
+  addGlobeToApplication(): THREE.Mesh {
+    const geometry = new THREE.SphereGeometry(2.5, 15, 15);
+    const material = new THREE.MeshPhongMaterial({ map: earthTexture });
+    const mesh = new THREE.Mesh(geometry, material);
+    const applicationCenter = this.layout.center;
+
+    const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+    centerPoint.sub(applicationCenter);
+
+    mesh.position.copy(centerPoint);
+
+    this.add(mesh);
+
+    this.globeMesh = mesh;
+
+    return mesh;
+  }
+
+  initializeGlobeAnimation() {
+    if (!this.globeMesh) { return; }
+
+    const period = 1000;
+    const times = [0, period];
+    const values = [0, 360];
+
+    const trackName = '.rotation[y]';
+    const track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+    const clip = new THREE.AnimationClip('default', period, [track]);
+
+    this.animationMixer = new THREE.AnimationMixer(this.globeMesh);
+
+    const clipAction = this.animationMixer.clipAction(clip);
+    clipAction.play();
+  }
+
+  repositionGlobeToApplication() {
+    if (!this.globeMesh) { return; }
+
+    const applicationCenter = this.layout.center;
+
+    const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+    centerPoint.sub(applicationCenter);
+
+    this.globeMesh.position.copy(centerPoint);
   }
 
   getBoxLayout(id: string) {
