@@ -145,6 +145,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   debug = debugLogger('ArRendering');
 
+  @tracked
   // Used to register (mouse) events
   interaction!: Interaction;
 
@@ -385,13 +386,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   private getIntersectableObjects() {
-    const intersectableObjects: THREE.Object3D[] = [this.vrLandscapeRenderer.landscapeObject3D];
-
-    this.applicationMarkers.forEach((appMarker) => {
-      intersectableObjects.push(appMarker);
-    });
-
-    return intersectableObjects;
+    return [this.vrLandscapeRenderer.landscapeObject3D, ...this.applicationMarkers];
   }
 
   static raycastFilter(intersection: THREE.Intersection) {
@@ -429,7 +424,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       if (this.applicationMarkers.length <= i) {
         applicationMarker = new THREE.Group();
         this.sceneService.scene.add(applicationMarker);
-        this.applicationMarkers.push(applicationMarker);
+        this.applicationMarkers = [...this.applicationMarkers, applicationMarker];
       } else {
         applicationMarker = this.applicationMarkers[i];
       }
