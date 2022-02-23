@@ -1,5 +1,5 @@
 import Service, { inject as service } from '@ember/service';
-import config from 'explorviz-frontend/config/environment';
+import ENV from 'explorviz-frontend/config/environment';
 import { Auth0Error, Auth0UserProfile } from 'auth0-js';
 import Auth0Lock from 'auth0-lock';
 import debugLogger from 'ember-debug-logger';
@@ -20,19 +20,19 @@ export default class Auth extends Service {
   constructor() {
     super(...arguments);
 
-    if (config.environment === 'noauth') { // no-auth
-      this.set('user', config.auth0.profile);
-      this.set('accessToken', config.auth0.accessToken);
+    if (ENV.auth0.enabled === 'false') { // no-auth
+      this.set('user', ENV.auth0.profile);
+      this.set('accessToken', ENV.auth0.accessToken);
       return;
     }
 
     this.lock = new Auth0Lock(
-      config.auth0.clientId,
-      config.auth0.domain,
+      ENV.auth0.clientId,
+      ENV.auth0.domain,
       {
         auth: {
-          redirectUrl: config.auth0.callbackUrl,
-          audience: `https://${config.auth0.domain}/api/v2/`,
+          redirectUrl: ENV.auth0.callbackUrl,
+          audience: `https://${ENV.auth0.domain}/api/v2/`,
           responseType: 'token',
           params: {
             scope: 'openid profile',
@@ -41,7 +41,7 @@ export default class Auth extends Service {
         },
         container: 'auth0-login-container',
         theme: {
-          logo: config.auth0.logoUrl,
+          logo: ENV.auth0.logoUrl,
         },
         closable: false,
         languageDictionary: {
@@ -51,7 +51,7 @@ export default class Auth extends Service {
     );
 
     this.lock.on('authenticated', (authResult) => {
-      this.router.transitionTo(config.auth0.routeAfterLogin).then(async () => {
+      this.router.transitionTo(ENV.auth0.routeAfterLogin).then(async () => {
         await this.setUser(authResult.accessToken);
         this.set('accessToken', authResult.accessToken);
       });
@@ -71,7 +71,7 @@ export default class Auth extends Service {
     if (this.lock) {
       this.lock.show();
     } else { // no-auth
-      this.router.transitionTo(config.auth0.routeAfterLogin);
+      this.router.transitionTo(ENV.auth0.routeAfterLogin);
     }
   }
 
@@ -92,8 +92,8 @@ export default class Auth extends Service {
           }
         });
       } else { // no-auth
-        this.set('user', config.auth0.profile);
-        resolve(config.auth0.profile);
+        this.set('user', ENV.auth0.profile);
+        resolve(ENV.auth0.profile);
       }
     });
   }
@@ -120,8 +120,8 @@ export default class Auth extends Service {
           }
         });
       } else { // no-auth
-        this.set('user', config.auth0.profile);
-        this.set('accessToken', config.auth0.accessToken);
+        this.set('user', ENV.auth0.profile);
+        this.set('accessToken', ENV.auth0.accessToken);
         resolve({});
       }
     });
@@ -135,8 +135,8 @@ export default class Auth extends Service {
     this.set('accessToken', undefined);
     if (this.lock) {
       this.lock.logout({
-        clientID: config.auth0.clientId,
-        returnTo: config.auth0.logoutReturnUrl,
+        clientID: ENV.auth0.clientId,
+        returnTo: ENV.auth0.logoutReturnUrl,
       });
     } else { // no-auth
       this.router.transitionTo('/');

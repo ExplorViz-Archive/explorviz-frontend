@@ -5,8 +5,8 @@ sed -i "s#change-landscape-url#$LANDSCAPE_URL#g" /usr/share/nginx/html/index.htm
 sed -i "s#change-trace-url#$TRACE_URL#g" /usr/share/nginx/html/index.html
 sed -i "s#change-user-url#$USER_URL#g" /usr/share/nginx/html/index.html
 sed -i "s#change-collab-url#$COLLAB_URL#g" /usr/share/nginx/html/index.html
-sed -i "s#change-vr-url#$VR_URL#g" /usr/share/nginx/html/index.html
-sed -i "s#change-vr-socket-path#$VR_SOCKET_PATH#g" /usr/share/nginx/html/index.html
+sed -i "s#change-collaboration-url#$COLLABORATION_SERV_URL#g" /usr/share/nginx/html/index.html
+sed -i "s#change-collaboration-socket-path#$COLLABORATION_SOCKET_PATH#g" /usr/share/nginx/html/index.html
 sed -i "s#change-frontend-host-name#$FRONTEND_HOST_NAME#g" /usr/share/nginx/html/index.html
 sed -i "s#change-auth0-logo-url#$AUTH0_LOGO_URL#g" /usr/share/nginx/html/index.html
 sed -i "s#change-auth0-callback-url#$AUTH0_CALLBACK_URL#g" /usr/share/nginx/html/index.html

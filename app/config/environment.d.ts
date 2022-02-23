@@ -14,6 +14,7 @@ declare const config: {
   locationType: string;
   rootURL: string;
   auth0: {
+    enabled: string,
     clientId: string,
     domain: string,
     logoUrl: string,
@@ -28,8 +29,8 @@ declare const config: {
     traceService: string,
     userService: string,
     collaborativeService: string,
-    vrService: string,
-    vrSocketPath: string,
+    collaborationService: string,
+    collaborationSocketPath: string,
   },
   APP: any;
 };

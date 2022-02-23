@@ -19,7 +19,7 @@ import VrLandscapeRenderer from './vr-landscape-renderer';
 import VrRoomSerializer from './vr-room-serializer';
 import VrSceneService from './vr-scene';
 
-const { vrService } = ENV.backendAddresses;
+const { collaborationService } = ENV.backendAddresses;
 
 export default class VrRoomService extends Service {
   @service('auth')
@@ -50,7 +50,7 @@ export default class VrRoomService extends Service {
   private sceneService!: VrSceneService;
 
   async listRooms(): Promise<RoomListRecord[]> {
-    const url = `${vrService}/v2/vr/rooms`;
+    const url = `${collaborationService}/v2/vr/rooms`;
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${this.auth.accessToken}`,
@@ -64,7 +64,7 @@ export default class VrRoomService extends Service {
   }
 
   async createRoom(): Promise<RoomCreatedResponse> {
-    const url = `${vrService}/v2/vr/room`;
+    const url = `${collaborationService}/v2/vr/room`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -169,7 +169,7 @@ export default class VrRoomService extends Service {
   }
 
   async joinLobby(roomId: string): Promise<LobbyJoinedResponse> {
-    const url = `${vrService}/v2/vr/room/${roomId}/lobby`;
+    const url = `${collaborationService}/v2/vr/room/${roomId}/lobby`;
     const response = await fetch(url, {
       method: 'POST',
       headers: {
