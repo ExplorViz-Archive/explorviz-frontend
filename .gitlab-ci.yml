@@ -34,6 +34,7 @@ test:
     - exec-docker
   script:
     #- npm ci --cache .npm --prefer-offline
+    - npm install npm@latest -g
     - npm install
     - ember test --launch chromium
 
