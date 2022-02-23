@@ -21,7 +21,7 @@ linting:
     - npm --version
     - ls -l
     - npm install npm@latest -g
-    - npm update
+    #- npm update
    # - npm ci --cache .npm --prefer-offline
     - npm install
     - npm install -g ember-template-lint
