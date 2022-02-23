@@ -17,6 +17,10 @@ linting:
   tags:
     - exec-docker
   before_script:
+    - node --version
+    - npm --version
+    - ls -l
+    - npm install npm@latest -g
     - npm update
    # - npm ci --cache .npm --prefer-offline
     - npm install
