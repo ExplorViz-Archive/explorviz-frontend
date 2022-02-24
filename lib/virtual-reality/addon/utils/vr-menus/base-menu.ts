@@ -1,164 +1,238 @@
 import THREE from 'three';
-import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import Item from './items/item';
-import InteractiveItem from './items/interactive-item';
+import VrMenuFactoryService from '../../services/vr-menu-factory';
+import VRControllerBindings from '../vr-controller/vr-controller-bindings';
+import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
+import VRControllerThumbpadBinding from '../vr-controller/vr-controller-thumbpad-binding';
+import MenuGroup from './menu-group';
 
-export default abstract class BaseMenu extends BaseMesh {
-  canvas: HTMLCanvasElement;
+export enum MenuState {
+  /**
+   * The initial state of the menu before it has been opened y a menu group.
+   */
+  INIT,
 
-  resolution: { width: number, height: number };
+  /**
+   * The state of the menu when it is the currently open menu of a menu group.
+   */
+  OPEN,
 
-  items: Item[];
+  /**
+   * The state of the menu when it has been closed.
+   */
+  CLOSED,
 
-  color: string;
+  /**
+   * The state of the menu when it is still opened by a menu group but another
+   * menu is currently active.
+   */
+  PAUSED,
 
-  lastHoveredItem: InteractiveItem | undefined;
+  /**
+   * The state of the menu when it has been detached from the menu group and
+   * is placed in the world.
+   */
+  DETACHED,
+}
 
-  get opacity() {
-    const material = this.material as THREE.Material;
-    return material.opacity;
-  }
+export type BaseMenuArgs = {
+  menuFactory: VrMenuFactoryService;
+};
 
-  set opacity(value: number) {
-    const material = this.material as THREE.Material;
-    material.opacity = value;
-  }
+/**
+ * Base class for all menus that defines life cycle methods and callbacks for
+ * the menu.
+ *
+ * There are menus with a user interface and menus without a user interface.
+ * For example when an object is grabbed an invisible menu is opened that
+ * takes control over the button bindings of the controller that grabbed the
+ * object.
+ */
+export default abstract class BaseMenu extends THREE.Group {
+  private menuState: MenuState;
 
-  constructor(resolution: { width: number, height: number } = { width: 512, height: 512 }, color = '#444444') {
-    const material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(color),
-    });
-    super(new THREE.Color(color));
+  readonly menuFactory: VrMenuFactoryService;
 
-    this.resolution = resolution;
-    this.color = color;
-    this.items = [];
-
-    this.initGeometry();
-    this.material = material;
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = this.resolution.width;
-    this.canvas.height = this.resolution.height;
-
-    this.opacity = 0.8;
-  }
-
-  initGeometry() {
-    this.geometry = new THREE.PlaneGeometry(
-      (this.resolution.width / 512) * 0.3,
-      (this.resolution.height / 512) * 0.3,
-    );
-  }
-
-  update() {
-    const { canvas } = this;
-    const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = this.color;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    for (let i = 0; i < this.items.length; i++) {
-      const item = this.items[i];
-      item.drawToCanvas(ctx);
-    }
-
-    // create texture out of canvas
-    const texture = new THREE.CanvasTexture(canvas);
-    // Map texture
-    const material = new THREE.MeshBasicMaterial({ map: texture, depthTest: true });
-    material.transparent = true;
-    material.opacity = this.opacity;
-
-    // Update texture
-    texture.needsUpdate = true;
-    // Update mesh material
-    this.material = material;
-  }
-
-  hover(uv: THREE.Vector2) {
-    const item = this.getItem(uv) as InteractiveItem | undefined;
-
-    if (this.lastHoveredItem && !item) {
-      this.lastHoveredItem.resetHoverEffect();
-      this.lastHoveredItem = undefined;
-    } else if (this.lastHoveredItem && item && this.lastHoveredItem !== item) {
-      this.lastHoveredItem.resetHoverEffect();
-      item.enableHoverEffect();
-      this.lastHoveredItem = item;
-    } else if (!this.lastHoveredItem && item) {
-      item.enableHoverEffect();
-      this.lastHoveredItem = item;
-    }
-
-    this.update();
-  }
-
-  // eslint-disable-next-line
-  applyHoverEffect() {}
-
-  resetHoverEffect() {
-    if (this.lastHoveredItem) {
-      this.lastHoveredItem.resetHoverEffect();
-      this.lastHoveredItem = undefined;
-    }
-
-    this.update();
-  }
-
-  triggerDown(uv: THREE.Vector2) {
-    const item = this.getItem(uv) as InteractiveItem | undefined;
-
-    if (item && item.onTriggerDown) {
-      item.onTriggerDown();
-    }
-  }
-
-  triggerPress(uv: THREE.Vector2, value: number) {
-    const item = this.getItem(uv) as InteractiveItem | undefined;
-
-    if (item && item.onTriggerPressed) {
-      item.onTriggerPressed(value);
-    }
+  constructor({ menuFactory }: BaseMenuArgs) {
+    super();
+    this.menuFactory = menuFactory;
+    this.menuState = MenuState.INIT;
   }
 
   /**
-   * Finds the menu item at given uv position.
-   *
-   * @param position - The uv position.
-   *
-   * @returns Item at given position if there is one, else undefined.
+   * Whether this menu is the currently open menu of a menu group.
    */
-  getItem(position: THREE.Vector2, onlyInteractiveItems = true) {
-    const items = onlyInteractiveItems
-      ? this.items.filter((item) => item instanceof InteractiveItem)
-      : this.items;
+  get isMenuOpen(): boolean {
+    return this.menuState === MenuState.OPEN;
+  }
 
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      // calculate pixel position
-      const x = this.resolution.width * position.x;
-      const y = this.resolution.height - (this.resolution.height * position.y);
+  /**
+   * Whether this menu has been closed.
+   *
+   * Note that this is not the inverse of `isMenuOpen`.
+   */
+  get isMenuClosed(): boolean {
+    return this.menuState === MenuState.CLOSED;
+  }
 
-      const {
-        minX,
-        minY,
-        maxX,
-        maxY,
-      } = item.getBoundingBox();
+  /**
+   * Whether this menu has been paused.
+   *
+   * A paused menu still belongs to a menu group but there is another menu
+   * that is currently active. A paused menu will not receive regular updates.
+   */
+  get isMenuPaused(): boolean {
+    return this.menuState === MenuState.PAUSED;
+  }
 
-      if (x >= minX && y >= minY && x <= maxX && y <= maxY) {
-        return item;
-      }
-    }
+  /**
+   * Whether this menu has been detached from its menu group and has been
+   * placed in the world.
+   */
+  get isMenuDetached(): boolean {
+    return this.menuState === MenuState.DETACHED;
+  }
+
+  /**
+   * Creates the bindings for the thumbpad of the controller that holds this
+   * menu.
+   */
+  makeThumbpadBinding(): VRControllerThumbpadBinding | undefined {
     return undefined;
   }
 
-  getItemById(id: string) {
-    return this.items.find((item) => item.id === id);
+  /**
+   * Creates the binding for the trigger button of the controller that holds
+   * this menu.
+   */
+  makeTriggerButtonBinding(): VRControllerButtonBinding<number> | undefined {
+    return undefined;
   }
 
-  back() {
-    super.deleteFromParent();
-    super.disposeRecursively();
+  /**
+   * Creates the binding for the controller's grip button to use for the
+   * controller that holds this menu.
+   */
+  makeGripButtonBinding(): VRControllerButtonBinding<undefined> | undefined {
+    return undefined;
+  }
+
+  /**
+   * Creates the binding for the menu button to use for the controller that
+   * holds this menu.
+   *
+   * By default the menu button closes the menu. Overwrite this method to
+   * return `undefined` to disable this behavior.
+   */
+  makeMenuButtonBinding(): VRControllerButtonBinding<undefined> | undefined {
+    const label = this.menuGroup?.hasPreviousMenu ? 'Back' : 'Close';
+    return new VRControllerButtonBinding(label, {
+      onButtonDown: () => this.closeMenu(),
+    });
+  }
+
+  /**
+   * Creates the controller bindings to use for the controller that has opened
+   * this menu instead of the default bindings whenever this menu is open.
+   *
+   * The controller bindings are created when the menu is opened. They do not
+   * refresh automatically.
+   */
+  makeControllerBindings(): VRControllerBindings {
+    return new VRControllerBindings({
+      thumbpad: this.makeThumbpadBinding(),
+      triggerButton: this.makeTriggerButtonBinding(),
+      gripButton: this.makeGripButtonBinding(),
+      menuButton: this.makeMenuButtonBinding(),
+    });
+  }
+
+  /**
+   * Whether the controller's ray should be shown when this menu is open.
+   *
+   * By default, the controller's ray is hidden since the controller cannot
+   * be used to interact with the environment while a menu is open. If the
+   * controller bindings are overridden by a subclass such that the controller
+   * can interact with the environment again, this getter should be overridden
+   * as well.
+   */
+  get enableControllerRay(): boolean {
+    return false;
+  }
+
+  get enableTeleport(): boolean {
+    return this.enableControllerRay;
+  }
+
+  get menuGroup(): MenuGroup | null {
+    if (this.parent instanceof MenuGroup) return this.parent;
+    return null;
+  }
+
+  /**
+   * Closes this menu.
+   */
+  closeMenu() {
+    this.closeMenusWhile((other) => this === other);
+  }
+
+  /**
+   * Closes menus of this menu's group until the current menu does not match
+   * the given predicate.
+   */
+  closeMenusWhile(predicate: (menu: BaseMenu) => boolean) {
+    this.menuGroup?.closeMenusWhile(predicate);
+  }
+
+  /**
+   * Detaches this menu.
+   */
+  detachMenu() {
+    this.menuGroup?.detachMenu();
+  }
+
+  /**
+   * Callback that is invoked by the menu group when this menu is opened.
+   */
+  onOpenMenu() {
+    this.menuState = MenuState.OPEN;
+  }
+
+  /**
+   * Callback that is invoked by the menu group once per frame.
+   *
+   * @param delta The time in seconds since the last frame.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onUpdateMenu(_delta: number) {}
+
+  /**
+   * Callback that is invoked by the menu group when this menu is hidden because
+   * another menu is openend instead.
+   */
+  onPauseMenu() {
+    this.menuState = MenuState.PAUSED;
+  }
+
+  /**
+   * Callback that is invoked by the menu group when this menu is shown again
+   * after it was hidden becaus ethe other menu was closed.
+   */
+  onResumeMenu() {
+    this.menuState = MenuState.OPEN;
+  }
+
+  /**
+   * Callback that is invoked by the menu group when this menu is detached
+   * and added to the world instead.
+   */
+  onDetachMenu() {
+    this.menuState = MenuState.DETACHED;
+  }
+
+  /**
+   * Callback that is invoked by the menu group when this menu is closed.
+   */
+  onCloseMenu() {
+    this.menuState = MenuState.CLOSED;
   }
 }

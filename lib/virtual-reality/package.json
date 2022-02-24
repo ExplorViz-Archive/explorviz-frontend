@@ -9,6 +9,8 @@
   "dependencies": {
     "@ember/render-modifiers": "^1.0.2",
     "@glimmer/component": "^1.0.0",
+    "@glimmer/tracking": "^1.0.0",
+    "@webxr-input-profiles/motion-controllers": "^1.0.0",
     "broccoli-funnel": "3.0.3",
     "broccoli-merge-trees": "4.2.0",
     "elkjs": "^0.7.0",
@@ -21,7 +23,6 @@
     "ember-concurrency-ts": "^0.2.0",
     "ember-debug-logger": "^2.1.1",
     "ember-websockets": "^7.2.0",
-    "@glimmer/tracking": "^1.0.0",
     "jquery": "^3.4.1",
     "three": "^0.119.1",
     "webxr-polyfill": "^2.0.3"

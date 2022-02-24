@@ -8,6 +8,8 @@ export default class Labeler {
 
   appLabelCache: Map<string, PlaneLabelMesh> = new Map();
 
+  labelOffset = 0.001;
+
   /**
  * Creates a label and adds it at a calculated position to the given node mesh
  *
@@ -32,7 +34,7 @@ export default class Labeler {
     // Add label centered at top of node mesh label
     labelMesh.position.x = -(labelMeshLength / 2.0);
     labelMesh.position.y = bboxParent.min.y + yOffset;
-    labelMesh.position.z = bboxParent.max.z + 0.001;
+    labelMesh.position.z = bboxParent.max.z + this.labelOffset;
 
     nodeMesh.add(labelMesh);
   }
@@ -60,7 +62,7 @@ export default class Labeler {
     // Position label at left side of parent mesh: Leave space for app logo
     labelMesh.position.x = bboxParent.min.x + xOffset;
     labelMesh.position.y = -(labelHeight / 2.0);
-    labelMesh.position.z = bboxParent.max.z + 0.001;
+    labelMesh.position.z = bboxParent.max.z + this.labelOffset;
 
     applicationMesh.add(labelMesh);
   }
@@ -87,7 +89,7 @@ export default class Labeler {
  * @param applicationMesh Mesh of application which shall be labeled
  * @param imageLoader Creates or returns cached image
  */
-  static addApplicationLogo(applicationMesh: ApplicationMesh, imageLoader: any,
+  addApplicationLogo(applicationMesh: ApplicationMesh, imageLoader: any,
     width = 0.4, height = 0.4) {
     const application = applicationMesh.dataModel;
 
@@ -101,7 +103,7 @@ export default class Labeler {
 
     // Position at the very right of application mesh
     logoPos.x = appBBox.max.x - RIGHT_PADDING;
-    logoPos.z = appBBox.max.z + 0.001;
+    logoPos.z = appBBox.max.z + this.labelOffset;
 
     const texturePartialPath = application.language.toLowerCase();
 

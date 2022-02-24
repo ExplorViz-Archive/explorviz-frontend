@@ -33,6 +33,7 @@ module.exports = {
     '@typescript-eslint/type-annotation-spacing': ['error'],
     'no-param-reassign': ['error', { props: false }],
     'func-names': ['error', 'always', { generators: 'never' }],
+    'class-methods-use-this': 'off',
   },
   overrides: [
     // node files

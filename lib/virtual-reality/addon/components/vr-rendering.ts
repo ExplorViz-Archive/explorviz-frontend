@@ -1,389 +1,460 @@
-import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
 import debugLogger from 'ember-debug-logger';
-import THREE from 'three';
-import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
+import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import Configuration from 'explorviz-frontend/services/configuration';
-import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
-import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
-import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
-import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
-import { enqueueTask, restartableTask, task } from 'ember-concurrency-decorators';
-import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
-import * as LandscapeCommunicationRendering from
-  'explorviz-frontend/utils/landscape-rendering/communication-rendering';
-import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
-import FloorMesh from 'virtual-reality/utils/view-objects/vr/floor-mesh';
-import WebXRPolyfill from 'webxr-polyfill';
-import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
-import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
+import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
+import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
+import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
+import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
-import * as EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
-import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
-import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
-import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
-import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
+import THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import DeltaTimeService from 'virtual-reality/services/delta-time';
+import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-groups';
+import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
+import SpectateUserService from 'virtual-reality/services/spectate-user';
+import VrApplicationRenderer, { AddApplicationArgs } from 'virtual-reality/services/vr-application-renderer';
+import VrAssetRepository from 'virtual-reality/services/vr-asset-repo';
+import VrLandscapeRenderer from 'virtual-reality/services/vr-landscape-renderer';
+import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
+import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
+import VrMessageSender from 'virtual-reality/services/vr-message-sender';
+import VrSceneService from 'virtual-reality/services/vr-scene';
+import VrTimestampService from 'virtual-reality/services/vr-timestamp';
+import WebSocketService from 'virtual-reality/services/web-socket';
+import { findGrabbableObject, GrabbableObjectWrapper, isGrabbableObject } from 'virtual-reality/utils/view-objects/interfaces/grabbable-object';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
-import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
-import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VRController';
-import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
-import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
-import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
-import AdvancedMenu from 'virtual-reality/utils/vr-menus/advanced-menu';
-import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
-import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
-import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
-import DeltaTime from 'virtual-reality/services/delta-time';
-import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
-import ZoomMenu from 'virtual-reality/utils/vr-menus/zoom-menu';
-import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
-import { perform } from 'ember-concurrency-ts';
-import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
-import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
-import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
-import { tracked } from '@glimmer/tracking';
-import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
-import UserSettings from 'explorviz-frontend/services/user-settings';
+import FloorMesh from 'virtual-reality/utils/view-objects/vr/floor-mesh';
+import VRController from 'virtual-reality/utils/vr-controller';
+import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-controller-bindings';
+import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-controller-bindings-list';
+import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
+import VRControllerThumbpadBinding, { VRControllerThumbpadVerticalDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
+import VrInputManager from 'virtual-reality/utils/vr-controller/vr-input-manager';
+import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
+import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
+import InteractiveMenu from 'virtual-reality/utils/vr-menus/interactive-menu';
+import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
+import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
+import HintMenu from 'virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu';
+import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
+import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
+import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
+import { SelfConnectedMessage } from 'virtual-reality/utils/vr-message/receivable/self_connected';
+import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
+import { UserDisconnectedMessage } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
+import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
+import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
+import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
+import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
+import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
+import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
+import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
+import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
+import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
+import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
+import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
+import WebXRPolyfill from 'webxr-polyfill';
+import VrHighlightingService from '../services/vr-highlighting';
+import VrRoomSerializer from '../services/vr-room-serializer';
+import { UserControllerConnectMessage, USER_CONTROLLER_CONNECT_EVENT } from '../utils/vr-message/sendable/user_controller_connect';
+import { UserControllerDisconnectMessage } from '../utils/vr-message/sendable/user_controller_disconnect';
+import { ControllerId, CONTROLLER_1_ID, CONTROLLER_2_ID } from '../utils/vr-message/util/controller_id';
 
 interface Args {
   readonly id: string;
   readonly landscapeData: LandscapeData;
+  readonly selectedTimestampRecords: Timestamp[];
   readonly font: THREE.Font;
 }
 
-type LayoutData = {
-  height: number,
-  width: number,
-  depth: number,
-  positionX: number,
-  positionY: number,
-  positionZ: number
-};
+const THUMBPAD_THRESHOLD = 0.5;
+const MOUSE_MOVE_SPEED = 3.0;
+const MOUSE_ROTATION_SPEED = Math.PI;
 
-export default class VrRendering extends Component<Args> {
-  // #region CLASS FIELDS AND GETTERS
+export default class VrRendering
+  extends Component<Args>
+  implements VrMessageListener {
+  // #region SERVICES
 
   @service('configuration')
-  configuration!: Configuration;
-
-  @service('configuration')
-  heatmapConf!: HeatmapConfiguration;
-
-  @service('user-settings')
-  userSettings!: UserSettings;
-
-  @service('local-vr-user')
-  localUser!: LocalVrUser;
+  private configuration!: Configuration;
 
   @service('delta-time')
-  time!: DeltaTime;
+  private deltaTimeService!: DeltaTimeService;
 
-  @service()
-  worker!: any;
+  @service('detached-menu-groups')
+  private detachedMenuGroups!: DetachedMenuGroupsService;
 
-  // Maps models to a computed layout
-  modelIdToPlaneLayout: Map<string, PlaneLayout> | null = null;
+  @service('grabbed-object')
+  private grabbedObjectService!: GrabbedObjectService;
 
-  debug = debugLogger('VrRendering');
+  @service('local-vr-user')
+  private localUser!: LocalVrUser;
 
-  canvas!: HTMLCanvasElement;
+  @service('remote-vr-users')
+  private remoteUsers!: RemoteVrUserService;
 
-  scene!: THREE.Scene;
+  @service('repos/timestamp-repository')
+  private timestampRepo!: TimestampRepository;
+
+  @service('spectate-user')
+  private spectateUserService!: SpectateUserService;
+
+  @service('vr-application-renderer')
+  private vrApplicationRenderer!: VrApplicationRenderer;
+
+  @service('vr-asset-repo')
+  private assetRepo!: VrAssetRepository;
+
+  @service('vr-highlighting')
+  private highlightingService!: VrHighlightingService;
+
+  @service('vr-landscape-renderer')
+  private vrLandscapeRenderer!: VrLandscapeRenderer;
+
+  @service('vr-menu-factory')
+  private menuFactory!: VrMenuFactoryService;
+
+  @service('vr-message-receiver')
+  private receiver!: VrMessageReceiver;
+
+  @service('vr-message-sender')
+  private sender!: VrMessageSender;
+
+  @service('vr-room-serializer')
+  private roomSerializer!: VrRoomSerializer;
+
+  @service('vr-scene')
+  private sceneService!: VrSceneService;
+
+  @service('vr-timestamp')
+  private timestampService!: VrTimestampService;
+
+  @service('web-socket')
+  private webSocket!: WebSocketService;
+
+  // #endregion SERVICES
+
+  // #region CLASS FIELDS
+
+  private canvas!: HTMLCanvasElement;
+
+  private debug = debugLogger('VrRendering');
+
+  private debugMenuGroup!: MenuGroup;
+
+  private hintMenuQueue!: MenuQueue;
+
+  private messageMenuQueue!: MenuQueue;
+
+  private primaryInputManager = new VrInputManager();
+
+  private secondaryInputManager = new VrInputManager();
+
+  private vrSessionActive: boolean = false;
+
+  private willDestroyController: AbortController = new AbortController();
 
   @tracked
-  camera!: THREE.PerspectiveCamera;
+  hammerInteraction: HammerInteraction = HammerInteraction.create();
 
-  renderer!: THREE.WebGLRenderer;
+  // #endregion CLASS FIELDS
 
-  // Group which contains all currently opened application objects
-  applicationGroup: ApplicationGroup;
-
-  controllerMainMenus: THREE.Group;
-
-  controllerInfoMenus: THREE.Group;
-
-  // Depth of boxes for landscape entities
-  landscapeDepth: number;
-
-  // Scalar with which the landscape is scaled (evenly in all dimensions)
-  landscapeScalar: number;
-
-  // Scalar with which the application is scaled (evenly in all dimensions)
-  applicationScalar: number;
-
-  floor!: FloorMesh;
-
-  closeButtonTexture: THREE.Texture;
-
-  mainMenu: BaseMenu | undefined;
-
-  infoMenu: DetailInfoMenu | undefined;
-
-  hintMenu: HintMenu | undefined;
-
-  landscapeOffset = new THREE.Vector3();
-
-  get font() {
-    return this.args.font;
-  }
-
-  readonly elk: ELK;
-
-  readonly imageLoader: ImageLoader = new ImageLoader();
-
-  readonly appCommRendering: AppCommunicationRendering;
-
-  // Provides functions to label landscape meshes
-  readonly landscapeLabeler = new LandscapeLabeler();
-
-  // Extended Object3D which manages landscape meshes
-  readonly landscapeObject3D!: LandscapeObject3D;
-
-  drawableClassCommunications: Map<string, DrawableClassCommunication[]> = new Map();
-
-  @tracked
-  raycastObjects: THREE.Object3D[];
-
-  // #endregion CLASS FIELDS AND GETTERS
-
-  // #region COMPONENT AND SCENE INITIALIZATION
-
-  constructor(owner: any, args: Args) {
-    super(owner, args);
-    this.debug('Constructor called');
-
-    this.elk = new ElkConstructor({
-      workerUrl: './assets/web-workers/elk-worker.min.js',
-    });
-
-    this.landscapeDepth = 0.7;
-
-    this.landscapeScalar = 0.1;
-    this.applicationScalar = 0.01;
-
-    this.applicationGroup = new ApplicationGroup();
-
-    this.controllerMainMenus = new THREE.Group();
-    this.controllerMainMenus.position.y += 0.15;
-    this.controllerMainMenus.position.z -= 0.15;
-    this.controllerMainMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
-    this.localUser.controllerMainMenus = this.controllerMainMenus;
-
-    this.controllerInfoMenus = new THREE.Group();
-    this.controllerInfoMenus.position.y += 0.15;
-    this.controllerInfoMenus.position.z -= 0.15;
-    this.controllerInfoMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
-    this.localUser.controllerInfoMenus = this.controllerInfoMenus;
-
-    this.appCommRendering = new AppCommunicationRendering(this.configuration,
-      this.userSettings, this.heatmapConf);
-
-    // Load image for delete button
-    this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
-
-    // Load and scale landscape
-    this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
-    const scale = this.landscapeScalar;
-    this.landscapeObject3D.scale.set(scale, scale, scale);
-
-    // Rotate landscape such that it lays flat on the floor
-    this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
-
-    this.raycastObjects = [this.landscapeObject3D, this.applicationGroup];
-  }
+  // #region INITIALIZATION
 
   /**
-     * Calls all three related init functions and adds the three
-     * performance panel if it is activated in user settings
-     */
-  initRendering() {
-    this.initScene();
-    this.initCamera();
+   * Calls all init functions.
+   */
+  private initRendering() {
+    this.initHUD();
     this.initRenderer();
-    this.initLights();
+    this.initServices();
     this.initInteraction();
+    this.initPrimaryInput();
+    this.initSecondaryInput();
     this.initControllers();
+    this.initWebSocket();
   }
 
   /**
-     * Creates a scene, its background and adds a landscapeObject3D to it
-     */
-  initScene() {
-    this.scene = new THREE.Scene();
-    this.scene.background = this.configuration.landscapeColors.backgroundColor;
-    this.scene.add(this.landscapeObject3D);
+   * Creates the menu groups that are attached to the user's camera.
+   */
+  private initHUD() {
+    this.debug('Initializing head-up display menus...');
 
-    const floorSize = 10;
-    const floorMesh = new FloorMesh(floorSize, floorSize);
-    this.floor = floorMesh;
+    // Menu group for hints.
+    this.hintMenuQueue = new MenuQueue({
+      detachedMenuGroups: this.detachedMenuGroups,
+    });
+    this.hintMenuQueue.position.z = -0.3;
+    this.localUser.defaultCamera.add(this.hintMenuQueue);
 
-    this.scene.add(floorMesh);
-    this.scene.add(this.applicationGroup);
-    this.scene.add(this.localUser.userGroup);
+    // Menu group for message boxes.
+    this.messageMenuQueue = new MenuQueue({
+      detachedMenuGroups: this.detachedMenuGroups,
+    });
+    this.messageMenuQueue.rotation.x = 0.45;
+    this.messageMenuQueue.position.y = 0.1;
+    this.messageMenuQueue.position.z = -0.3;
+    this.localUser.defaultCamera.add(this.messageMenuQueue);
 
-    this.debug('Scene created');
+    // Menu group for previewing menus during development.
+    this.debugMenuGroup = new MenuGroup({
+      detachedMenuGroups: this.detachedMenuGroups,
+    });
+    this.debugMenuGroup.position.z = -0.35;
+    this.localUser.defaultCamera.add(this.debugMenuGroup);
   }
 
   /**
-     * Creates a PerspectiveCamera according to canvas size and sets its initial position
-     */
-  initCamera() {
+   * Initiates a WebGLRenderer
+   */
+  private initRenderer() {
+    this.debug('Initializing renderer...');
+
     const { width, height } = this.canvas;
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    this.camera.position.set(0, 1, 2);
-    this.localUser.addCamera(this.camera);
-    this.debug('Camera added');
-  }
-
-  /**
-     * Initiates a WebGLRenderer
-     */
-  initRenderer() {
-    const { width, height } = this.canvas;
-    this.renderer = new THREE.WebGLRenderer({
+    this.localUser.renderer = new THREE.WebGLRenderer({
       antialias: true,
       canvas: this.canvas,
     });
-    this.localUser.renderer = this.renderer;
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(width, height);
-    this.renderer.xr.enabled = true;
+    this.localUser.renderer.setPixelRatio(window.devicePixelRatio);
+    this.localUser.renderer.setSize(width, height);
+    this.localUser.renderer.xr.enabled = true;
 
     const polyfill = new WebXRPolyfill();
     if (polyfill) {
       this.debug('Polyfill enabled');
     }
-    this.debug('Renderer set up');
   }
 
-  /**
-     * Creates a SpotLight and an AmbientLight and adds it to the scene
-     */
-  initLights() {
-    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
-    spotLight.position.set(100, 100, 100);
-    spotLight.castShadow = false;
-    this.scene.add(spotLight);
+  private initServices() {
+    this.debug('Initializing services...');
 
-    const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
-    this.scene.add(light);
-    this.debug('Lights added');
+    // Use given font for landscape and application rendering.
+    this.assetRepo.font = this.args.font;
+
+    // Initialize timestamp and landscape data. If no timestamp is selected,
+    // the latest timestamp is used. When there is no timestamp, we fall back
+    // to the current time.
+    if (this.args.landscapeData) {
+      const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
+      const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
+        || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
+        || new Date().getTime();
+      this.timestampService.setTimestampLocally(
+        timestamp,
+        this.args.landscapeData.structureLandscapeData,
+        this.args.landscapeData.dynamicLandscapeData,
+      );
+    } else {
+      this.debug('No landscape data found.');
+    }
   }
 
   /**
    * Binds this context to all event handling functions and
    * passes them to a newly created Interaction object
    */
-  initInteraction() {
-    // Add key listener for room positioning
-    window.onkeydown = (event: any) => {
-      this.handleKeyboard(event);
+  private initInteraction() {
+    this.debug('Initializing interaction...');
+    this.hammerInteraction.setupHammer(this.canvas);
+
+    // Add additional event listeners. Since TypeScript does not yet support
+    // the signal option  of `addEventListener`, we have to listen for the
+    // will destroy signal manually.
+    const keydownListener = (event: KeyboardEvent) => this.handleKeyboard(event);
+    window.addEventListener('keydown', keydownListener);
+    this.willDestroyController.signal.addEventListener('abort', () => {
+      window.removeEventListener('keydown', keydownListener);
+    });
+  }
+
+  private initPrimaryInput() {
+    // When any base mash is hovered, highlight it.
+    this.primaryInputManager.addInputHandler({
+      targetType: BaseMesh,
+      hover: (event) => event.target.applyHoverEffect(),
+      resetHover: (event) => event.target.resetHoverEffect(),
+    });
+
+    // When an application on the landscape is clicked, open the application.
+    this.primaryInputManager.addInputHandler<ApplicationMesh>({
+      targetType: ApplicationMesh,
+      triggerDown: (event) => this.addApplicationOrShowHint(event.target.dataModel, {
+        position: event.intersection.point,
+        quaternion: new THREE.Quaternion()
+          .setFromEuler(
+            new THREE.Euler(
+              90 * THREE.MathUtils.DEG2RAD,
+              90 * THREE.MathUtils.DEG2RAD,
+              0,
+            ),
+          )
+          .premultiply(this.vrLandscapeRenderer.landscapeObject3D.quaternion),
+      }),
+    });
+
+    // When a component of an application is clicked, open it.
+    this.primaryInputManager.addInputHandler({
+      targetType: ComponentMesh,
+      triggerDown: (event) => {
+        if (event.target.parent instanceof ApplicationObject3D) {
+          this.vrApplicationRenderer.toggleComponent(
+            event.target,
+            event.target.parent,
+          );
+        }
+      },
+    });
+
+    // When the foundation of an application is clicked, close all components.
+    this.primaryInputManager.addInputHandler({
+      targetType: FoundationMesh,
+      triggerDown: (event) => {
+        if (event.target.parent instanceof ApplicationObject3D) {
+          this.vrApplicationRenderer.closeAllComponents(event.target.parent);
+        }
+      },
+    });
+
+    // When a close icon is clicked, close the corresponding object.
+    this.primaryInputManager.addInputHandler({
+      targetType: CloseIcon,
+      triggerDown: (event) => event.target.close().then((closedSuccessfully: boolean) => {
+        if (!closedSuccessfully) this.showHint('Object could not be closed');
+      }),
+    });
+
+    // Initialize menu interaction with other controller.
+    this.primaryInputManager.addInputHandler({
+      targetType: InteractiveMenu,
+      triggerDown: (event) => event.target.triggerDown(event.intersection),
+      triggerPress: (event) => event.target.triggerPress(event.intersection, event.value),
+      triggerUp: (event) => event.target.triggerUp(event.intersection),
+      hover: (event) => event.target.hover(event.intersection),
+      resetHover: (event) => event.target.resetHoverEffect(),
+    });
+  }
+
+  private initSecondaryInput() {
+    this.secondaryInputManager.addInputHandler({
+      targetType: FloorMesh,
+      triggerDown: (event) => this.localUser.teleportToPosition(event.intersection.point),
+      hover: ({ controller, intersection }) => {
+        if (controller?.teleportArea && controller?.ray) {
+          controller.teleportArea.showAbovePosition(intersection.point);
+          controller.teleportArea.visible = controller.ray.visible && controller.enableTeleport;
+        }
+      },
+      resetHover: ({ controller }) => {
+        if (controller?.teleportArea) {
+          controller.teleportArea.visible = false;
+        }
+      },
+    });
+
+    this.secondaryInputManager.addInputHandler({
+      targetType: ApplicationObject3D,
+      triggerDown: (event) => this.highlightingService.highlightComponent(
+        event.target,
+        event.intersection.object,
+      ),
+    });
+  }
+
+  private initControllers() {
+    this.debug('Initializing controllers...');
+
+    this.localUser.setController1(
+      this.initController({ gamepadIndex: CONTROLLER_1_ID }),
+    );
+    this.localUser.setController2(
+      this.initController({ gamepadIndex: CONTROLLER_2_ID }),
+    );
+  }
+
+  private initController({
+    gamepadIndex,
+  }: {
+    gamepadIndex: ControllerId;
+  }): VRController {
+    // Initialize the controller's menu group.
+    const menuGroup = new MenuGroup({
+      detachedMenuGroups: this.detachedMenuGroups,
+    });
+
+    // Initialize controller.
+    const controller = new VRController({
+      gamepadIndex,
+      scene: this.sceneService.scene,
+      bindings: new VRControllerBindingsList(
+        this.makeControllerBindings(),
+        menuGroup.controllerBindings,
+      ),
+      gripSpace: this.localUser.renderer.xr.getControllerGrip(gamepadIndex),
+      raySpace: this.localUser.renderer.xr.getController(gamepadIndex),
+      color: new THREE.Color('red'),
+      menuGroup,
+    });
+    controller.setToDefaultAppearance();
+
+    // Set camera of the controller's raycaster view-dependent objects such as
+    // sprites can be intersected.
+    controller.raycaster.camera = this.localUser.defaultCamera;
+
+    // Add connection event listeners.
+    controller.eventCallbacks.connected = () => this.onControllerConnected(controller);
+    controller.eventCallbacks.disconnected = () => this.onControllerDisconnected(controller);
+
+    // Add hover event listeners.
+    controller.eventCallbacks.updateIntersectedObject = () => {
+      this.handleHover(controller.intersectedObject, controller);
     };
+
+    // Position menus above controller at an angle.
+    menuGroup.position.y += 0.15;
+    menuGroup.position.z -= 0.15;
+    menuGroup.rotateX(340 * THREE.MathUtils.DEG2RAD);
+
+    return controller;
   }
 
-  initControllers() {
-    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor,
-      this.controllerMainMenus, this.controllerInfoMenus];
+  private async initWebSocket() {
+    this.debug('Initializing websocket...');
 
-    // Init secondary/utility controller
-    const raySpace1 = this.renderer.xr.getController(0);
-    const gripSpace1 = this.renderer.xr.getControllerGrip(0);
-
-    const callbacks1 = {
-      thumbpadTouch: this.onThumbpadTouch.bind(this),
-      triggerDown: this.onInteractionTriggerDown.bind(this),
-      triggerPress: VrRendering.onInteractionTriggerPress.bind(this),
-      menuDown: this.onInteractionMenuDown.bind(this),
-      gripDown: this.onInteractionGripDown.bind(this),
-      gripUp: this.onInteractionGripUp.bind(this),
-    };
-    const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
-      raySpace1, callbacks1, this.scene);
-    controller1.setToDefaultAppearance();
-    controller1.raySpace.add(this.controllerInfoMenus);
-    controller1.intersectableObjects = intersectableObjects;
-
-    this.localUser.controller1 = controller1;
-    this.localUser.userGroup.add(controller1);
-
-    // Init secondary controller
-    const raySpace2 = this.renderer.xr.getController(1);
-    const gripSpace2 = this.renderer.xr.getControllerGrip(1);
-
-    const callbacks2 = {
-      triggerDown: this.onUtilityTrigger.bind(this),
-      menuDown: this.onUtilityMenuDown.bind(this),
-      gripDown: this.onUtilityGripDown.bind(this),
-      gripUp: this.onUtilityGripUp.bind(this),
-    };
-
-    const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
-      raySpace2, callbacks2, this.scene);
-    controller2.setToDefaultAppearance();
-    controller2.raySpace.add(this.controllerMainMenus);
-    controller2.intersectableObjects = intersectableObjects;
-
-    this.localUser.controller2 = controller2;
-    this.localUser.userGroup.add(controller2);
+    this.webSocket.socketCloseCallback = () => this.onSelfDisconnected();
+    this.receiver.addMessageListener(this);
   }
 
-  // eslint-disable-next-line
-  onInteractionGripDown(controller: VRController) {
-    if (!controller.intersectedObject) return;
+  // #endregion INITIALIZATION
 
-    const { object } = controller.intersectedObject;
+  // #region DESTRUCTION
 
-    if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D)
-      && controller.ray) {
-      controller.grabObject(object.parent);
-    }
+  willDestroy() {
+    // Reset rendering.
+    this.vrApplicationRenderer.removeAllApplicationsLocally();
+    this.vrLandscapeRenderer.cleanUpLandscape();
+    this.detachedMenuGroups.removeAllDetachedMenusLocally();
+
+    // Reset services.
+    this.localUser.reset();
+    this.spectateUserService.reset();
+
+    // Remove event listers.
+    this.receiver.removeMessageListener(this);
+    this.willDestroyController.abort();
   }
 
-  onInteractionMenuDown(controller: VRController) {
-    if (!controller.intersectedObject) {
-      this.closeInfoMenu();
-      return;
-    }
-
-    const { object } = controller.intersectedObject;
-
-    const content = composeContent(object);
-    if (content) {
-      this.openInfoMenu(content);
-    } else {
-      this.closeInfoMenu();
-    }
-  }
-
-  onInteractionGripUp(controller: VRController) {
-    const object = controller.grabbedObject;
-    controller.releaseObject();
-
-    if (object instanceof ApplicationObject3D) {
-      this.applicationGroup.add(object);
-    }
-  }
-
-  // eslint-disable-next-line
-  onUtilityGripDown(/* controller: VRController */) {
-    this.openZoomMenu();
-  }
-
-  // eslint-disable-next-line
-  onUtilityGripUp(/* controller: VRController */) {
-    if (this.mainMenu instanceof ZoomMenu) {
-      this.closeControllerMenu();
-    }
-  }
-
-  // #endregion COMPONENT AND SCENE INITIALIZATION
+  // #endregion DESTRUCTION
 
   // #region ACTIONS
 
@@ -392,7 +463,6 @@ export default class VrRendering extends Component<Args> {
     this.debug('Canvas inserted');
 
     this.canvas = canvas;
-
     canvas.oncontextmenu = (e) => {
       e.preventDefault();
     };
@@ -402,811 +472,777 @@ export default class VrRendering extends Component<Args> {
   async outerDivInserted(outerDiv: HTMLElement) {
     this.debug('Outer Div inserted');
 
+    // Initialize the component.
     this.initRendering();
-
-    this.renderer.setAnimationLoop(this.render.bind(this));
-
     this.resize(outerDiv);
 
-    await perform(this.loadNewLandscape);
+    // Start main loop.
+    this.localUser.renderer.setAnimationLoop(() => this.tick());
   }
 
   /**
-     * Call this whenever the canvas is resized. Updated properties of camera
-     * and renderer.
-     *
-     * @param outerDiv HTML element containing the canvas
-     */
+   * Call this whenever the canvas is resized. Updated properties of camera
+   * and renderer.
+   *
+   * @param outerDiv HTML element containing the canvas
+   */
   @action
   resize(outerDiv: HTMLElement) {
-    const width = Number(outerDiv.clientWidth);
-    const height = Number(outerDiv.clientHeight);
-
-    // Update renderer and camera according to new canvas size
-    this.renderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    const width = outerDiv.clientWidth;
+    const height = outerDiv.clientHeight;
+    this.localUser.updateCameraAspectRatio(width, height);
   }
 
   @action
   onVrSessionStarted(/* session: XRSession */) {
     this.debug('WebXRSession started');
+    this.vrSessionActive = true;
   }
 
   @action
   onVrSessionEnded() {
     this.debug('WebXRSession ended');
+    this.vrSessionActive = false;
     const outerDiv = this.canvas?.parentElement;
     if (outerDiv) {
       this.resize(outerDiv);
     }
   }
 
-  /**
-   * Inherit this function to update the scene with a new renderingModel. It
-   * automatically removes every mesh from the scene and finally calls
-   * the (overridden) "populateLandscape" function. Add your custom code
-   * as shown in landscape-rendering.
-   *
-   * @method cleanAndUpdateScene
-   */
   @action
-  async cleanAndUpdateScene() {
-    await perform(this.populateLandscape);
+  async onDropFiles(files: File[]) {
+    const filesByName = new Map<string, File>();
+    files.forEach((file) => filesByName.set(file.name, file));
 
-    this.debug('clean and populate landscape-rendering');
+    // Create a loading manager that converts file names to object URLs.
+    const loadingManager = new THREE.LoadingManager();
+    const objectURLs: string[] = [];
+    loadingManager.setURLModifier((url) => {
+      const file = filesByName.get(url);
+      if (file) {
+        const objectUrl = URL.createObjectURL(file);
+        objectURLs.push(objectUrl);
+        return objectUrl;
+      }
+      return url;
+    });
+
+    const tasks: Promise<any>[] = [];
+
+    // Load all glTF models.
+    files.forEach((file) => {
+      if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
+        tasks.push(
+          new Promise((resolve) => {
+            const gltfLoader = new GLTFLoader(loadingManager);
+            gltfLoader.load(file.name, (gltf) => {
+              const object = new GrabbableObjectWrapper(gltf.scene);
+              this.sceneService.scene.add(object);
+              resolve(null);
+            });
+          }),
+        );
+      }
+    });
+
+    // If a single image file has been dropped, use it as a panorama.
+    if (files.length === 1) {
+      const file = files[0];
+      if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) {
+        tasks.push(
+          new Promise((resolve) => {
+            const loader = new THREE.TextureLoader(loadingManager);
+            loader.load(file.name, (texture) => {
+              texture.minFilter = THREE.NearestFilter;
+              texture.generateMipmaps = false;
+
+              const geometry = new THREE.SphereGeometry(10, 256, 256);
+              const material = new THREE.MeshStandardMaterial({
+                map: texture,
+                side: THREE.BackSide,
+                displacementScale: -4.0,
+              });
+              this.localUser.setPanoramaShere(
+                new THREE.Mesh(geometry, material),
+              );
+              resolve(null);
+            });
+          }),
+        );
+      }
+    }
+
+    // Revoke the object URLs when all loading tasks are done.
+    await Promise.all(tasks);
+    objectURLs.forEach((url) => URL.revokeObjectURL(url));
   }
 
   // #endregion ACTIONS
 
-  // #region RENDERING AND SCENE POPULATION
+  // #region MAIN LOOP
 
   /**
-   * Main rendering function
+   * Main loop that is called once per frame.
    */
-  render() {
-    if (this.isDestroyed) { return; }
-
-    this.time.update();
-
-    this.localUser.updateControllers();
-
-    this.renderer.render(this.scene, this.camera);
-
-    if (this.mainMenu instanceof ZoomMenu) {
-      this.mainMenu.renderLens();
-    }
-  }
-
-  @task*
-  loadNewLandscape() {
-    yield perform(this.populateLandscape);
-  }
-
-  /**
- * Computes new meshes for the landscape and adds them to the scene
- *
- * @method populateLandscape
- */
-  // @ts-ignore
-  @restartableTask*
-  // eslint-disable-next-line
-  populateLandscape() {
-    this.debug('populate landscape-rendering');
-
-    const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
-
-    this.landscapeObject3D.dataModel = structureLandscapeData;
-
-    // Run Klay layouting in 3 steps within workers
-    try {
-      const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
-        dynamicLandscapeData);
-
-      // Do layout pre-processing (1st step)
-      const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
-        structureLandscapeData,
-        applicationCommunications,
-      });
-
-      // Run actual klay function (2nd step)
-      const newGraph: ElkNode = yield this.elk.layout(graph);
-
-      // Post-process layout graph (3rd step)
-      const layoutedLandscape: Layout3Return = yield this.worker.postMessage('layout3', {
-        graph: newGraph,
-        modelIdToPoints,
-        structureLandscapeData,
-        applicationCommunications,
-      });
-
-      // Clean old landscape
-      this.cleanUpLandscape();
-
-      const {
-        modelIdToLayout,
-        modelIdToPoints: modelIdToPointsComplete,
-      }: Layout3Return = layoutedLandscape;
-
-      const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
-
-      this.modelIdToPlaneLayout = modelIdToPlaneLayout;
-
-      // Convert the simple to a PlaneLayout map
-      LandscapeRendering.convertToPlaneLayoutMap(modelIdToLayout, modelIdToPlaneLayout);
-
-      // Compute center of landscape
-      const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
-      const centerPoint = landscapeRect.center;
-
-      // Update camera zoom accordingly
-      updateCameraZoom(landscapeRect, this.camera, this.renderer);
-
-      // Render all landscape entities
-      const { nodes } = structureLandscapeData;
-
-      // Draw boxes for nodes
-      nodes.forEach((node: Node) => {
-        this.renderNode(node, modelIdToPlaneLayout.get(node.ipAddress), centerPoint);
-
-        const { applications } = node;
-
-        // Draw boxes for applications
-        applications.forEach((application: Application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.instanceId),
-            centerPoint);
-        });
-      });
-
-      // Render application communication
-      const color = this.configuration.landscapeColors.communicationColor;
-      const tiles = LandscapeCommunicationRendering
-        .computeCommunicationTiles(applicationCommunications, modelIdToPointsComplete,
-          color, this.landscapeDepth / 2 + 0.25);
-
-      LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
-        centerPoint, 0.004, 0.028);
-
-      this.centerLandscape();
-
-      this.debug('Landscape loaded');
-    } catch (e) {
-      this.debug(e);
-    }
-  }
-
-  // #endregion RENDERING AND SCENE POPULATION
-
-  // #region LANDSCAPE RENDERING
-
-  /**
- * Creates & positions a node mesh with corresponding labels.
- * Then adds it to the landscapeObject3D.
- *
- * @param node Data model for the node mesh
- * @param layout Layout data to position the mesh correctly
- * @param centerPoint Offset of landscape object
- */
-  renderNode(node: Node, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create node mesh
-    const nodeMesh = new NodeMesh(
-      layout,
-      node,
-      this.configuration.landscapeColors.nodeColor,
-      this.configuration.applicationColors.highlightedEntityColor,
-      this.landscapeDepth,
-      0.2,
-    );
-
-    // Create and add label + icon
-    nodeMesh.setToDefaultPosition(centerPoint);
-
-    // Label with own ip-address by default
-    const labelText = nodeMesh.getDisplayName();
-
-    this.landscapeLabeler.addNodeTextLabel(nodeMesh, labelText, this.font,
-      this.configuration.landscapeColors.nodeTextColor);
-
-    // Add to scene
-    this.landscapeObject3D.add(nodeMesh);
-  }
-
-  /**
- * Creates & positions an application mesh with corresponding labels.
- * Then adds it to the landscapeObject3D.
- *
- * @param application Data model for the application mesh
- * @param layout Layout data to position the mesh correctly
- * @param centerPoint Offset of landscape object
- */
-  renderApplication(application: Application, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create application mesh
-    const applicationMesh = new ApplicationMesh(
-      layout,
-      application,
-      this.configuration.landscapeColors.applicationColor,
-      this.configuration.applicationColors.highlightedEntityColor,
-      this.landscapeDepth,
-      0.3,
-    );
-    applicationMesh.setToDefaultPosition(centerPoint);
-
-    // Create and add label + icon
-    this.landscapeLabeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
-      this.configuration.landscapeColors.applicationTextColor);
-    LandscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
-
-    // Add to scene
-    this.landscapeObject3D.add(applicationMesh);
-  }
-
-  // #endregion LANDSCAPE RENDERING
-
-  // #region APLICATION RENDERING
-
-  // @ts-ignore
-  @enqueueTask*
-  // eslint-disable-next-line
-  addApplicationTask(applicationModel: Application, origin: THREE.Vector3, 
-    callback?: (applicationObject3D: ApplicationObject3D) => void) {
-    try {
-      if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
-        return;
-      }
-
-      const { dynamicLandscapeData } = this.args.landscapeData;
-
-      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', applicationModel);
-
-      // Converting plain JSON layout data due to worker limitations
-      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
-
-      const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap,
-        dynamicLandscapeData);
-
-      // Add new meshes to application
-      EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
-        this.configuration.applicationColors);
-
-      this.updateDrawableClassCommunications(applicationObject3D);
-
-      const drawableComm = this.drawableClassCommunications
-        .get(applicationObject3D.dataModel.instanceId)!;
-
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-
-      // Add labels and close icon to application
-      this.addLabels(applicationObject3D);
-      const closeIcon = new CloseIcon(this.closeButtonTexture);
-      closeIcon.addToApplication(applicationObject3D);
-
-      // Scale application to a reasonable size to work with it
-      const scalar = this.applicationScalar;
-      applicationObject3D.scale.set(scalar, scalar, scalar);
-
-      this.positionApplication(applicationObject3D, origin);
-
-      this.applicationGroup.addApplication(applicationObject3D);
-      this.localUser.controller1?.intersectableObjects.push(applicationObject3D);
-      this.localUser.controller2?.intersectableObjects.push(applicationObject3D);
-
-      if (callback) callback(applicationObject3D);
-    } catch (e: any) {
-      this.debug(e);
-    }
-  }
-
-  updateDrawableClassCommunications(applicationObject3D: ApplicationObject3D) {
-    if (this.drawableClassCommunications.has(applicationObject3D.dataModel.instanceId)) {
+  private tick() {
+    if (this.isDestroyed) {
       return;
     }
 
-    const { structureLandscapeData } = this.args.landscapeData;
-    const drawableClassCommunications = computeDrawableClassCommunication(
-      structureLandscapeData,
-      applicationObject3D.traces,
-    );
+    // Compute time since last tick.
+    this.deltaTimeService.update();
+    const delta = this.deltaTimeService.getDeltaTime();
 
-    const allClasses = new Set(getAllClassesInApplication(applicationObject3D.dataModel));
+    this.update(delta);
 
-    const communicationInApplication = drawableClassCommunications.filter(
-      (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
-    );
+    this.render();
 
-    this.drawableClassCommunications.set(applicationObject3D.dataModel.instanceId,
-      communicationInApplication);
+    // Send position update to backend. This must happen after the scene has
+    // been rendered such that the camera position is not corrupted.
+    this.sendPoses();
   }
 
-  addApplication(applicationModel: Application, origin: THREE.Vector3) {
+  /**
+   * Updates menus, services and all objects in the scene.
+   */
+  private update(delta: number) {
+    // Update controllers and menus.
+    this.localUser.updateControllers(delta);
+    this.hintMenuQueue.updateMenu(delta);
+    this.messageMenuQueue.updateMenu(delta);
+    this.debugMenuGroup.updateMenu(delta);
+    this.detachedMenuGroups.updateDetachedMenus(delta);
+
+    // Update services.
+    this.spectateUserService.update();
+    this.grabbedObjectService.sendObjectPositions();
+    this.remoteUsers.updateRemoteUsers(delta);
+
+    // update applications' globe animation
+    this.vrApplicationRenderer.updateAllApplicationGlobes(this.deltaTimeService.getDeltaTime());
+  }
+
+  /**
+   * Renders the scene.
+   */
+  private render() {
+    this.localUser.renderer.render(
+      this.sceneService.scene,
+      this.localUser.defaultCamera,
+    );
+  }
+
+  // #endregion MAIN LOOP
+
+  // #region APPLICATION RENDERING
+
+  private async addApplicationOrShowHint(
+    applicationModel: Application,
+    args: AddApplicationArgs,
+  ): Promise<ApplicationObject3D | null> {
     if (applicationModel.packages.length === 0) {
       this.showHint('No data available');
-    } else if (!this.applicationGroup.hasApplication(applicationModel.instanceId)) {
-      perform(this.addApplicationTask, applicationModel, origin);
+      return Promise.resolve(null);
     }
-  }
 
-  /**
-   * Sets a (newly opened) application to its default position.
-   *
-   * @param applicationObject3D Application which shall be positioned
-   * @param origin Point of reference (position of application in landscape object)
-   */
-  positionApplication(applicationObject3D: ApplicationObject3D, origin: THREE.Vector3) {
-    // Rotate app so that it is aligned with landscape
-    applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
-    applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
-    applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+    if (
+      this.vrApplicationRenderer.isApplicationOpen(applicationModel.id)
+    ) {
+      this.showHint('Application already opened');
+      return Promise.resolve(null);
+    }
 
-    applicationObject3D.position.copy(origin);
-  }
-
-  /**
-   * Adds labels to all box meshes of a given application
-   */
-  addLabels(applicationObject3D: ApplicationObject3D) {
-    if (!this.font) { return; }
-
-    const {
-      clazzTextColor,
-      componentTextColor,
-      foundationTextColor,
-    } = this.configuration.applicationColors;
-
-    applicationObject3D.getBoxMeshes().forEach((mesh) => {
-    /* Labeling is time-consuming. Thus, label only visible meshes incrementally
-       as opposed to labeling all meshes up front (as done in application-rendering) */
-      if (!mesh.visible) return;
-
-      if (mesh instanceof ClazzMesh) {
-        ApplicationLabeler
-          .addClazzTextLabel(mesh, this.font, clazzTextColor);
-      } else if (mesh instanceof ComponentMesh) {
-        ApplicationLabeler
-          .addBoxTextLabel(mesh, this.font, componentTextColor);
-      } else if (mesh instanceof FoundationMesh) {
-        ApplicationLabeler
-          .addBoxTextLabel(mesh, this.font, foundationTextColor);
-      }
-    });
+    return this.vrApplicationRenderer.addApplication(applicationModel, args);
   }
 
   // #endregion APPLICATION RENDERING
 
-  // #region CONTROLLER HANDLERS
+  // #region MENUS
 
-  onInteractionTriggerDown(controller: VRController) {
-    if (!controller.intersectedObject) return;
-
-    this.handlePrimaryInputOn(controller.intersectedObject);
-  }
-
-  static onInteractionTriggerPress(controller: VRController, value: number) {
-    if (!controller.intersectedObject) return;
-
-    const { object, uv } = controller.intersectedObject;
-
-    if (object instanceof BaseMenu && uv) {
-      object.triggerPress(uv, value);
+  private showHint(title: string, text: string | undefined = undefined) {
+    // Show the hint only if there is no hint with the text in the queue
+    // already. This prevents the same hint to be shown multiple times when
+    // the user repeats the action that causes the hint.
+    if (
+      !this.hintMenuQueue.hasEnquedOrCurrentMenu(
+        (menu) => menu instanceof HintMenu
+          && menu.titleItem.text === title
+          && menu.textItem?.text === text,
+      )
+    ) {
+      this.hintMenuQueue.enqueueMenu(
+        this.menuFactory.buildHintMenu(title, text),
+      );
     }
   }
 
-  onUtilityTrigger(controller: VRController) {
-    if (!controller.intersectedObject) return;
-
-    this.handleSecondaryInputOn(controller.intersectedObject);
+  private openToolMenu(controller: VRController) {
+    controller.menuGroup.openMenu(this.menuFactory.buildToolMenu());
   }
 
-  /**
-   * This method handles inputs of the touchpad or analog stick respectively.
-   * This input is used to move a grabbed application towards or away from the controller.
-   */
-  onThumbpadTouch(controller: VRController, axes: number[]) {
-    const { grabbedObject } = controller;
+  private openInfoMenu(controller: VRController, object: EntityMesh) {
+    controller.menuGroup.openMenu(this.menuFactory.buildInfoMenu(object));
+  }
 
-    if (!grabbedObject) return;
+  // #endregion MENUS
 
-    controller.updateIntersectedObject();
+  // #region INTERACTION
 
-    const { intersectedObject } = controller;
+  private async onControllerConnected(controller: VRController) {
+    // Set visibilty and rays accordingly
+    if (this.spectateUserService.isActive) controller.setToSpectatingAppearance();
+    else controller.setToDefaultAppearance();
 
-    if (!intersectedObject) return;
+    this.sender.sendControllerConnect(controller);
+  }
 
-    // Position where ray hits the application
-    const intersectionPosWorld = intersectedObject.point;
-    const intersectionPosLocal = intersectionPosWorld.clone();
-    grabbedObject.worldToLocal(intersectionPosLocal);
+  private onControllerDisconnected(controller: VRController) {
+    // Close all open menus of the disconnected controller.
+    controller.menuGroup.closeAllMenus();
 
-    const controllerPosition = new THREE.Vector3();
-    controller.raySpace.getWorldPosition(controllerPosition);
-    const controllerPositionLocal = controllerPosition.clone();
-    grabbedObject.worldToLocal(controllerPositionLocal);
+    // Inform other users that the controller disconnected.
+    this.sender.sendControllerDisconnect(controller);
+  }
 
-    const direction = new THREE.Vector3();
-    direction.subVectors(intersectionPosLocal, controllerPositionLocal);
+  private makeControllerBindings(): VRControllerBindings {
+    return new VRControllerBindings({
+      triggerButton: new VRControllerButtonBinding('Open / Close', {
+        onButtonDown: (controller: VRController) => {
+          if (!controller.intersectedObject) return;
+          this.primaryInputManager.handleTriggerDown(
+            controller.intersectedObject,
+            controller,
+          );
+        },
+        onButtonPress: (controller: VRController, value: number) => {
+          if (!controller.intersectedObject) return;
+          this.primaryInputManager.handleTriggerPress(
+            controller.intersectedObject,
+            value,
+            controller,
+          );
+        },
+        onButtonUp: (controller: VRController) => {
+          if (!controller.intersectedObject) return;
+          this.primaryInputManager.handleTriggerUp(
+            controller.intersectedObject,
+            controller,
+          );
+        },
+      }),
 
-    const worldDirection = new THREE.Vector3().subVectors(controllerPosition, intersectionPosWorld);
+      menuButton: new VRControllerButtonBinding('Menu', {
+        onButtonDown: (controller) => this.openToolMenu(controller),
+      }),
 
-    const yAxis = axes[1];
+      gripButton: new VRControllerButtonBinding('Grab Object', {
+        onButtonDown: (controller) => this.grabIntersectedObject(controller),
+      }),
 
-    // Stop application from moving too close to controller
-    if ((worldDirection.length() > 0.5 && Math.abs(yAxis) > 0.1)
-        || (worldDirection.length() <= 0.5 && yAxis > 0.1)) {
-      // Adapt distance for moving according to trigger value
-      direction.normalize();
-      const length = yAxis * this.time.getDeltaTime();
+      thumbpad: new VRControllerThumbpadBinding(
+        {
+          labelUp: 'Teleport / Highlight',
+          labelDown: 'Show Details',
+        },
+        {
+          onThumbpadDown: (controller, axes) => {
+            const direction = VRControllerThumbpadBinding.getVerticalDirection(axes, {
+              threshold: THUMBPAD_THRESHOLD,
+            });
+            switch (direction) {
+              case VRControllerThumbpadVerticalDirection.UP:
+                if (controller.intersectedObject) {
+                  this.secondaryInputManager.handleTriggerDown(
+                    controller.intersectedObject,
+                  );
+                }
+                break;
+              case VRControllerThumbpadVerticalDirection.DOWN:
+                if (controller.intersectedObject) {
+                  const { object } = controller.intersectedObject;
+                  if (isEntityMesh(object)) {
+                    this.openInfoMenu(controller, object);
+                  }
+                }
+                break;
+              default:
+                break;
+            }
+          },
+        },
+      ),
+    });
+  }
 
-      this.translateApplication(grabbedObject, direction, length);
+  private grabIntersectedObject(controller: VRController) {
+    if (!controller.intersectedObject || !controller.ray) return;
+
+    let current: THREE.Object3D | null = controller.intersectedObject.object;
+    while (current) {
+      if (isGrabbableObject(current)) {
+        controller.menuGroup.openMenu(this.menuFactory.buildGrabMenu(current));
+        break;
+      } else {
+        current = current.parent;
+      }
     }
-
-    if (controller.ray) { controller.ray.scale.z = intersectedObject.distance; }
   }
-
-  onUtilityMenuDown() {
-    if (this.mainMenu) {
-      this.mainMenu.back();
-    } else {
-      this.openMainMenu();
-    }
-  }
-
-  // #endregion CONTROLLER HANDLERS
-
-  // #region MOUSE & KEYBOARD EVENT HANDLER
 
   @action
   handleDoubleClick(intersection: THREE.Intersection | null) {
-    if (!intersection) return;
-
-    this.handlePrimaryInputOn(intersection);
+    if (this.vrSessionActive || !intersection) return;
+    this.primaryInputManager.handleTriggerDown(intersection);
   }
 
   @action
   handleSingleClick(intersection: THREE.Intersection | null) {
-    if (!intersection) return;
-
-    this.handleSecondaryInputOn(intersection);
+    if (this.vrSessionActive || !intersection) return;
+    this.secondaryInputManager.handleTriggerDown(intersection);
   }
 
   @action
-  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
+  handlePanning(delta: { x: number; y: number }, button: 1 | 2 | 3) {
+    if (this.vrSessionActive) return;
+
     const LEFT_MOUSE_BUTTON = 1;
+    const RIGHT_MOUSE_BUTTON = 3;
 
-    if (button === LEFT_MOUSE_BUTTON) {
-      // Move landscape further if camera is far away
-      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
+    const x = delta.x / this.canvas.width;
+    const y = delta.y / this.canvas.height;
 
-      // Adapt panning speed
-      const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
-      const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
-
-      // Adapt camera position (apply panning)
-      this.camera.position.x += xOffset;
-      this.camera.position.y += yOffset;
-    }
-  }
-
-  @action
-  handleMouseWheel(delta: number) {
-    this.camera.position.z += delta * 0.2;
-  }
-
-  handleKeyboard(event: any) {
-    const mvDst = 0.05;
-    // Handle keys
-    switch (event.key) {
-      case 'q':
-        this.rotateLandscape(-mvDst);
+    switch (button) {
+      case LEFT_MOUSE_BUTTON:
+        // Move user.
+        this.localUser.moveInCameraDirection(
+          new THREE.Vector3(-x * MOUSE_MOVE_SPEED, 0, -y * MOUSE_MOVE_SPEED),
+          { enableY: false },
+        );
         break;
-      case 'e':
-        this.rotateLandscape(mvDst);
-        break;
-      case 'w':
-        this.moveLandscape(0, mvDst, 0);
-        break;
-      case 's':
-        this.moveLandscape(0, -mvDst, 0);
-        break;
-      case 'a':
-        this.moveLandscape(-mvDst, 0, 0);
-        break;
-      case 'd':
-        this.moveLandscape(mvDst, 0, 0);
-        break;
-      case '1':
-        this.moveLandscape(0, 0, -mvDst);
-        break;
-      case '2':
-        this.moveLandscape(0, 0, mvDst);
-        break;
-      case 'c':
-        this.localUser.connect();
-        break;
-      case 'r':
-        this.resetLandscapePosition();
-        break;
-      case 'l':
-        perform(this.loadNewLandscape);
+      case RIGHT_MOUSE_BUTTON:
+        // Rotate camera to look around.
+        this.localUser.rotateCamera(y * MOUSE_ROTATION_SPEED, x * MOUSE_ROTATION_SPEED);
         break;
       default:
         break;
     }
   }
-  // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
-  // #region MENUS
-
-  showHint(title: string, text: string | null = null) {
-    if (this.hintMenu) {
-      this.hintMenu.back();
-      this.hintMenu = undefined;
-    }
-    const hintMenu = new HintMenu(this.camera, title, text);
-    this.hintMenu = hintMenu;
-    hintMenu.startAnimation();
+  @action
+  handleMouseWheel(delta: number) {
+    if (this.vrSessionActive) return;
+    this.localUser.cameraHeight += delta * 0.05;
   }
 
-  openMainMenu() {
-    this.closeControllerMenu();
+  @action
+  handleMouseMove(intersection: THREE.Intersection | null) {
+    if (this.vrSessionActive) return;
+    this.handleHover(intersection, null);
+  }
 
-    if (!this.localUser.controller1) return;
+  private handleHover(
+    intersection: THREE.Intersection | null,
+    controller: VRController | null,
+  ) {
+    if (intersection) {
+      this.primaryInputManager.handleHover(intersection, controller);
+      this.secondaryInputManager.handleHover(intersection, controller);
+    } else {
+      this.primaryInputManager.resetHover(controller);
+      this.secondaryInputManager.resetHover(controller);
+    }
+  }
 
-    this.mainMenu = new MainMenu({
-      closeMenu: this.closeControllerMenu.bind(this),
-      openCameraMenu: this.openCameraMenu.bind(this),
-      openAdvancedMenu: this.openAdvancedMenu.bind(this),
+  private handleKeyboard(event: KeyboardEvent) {
+    switch (event.key) {
+      case 'Escape':
+        if (!this.vrSessionActive) {
+          // Close current debug menu or open tool menu if no menu is debugged.
+          if (this.debugMenuGroup.currentMenu) {
+            this.debugMenuGroup.closeMenu();
+          } else {
+            this.debugMenuGroup.openMenu(this.menuFactory.buildToolMenu());
+          }
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  // #endregion INTERACTION
+
+  // #region SENDING MESSAGES
+
+  private sendPoses() {
+    const poses = VrPoses.getPoses(
+      this.localUser.camera,
+      this.localUser.controller1,
+      this.localUser.controller2,
+    );
+    this.sender.sendPoseUpdate(
+      poses.camera,
+      poses.controller1,
+      poses.controller2,
+    );
+  }
+
+  private sendInitialControllerConnectState() {
+    this.sender.sendControllerConnect(this.localUser.controller1);
+    this.sender.sendControllerConnect(this.localUser.controller2);
+  }
+
+  // #endregion SENDING MESSAGES
+
+  // #region HANDLING MESSAGES
+
+  private onSelfDisconnected(event?: any) {
+    if (this.localUser.isConnecting) {
+      this.showHint('VR service not responding');
+    } else if (event) {
+      switch (event.code) {
+        case 1000: // Normal Closure
+          this.showHint('Successfully disconnected');
+          break;
+        case 1006: // Abnormal closure
+          this.showHint('VR service closed abnormally');
+          break;
+        default:
+          this.showHint('Unexpected disconnect');
+      }
+    }
+
+    // Remove remote users.
+    this.remoteUsers.removeAllRemoteUsers();
+
+    // Reset highlighting colors.
+    this.vrApplicationRenderer.getOpenApplications().forEach((application) => {
+      application.setHighlightingColor(
+        this.configuration.applicationColors.highlightedEntityColor,
+      );
     });
 
-    this.controllerMainMenus.add(this.mainMenu);
+    this.localUser.disconnect();
   }
 
-  openZoomMenu() {
-    this.closeControllerMenu();
-
-    this.mainMenu = new ZoomMenu(this.closeControllerMenu.bind(this), this.renderer,
-      this.scene, this.camera);
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  openCameraMenu() {
-    this.closeControllerMenu();
-
-    const user = this.localUser;
-
-    this.mainMenu = new CameraMenu(this.openMainMenu.bind(this), user.getCameraDelta.bind(user),
-      user.changeCameraHeight.bind(user));
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  openAdvancedMenu() {
-    this.closeControllerMenu();
-
-    const user = this.localUser;
-
-    this.mainMenu = new AdvancedMenu(this.openMainMenu.bind(this),
-      user.toggleLeftyMode.bind(user), user.isLefty, this.resetAll.bind(this));
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  closeControllerMenu() {
-    if (this.mainMenu) {
-      this.controllerMainMenus.remove(this.mainMenu);
-      this.mainMenu.disposeRecursively();
-    }
-    this.mainMenu = undefined;
-  }
-
-  openInfoMenu(content: DetailedInfo) {
-    this.closeInfoMenu();
-
-    this.infoMenu = new DetailInfoMenu(this.closeInfoMenu.bind(this), content);
-
-    this.controllerInfoMenus.add(this.infoMenu);
-  }
-
-  closeInfoMenu() {
-    if (this.infoMenu) {
-      this.controllerInfoMenus.remove(this.infoMenu);
-    }
-    this.infoMenu = undefined;
-  }
-
-  // #endregion MENUS
-
-  // #region UTILS
-
-  handlePrimaryInputOn(intersection: THREE.Intersection) {
-    const self = this;
-    const { object, uv } = intersection;
-
-    function handleApplicationObject(appObject: THREE.Object3D) {
-      if (!(appObject.parent instanceof ApplicationObject3D)) return;
-
-      if (appObject instanceof ComponentMesh) {
-        self.toggleComponentAndUpdate(appObject, appObject.parent);
-      } else if (appObject instanceof CloseIcon) {
-        self.removeApplication(appObject.parent);
-      } else if (appObject instanceof FoundationMesh) {
-        self.closeAllComponentsAndUpdate(appObject.parent);
-      }
+  /**
+   * After succesfully connecting to the backend, create and spawn other users.
+   */
+  onSelfConnected({ self, users }: SelfConnectedMessage): void {
+    // Create User model for all users and add them to the users map by
+    // simulating the event of a user connecting.
+    for (let i = 0; i < users.length; i++) {
+      const userData = users[i];
+      this.onUserConnected(
+        {
+          event: USER_CONNECTED_EVENT,
+          id: userData.id,
+          name: userData.name,
+          color: userData.color,
+          position: userData.position,
+          quaternion: userData.quaternion,
+        },
+        false,
+      );
+      userData.controllers.forEach((controller) => {
+        this.onUserControllerConnect({
+          event: FORWARDED_EVENT,
+          userId: userData.id,
+          originalMessage: {
+            event: USER_CONTROLLER_CONNECT_EVENT,
+            controller,
+          },
+        });
+      });
     }
 
-    if (object instanceof ApplicationMesh) {
-      this.addApplication(object.dataModel, intersection.point);
-    // Handle application hits
-    } else if (object.parent instanceof ApplicationObject3D) {
-      handleApplicationObject(object);
-    } else if (object instanceof BaseMenu && uv) {
-      object.triggerDown(uv);
+    // Initialize local user.
+    this.localUser.connected({
+      id: self.id,
+      name: self.name,
+      color: new THREE.Color(...self.color),
+    });
+
+    // Send controllers.
+    this.sendInitialControllerConnectState();
+  }
+
+  onUserConnected(
+    {
+      id, name, color, position, quaternion,
+    }: UserConnectedMessage,
+    showConnectMessage = true,
+  ): void {
+    const remoteUser = new RemoteVrUser({
+      userName: name,
+      userId: id,
+      color: new THREE.Color(...color),
+      state: 'online',
+      localUser: this.localUser,
+    });
+    this.remoteUsers.addRemoteUser(remoteUser, { position, quaternion });
+
+    if (showConnectMessage) {
+      this.messageMenuQueue.enqueueMenu(
+        this.menuFactory.buildMessageBoxMenu({
+          title: 'User connected',
+          text: remoteUser.userName,
+          color: `#${remoteUser.color.getHexString()}`,
+          time: 3.0,
+        }),
+      );
     }
   }
 
-  toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
-    EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
-    this.addLabels(applicationObject3D);
+  /**
+   * Updates the specified user's camera and controller positions.
+   */
+  onUserPositions({
+    userId,
+    originalMessage: { camera, controller1, controller2 },
+  }: ForwardedMessage<UserPositionsMessage>): void {
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
+    if (!remoteUser) return;
 
-    const drawableComm = this.drawableClassCommunications
-      .get(applicationObject3D.dataModel.instanceId);
+    if (controller1) remoteUser.updateController(CONTROLLER_1_ID, controller1);
+    if (controller2) remoteUser.updateController(CONTROLLER_2_ID, controller2);
+    if (camera) remoteUser.updateCamera(camera);
+  }
 
-    if (drawableComm) {
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+  /**
+   * Updates whether the given user is pinging with the specified controller or not.
+   */
+  onPingUpdate({
+    userId,
+    originalMessage: { controllerId, isPinging },
+  }: ForwardedMessage<PingUpdateMessage>): void {
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
+    if (!remoteUser) return;
 
-      const { value } = this.userSettings.applicationSettings.transparencyIntensity;
-      Highlighting.updateHighlighting(applicationObject3D, drawableComm, value);
+    remoteUser.togglePing(controllerId, isPinging);
+  }
+
+  onMousePingUpdate() {}
+
+  onTimestampUpdate({
+    originalMessage: { timestamp },
+  }: ForwardedMessage<TimestampUpdateMessage>): void {
+    this.roomSerializer.preserveRoom(
+      () => this.timestampService.updateTimestampLocally(timestamp),
+      {
+        restoreLandscapeData: false,
+      },
+    );
+  }
+
+  onUserControllerConnect({
+    userId,
+    originalMessage: {
+      controller: {
+        controllerId,
+        assetUrl,
+        position,
+        quaternion,
+        intersection,
+      },
+    },
+  }: ForwardedMessage<UserControllerConnectMessage>): void {
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
+    if (!remoteUser) return;
+
+    remoteUser.initController(controllerId, assetUrl, {
+      position,
+      quaternion,
+      intersection,
+    });
+  }
+
+  onUserControllerDisconnect({
+    userId,
+    originalMessage: { controllerId },
+  }: ForwardedMessage<UserControllerDisconnectMessage>): void {
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
+    if (!remoteUser) return;
+
+    remoteUser.removeController(controllerId);
+  }
+
+  /**
+   * Removes the user that disconnected and informs our user about it.
+   *
+   * @param {JSON} data - Contains the id of the user that disconnected.
+   */
+  onUserDisconnect({ id }: UserDisconnectedMessage) {
+    // Remove user and show disconnect notification.
+    const removedUser = this.remoteUsers.removeRemoteUserById(id);
+    if (removedUser) {
+      this.messageMenuQueue.enqueueMenu(
+        this.menuFactory.buildMessageBoxMenu({
+          title: 'User disconnected',
+          text: removedUser.userName,
+          color: `#${removedUser.color.getHexString()}`,
+          time: 3.0,
+        }),
+      );
     }
   }
 
-  closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
-    EntityManipulation.closeAllComponents(applicationObject3D);
+  async onInitialLandscape({
+    landscape,
+    openApps,
+    detachedMenus,
+  }: InitialLandscapeMessage): Promise<void> {
+    this.roomSerializer.restoreRoom({ landscape, openApps, detachedMenus });
+  }
 
-    const drawableComm = this.drawableClassCommunications
-      .get(applicationObject3D.dataModel.instanceId);
-
-    if (drawableComm) {
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-
-      const { value } = this.userSettings.applicationSettings.transparencyIntensity;
-      Highlighting.updateHighlighting(applicationObject3D, drawableComm, value);
+  onAppOpened({
+    originalMessage: {
+      id, position, quaternion, scale,
+    },
+  }: ForwardedMessage<AppOpenedMessage>): void {
+    const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(
+      id,
+    );
+    if (application) {
+      this.vrApplicationRenderer.addApplicationLocally(application, {
+        position: new THREE.Vector3(...position),
+        quaternion: new THREE.Quaternion(...quaternion),
+        scale: new THREE.Vector3(...scale),
+      });
     }
   }
 
-  handleSecondaryInputOn(intersection: THREE.Intersection) {
-    const { object, point } = intersection;
-    if (object instanceof FloorMesh) {
-      this.localUser.teleportToPosition(point);
-    } else if (object.parent instanceof ApplicationObject3D) {
-      this.highlightAppEntity(object, object.parent);
-    }
+  onAppClosed({
+    originalMessage: { appId },
+  }: ForwardedMessage<AppClosedMessage>): void {
+    const application = this.vrApplicationRenderer.getApplicationById(appId);
+    if (application) this.vrApplicationRenderer.removeApplicationLocally(application);
   }
 
-  // eslint-disable-next-line
-  highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
-    if (object instanceof ComponentMesh || object instanceof ClazzMesh
-      || object instanceof ClazzCommunicationMesh) {
-      const drawableComm = this.drawableClassCommunications.get(application.dataModel.instanceId);
-
-      if (drawableComm) {
-        const { value } = this.userSettings.applicationSettings.transparencyIntensity;
-        Highlighting.highlight(object, application, drawableComm, value);
-      }
-    }
-  }
-
-  setAppPose(id: string, position: THREE.Vector3, quaternion: THREE.Quaternion, world = false) {
-    const application = this.applicationGroup.getApplication(id);
-
-    if (!application) {
+  onObjectMoved({
+    originalMessage: {
+      objectId, position, quaternion, scale,
+    },
+  }: ForwardedMessage<ObjectMovedMessage>): void {
+    // Find moved object in the scene.
+    const movedObject = findGrabbableObject(this.sceneService.scene, objectId);
+    if (!movedObject) {
+      this.debug('Could not find moved object', objectId);
       return;
     }
 
-    if (world) {
-      application.worldToLocal(position);
-    }
-
-    application.position.copy(position);
-    application.quaternion.copy(quaternion);
+    movedObject.position.fromArray(position);
+    movedObject.quaternion.fromArray(quaternion);
+    movedObject.scale.fromArray(scale);
   }
 
-  // eslint-disable-next-line
-  translateApplication(application: THREE.Object3D, direction: THREE.Vector3, length: number){
-    application.translateOnAxis(direction, length);
-    application.updateMatrix();
-  }
+  onComponentUpdate({
+    originalMessage: { isFoundation, appId, componentId },
+  }: ForwardedMessage<ComponentUpdateMessage>): void {
+    const applicationObject3D = this.vrApplicationRenderer.getApplicationById(
+      appId,
+    );
+    if (!applicationObject3D) return;
 
-  moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
-    const delta = new THREE.Vector3(deltaX, deltaY, deltaZ);
-    this.landscapeOffset.add(delta);
-    this.landscapeObject3D.position.add(delta);
-  }
+    const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentId);
 
-  centerLandscape() {
-    const { floor } = this;
-    const landscape = this.landscapeObject3D;
-    const offset = this.landscapeOffset;
-
-    // Compute bounding box of the floor
-    const bboxFloor = new THREE.Box3().setFromObject(floor);
-
-    // Calculate center of the floor
-    const centerFloor = new THREE.Vector3();
-    bboxFloor.getCenter(centerFloor);
-
-    const bboxLandscape = new THREE.Box3().setFromObject(landscape);
-
-    // Calculate center of the landscape
-    const centerLandscape = new THREE.Vector3();
-    bboxLandscape.getCenter(centerLandscape);
-
-    // Set new position of landscape
-    landscape.position.x += centerFloor.x - centerLandscape.x + offset.x;
-    landscape.position.z += centerFloor.z - centerLandscape.z + offset.z;
-
-    // Check distance between floor and landscape
-    if (bboxLandscape.min.y > bboxFloor.max.y) {
-      landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
-    }
-
-    // Check if landscape is underneath the floor
-    if (bboxLandscape.min.y < bboxFloor.min.y) {
-      landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
-    }
-
-    landscape.position.y += offset.y;
-  }
-
-  rotateLandscape(deltaX: number) {
-    this.landscapeObject3D.rotation.x -= deltaX;
-    this.updateLandscapeRotation(this.landscapeObject3D.quaternion.clone());
-  }
-
-  updateLandscapeRotation(quaternion: THREE.Quaternion) {
-    this.landscapeObject3D.quaternion.copy(quaternion);
-    this.centerLandscape();
-  }
-
-  resetLandscapePosition() {
-    this.landscapeObject3D.rotation.x = (-90 * THREE.MathUtils.DEG2RAD);
-    this.landscapeObject3D.rotation.y = (0);
-    this.landscapeObject3D.rotation.z = (0);
-    this.landscapeOffset.set(0, 0, 0);
-    this.centerLandscape();
-  }
-
-  removeApplication(application: ApplicationObject3D) {
-    this.applicationGroup.removeApplicationById(application.dataModel.instanceId);
-
-    const { controller1, controller2 } = this.localUser;
-    if (controller1) {
-      controller1.intersectableObjects = controller1.intersectableObjects
-        .filter((object) => object !== application);
-    }
-    if (controller2) {
-      controller2.intersectableObjects = controller2.intersectableObjects
-        .filter((object) => object !== application);
+    if (isFoundation) {
+      this.vrApplicationRenderer.closeAllComponentsLocally(applicationObject3D);
+    } else if (componentMesh instanceof ComponentMesh) {
+      this.vrApplicationRenderer.toggleComponentLocally(
+        componentMesh,
+        applicationObject3D,
+      );
     }
   }
 
-  cleanUpLandscape() {
-    this.landscapeObject3D.removeAllChildren();
-    this.landscapeObject3D.resetMeshReferences();
+  onHighlightingUpdate({
+    userId,
+    originalMessage: {
+      isHighlighted, appId, entityType, entityId,
+    },
+  }: ForwardedMessage<HighlightingUpdateMessage>): void {
+    const application = this.vrApplicationRenderer.getApplicationById(appId);
+    if (!application) return;
+
+    const user = this.remoteUsers.lookupRemoteUserById(userId);
+    if (!user) return;
+
+    if (isHighlighted) {
+      this.highlightingService.hightlightComponentLocallyByTypeAndId(
+        application,
+        {
+          entityType,
+          entityId,
+          color: user.color,
+        },
+      );
+    } else {
+      this.highlightingService.removeHighlightingLocally(application);
+    }
   }
 
-  resetAll() {
-    this.applicationGroup.clear();
-    this.resetLandscapePosition();
-    this.localUser.resetPosition();
+  /**
+   * Updates the state of given user to spectating or connected.
+   * Hides them if spectating.
+   *
+   * @param {string} userId - The user's id.
+   * @param {boolean} isSpectating - True, if the user is now spectating, else false.
+   */
+  onSpectatingUpdate({
+    userId,
+    originalMessage: { isSpectating },
+  }: ForwardedMessage<SpectatingUpdateMessage>): void {
+    const remoteUser = this.remoteUsers.setRemoteUserSpectatingById(
+      userId,
+      isSpectating,
+    );
+    if (!remoteUser) return;
+
+    const remoteUserHexColor = `#${remoteUser.color.getHexString()}`;
+    if (isSpectating) {
+      this.messageMenuQueue.enqueueMenu(
+        this.menuFactory.buildMessageBoxMenu({
+          title: remoteUser.userName,
+          text: ' is now spectating',
+          color: remoteUserHexColor,
+          time: 3.0,
+        }),
+      );
+    } else {
+      this.messageMenuQueue.enqueueMenu(
+        this.menuFactory.buildMessageBoxMenu({
+          title: remoteUser.userName,
+          text: ' stopped spectating',
+          color: remoteUserHexColor,
+          time: 3.0,
+        }),
+      );
+    }
   }
 
-  willDestroy() {
-    this.cleanUpLandscape();
-    this.applicationGroup.clear();
-    this.localUser.reset();
+  onMenuDetached({
+    objectId,
+    entityType,
+    detachId,
+    position,
+    quaternion,
+    scale,
+  }: MenuDetachedForwardMessage) {
+    const object = this.sceneService.findMeshByModelId(entityType, detachId);
+    if (isEntityMesh(object)) {
+      const menu = this.menuFactory.buildInfoMenu(object);
+      menu.position.fromArray(position);
+      menu.quaternion.fromArray(quaternion);
+      menu.scale.fromArray(scale);
+      this.detachedMenuGroups.addDetachedMenuLocally(menu, objectId);
+    }
   }
 
-  // #endregion UTILS
+  onDetachedMenuClosed({
+    originalMessage: { menuId },
+  }: ForwardedMessage<DetachedMenuClosedMessage>): void {
+    this.detachedMenuGroups.removeDetachedMenuLocallyById(menuId);
+  }
+
+  // #endregion HANDLING MESSAGES
 }

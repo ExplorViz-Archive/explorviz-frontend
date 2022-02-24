@@ -1,29 +1,33 @@
-<div
-  id="rendering"
-  {{did-insert this.outerDivInserted}}
-  {{did-resize this.resize debounce=100}}
->
-  <canvas
-    class="main-content-majority"
-    {{interaction-modifier
-      raycastObjects=this.raycastObjects
-      camera=this.camera
-      singleClick=this.handleSingleClick
-      doubleClick=this.handleDoubleClick
-      mouseWheel=this.handleMouseWheel
-      panning=this.handlePanning
-    }}
-    {{did-insert this.canvasInserted}}
+<VrDropArea @onDropFiles={{this.onDropFiles}}>
+  <div
+    id="rendering"
+    {{did-insert this.outerDivInserted}}
+    {{did-resize this.resize debounce=100}}
   >
-  </canvas>
-  {{#if this.loadNewLandscape.isRunning}}
-    <Visualization::Rendering::LoadingIndicator @text="Loading New Landscape" />
-  {{else if this.addApplication.isRunning}}
-    <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
-  {{/if}}
-</div>
-<VrButton
-  @renderer={{this.renderer}}
-  @onSessionStartedCallback={{this.onVrSessionStarted}}
-  @onSessionEndedCallback={{this.onVrSessionEnded}}
-/>
+    <canvas
+      class="main-content-majority"
+      {{did-insert this.canvasInserted}}
+      {{interaction-modifier
+        raycastObjects=this.sceneService.scene
+        camera=this.localUser.defaultCamera
+        singleClick=this.handleSingleClick
+        doubleClick=this.handleDoubleClick
+        mouseWheel=this.handleMouseWheel
+        mouseMove=this.handleMouseMove
+        panning=this.handlePanning
+        hammerInteraction=this.hammerInteraction
+      }}
+    >
+    </canvas>
+    {{#if this.loadNewLandscape.isRunning}}
+      <Visualization::Rendering::LoadingIndicator @text="Loading New Landscape" />
+    {{else if this.addApplication.isRunning}}
+      <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
+    {{/if}}
+  </div>
+  <VrButton
+    @renderer={{this.localUser.renderer}}
+    @onSessionStartedCallback={{this.onVrSessionStarted}}
+    @onSessionEndedCallback={{this.onVrSessionEnded}}
+  />
+</VrDropArea>

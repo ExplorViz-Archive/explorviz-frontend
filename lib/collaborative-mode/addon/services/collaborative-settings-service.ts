@@ -33,7 +33,7 @@ export default class CollaborativeSettingsService extends Service {
   randomUsername = `User${Math.floor(Math.random() * Math.floor(100))}`;
 
   get username(): string {
-    if (config.environment === 'noauth') { // no-auth
+    if (config.auth0.enabled === 'false') { // no-auth
       return this.randomUsername;
     }
     return this.auth.user?.name || '';

@@ -7,6 +7,7 @@ export default class RightClickMenuHammer extends RightClickMenu {
     window.addEventListener('click', this.closeContextMenu);
     window.addEventListener('contextmenu', this.closeContextMenu);
     this.args.hammer.on('righttap', this.contextMenu);
+    this.args.hammer.on('press', this.contextMenu);
 
     this.getTargetElement(this.popperId);
   }
@@ -17,6 +18,7 @@ export default class RightClickMenuHammer extends RightClickMenu {
 
     if (this.targetElement) {
       this.args.hammer.off('righttap', this.contextMenu);
+      this.args.hammer.off('press', this.contextMenu);
     }
 
     super.willDestroy(...arguments);

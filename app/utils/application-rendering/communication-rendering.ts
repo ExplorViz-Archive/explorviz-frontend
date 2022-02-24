@@ -89,6 +89,8 @@ export default class CommunicationRendering {
         return;
       }
 
+      commLayout.lineThickness *= this.configuration.commWidthMultiplier;
+
       // Add communication to application
       const pipe = new ClazzCommunicationMesh(commLayout, drawableClazzComm,
         communicationColor, highlightedEntityColor);

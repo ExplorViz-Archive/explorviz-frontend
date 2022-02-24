@@ -2,6 +2,11 @@
 
 /* eslint no-console: 0 */
 
+/**
+ * Environment variables:
+ * "DOTENV=.env-custom ember s" -> Use custom DOTENV file instead of default one
+ */
+
 const DOTENV = require('dotenv');
 var colors = require('colors'); // eslint-disable-line
 
@@ -10,19 +15,13 @@ module.exports = function initEnvironment(environment) {
 
   const P_ENV = process.env;
 
+  // custom DOTENV file, e.g., "DOTENV=.env-custom ember s"
   if (P_ENV.DOTENV) {
     DOTENV.config(path);
   } else if (environment === 'production') {
-    console.log('EXPL-WARNING: This is production mode. You must override the following variables via Docker environment variables in a Docker Compose file:'.yellow);
-    console.log('- LANDSCAPE_URL'.yellow);
-    console.log('- TRACE_URL'.yellow);
-    console.log('- USER_URL'.yellow);
-    console.log('- COLLAB_URL'.yellow);
-    console.log('- FRONTEND_HOST_NAME'.yellow);
-    console.log('... depending on your deployment, e.g., reverse proxy in use.'.yellow);
-
     DOTENV.config({ path: '.env-prod' });
   } else {
+    // Development, use .env file
     DOTENV.config();
   }
 
@@ -42,6 +41,7 @@ module.exports = function initEnvironment(environment) {
       },
     },
     auth0: {
+      enabled: P_ENV.AUTH0_ENABLED,
       clientId: P_ENV.AUTH0_CLIENT_ID,
       domain: P_ENV.AUTH0_DOMAIN,
       logoUrl: P_ENV.AUTH0_LOGO_URL,
@@ -60,6 +60,8 @@ module.exports = function initEnvironment(environment) {
       traceService: P_ENV.TRACE_SERV_URL,
       userService: P_ENV.USER_SERV_URL,
       collaborativeService: P_ENV.COLLAB_SERV_URL,
+      collaborationService: P_ENV.COLLABORATION_SERV_URL,
+      collaborationSocketPath: P_ENV.COLLABORATION_SOCKET_PATH,
     },
 
     APP: {

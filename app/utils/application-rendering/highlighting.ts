@@ -6,12 +6,11 @@ import {
   Class, isClass, isPackage, Package, StructureLandscapeData,
 } from '../landscape-schemes/structure-data';
 import { DrawableClassCommunication, isDrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
+import { getAllClassesInApplication } from '../application-helpers';
+import { getClassesInPackage } from '../package-helpers';
+import { getClassAncestorPackages } from '../class-helpers';
 import { Span, Trace } from '../landscape-schemes/dynamic-data';
 import { getHashCodeToClassMap } from '../landscape-structure-helpers';
-import { getAllClassesInApplication } from '../application-helpers';
-import { getClassAncestorPackages } from '../class-helpers';
-import { getClassesInPackage } from '../package-helpers';
-
 /**
  * Restores default color and transparency for all application meshes
  *
@@ -19,6 +18,7 @@ import { getClassesInPackage } from '../package-helpers';
  */
 export function removeHighlighting(applicationObject3D: ApplicationObject3D) {
   const meshes = applicationObject3D.getAllMeshes();
+
   meshes.forEach((mesh) => {
     mesh.unhighlight();
   });
@@ -77,6 +77,9 @@ export function highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMe
 
   // Reset highlighting
   removeHighlighting(applicationObject3D);
+
+  applicationObject3D.turnOpaque(false);
+
   const model = mesh.dataModel;
 
   // Highlight the entity itself

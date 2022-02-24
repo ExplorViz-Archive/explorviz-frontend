@@ -1,43 +1,73 @@
 import Service, { inject as service } from '@ember/service';
-
+import { tracked } from '@glimmer/tracking';
 import THREE from 'three';
-import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VRController';
-import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
-import WebSocket from './web-socket';
-import SpectateUser from './spectate-user';
+import Configuration from 'explorviz-frontend/services/configuration';
+import { computed } from '@ember/object';
+import VRController from 'virtual-reality/utils/vr-controller';
+
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import SpectateUserService from './spectate-user';
+import VrRoomService from './vr-room';
+import VrSceneService from './vr-scene';
+import WebSocketService from './web-socket';
 
 export type ConnectionStatus = 'offline' | 'connecting' | 'online';
 
 export default class LocalVrUser extends Service {
-  @service('web-socket')
-  webSocket!: WebSocket;
+  @service('configuration')
+  configuration!: Configuration;
 
   @service('spectate-user')
-  spectateUser!: SpectateUser;
+  private spectateUserService!: SpectateUserService;
 
-  userID!: string;
+  @service('vr-room')
+  private roomService!: VrRoomService;
 
+  @service('vr-scene')
+  private sceneService!: VrSceneService;
+
+  @service('web-socket')
+  private webSocket!: WebSocketService;
+
+  userId!: string;
+
+  @tracked
+  userName?: string;
+
+  @tracked
   color: THREE.Color | undefined;
 
+  @tracked
   renderer!: THREE.WebGLRenderer;
 
-  defaultCamera!: THREE.Camera;
+  private userGroup!: THREE.Group;
+
+  @tracked
+  defaultCamera!: THREE.PerspectiveCamera;
 
   controller1: VRController | undefined;
 
   controller2: VRController | undefined;
 
-  controllerMainMenus: THREE.Group | undefined;
+  panoramaSphere: THREE.Object3D | undefined;
 
-  controllerInfoMenus: THREE.Group | undefined;
-
-  userGroup!: THREE.Group;
-
-  multiUserMenu: MultiUserMenu | null = null;
-
+  @tracked
   connectionStatus: ConnectionStatus = 'offline';
 
-  isLefty = false;
+  @tracked
+  currentRoomId: string | null = null;
+
+  @computed('color', 'connectionStatus')
+  get highlightingColorStyle() {
+    let hexColor = '';
+    if (this.isOnline && this.color) {
+      hexColor = this.color.getHexString();
+    } else {
+      hexColor = this.configuration.applicationColors.highlightedEntityColor.getHexString();
+    }
+
+    return `color:#${hexColor}`;
+  }
 
   get camera() {
     if (this.renderer.xr.isPresenting) {
@@ -46,104 +76,80 @@ export default class LocalVrUser extends Service {
     return this.defaultCamera;
   }
 
-  get isOnline() { return this.state === 'online'; }
+  get isOnline() {
+    return this.connectionStatus === 'online';
+  }
 
-  get isConnecting() { return this.state === 'connecting'; }
+  get isConnecting() {
+    return this.connectionStatus === 'connecting';
+  }
 
-  get isSpectating() { return this.spectateUser.isActive; }
-
-  get position() { return this.userGroup.position; }
-
-  get state() { return this.connectionStatus; }
-
-  set state(state: ConnectionStatus) {
-    if (this.multiUserMenu) {
-      this.multiUserMenu.updateStatus(state);
-    }
-    this.connectionStatus = state;
+  get isSpectating() {
+    return this.spectateUserService.isActive;
   }
 
   init() {
     super.init();
 
-    this.userID = 'unknown';
-    this.state = 'offline';
+    this.userId = 'unknown';
+    this.connectionStatus = 'offline';
+
     this.userGroup = new THREE.Group();
+    this.sceneService.scene.add(this.userGroup);
+
+    // Initialize camera. The default aspect ratio is not known at this point
+    // and must be updated when the canvas is inserted.
+    this.defaultCamera = new THREE.PerspectiveCamera(75, 1.0, 0.1, 1000);
+    this.defaultCamera.position.set(0, 1, 2);
+    this.userGroup.add(this.defaultCamera);
   }
 
-  addCamera(camera: THREE.Camera) {
-    this.defaultCamera = camera;
-    this.userGroup.add(camera);
+  setController1(controller1: VRController) {
+    this.controller1 = controller1;
+    this.userGroup.add(controller1);
   }
 
-  updateControllers() {
-    if (this.controller1) { this.controller1.update(); }
-    if (this.controller2) { this.controller2.update(); }
+  setController2(controller2: VRController) {
+    this.controller2 = controller2;
+    this.userGroup.add(controller2);
   }
 
-  setControlsAccordingToHand() {
-    const hand = this.controller1?.gamepad?.hand;
-
-    if ((hand === 'right' && this.isLefty && this.controller1?.isInteractionController)
-      || (hand === 'right' && !this.isLefty && this.controller1?.isUtilityController)
-      || (hand === 'left' && this.isLefty && this.controller1?.isUtilityController)
-      || (hand === 'left' && !this.isLefty && this.controller1?.isInteractionController)) {
-      this.swapControls();
-    }
+  setPanoramaShere(panoramaSphere: THREE.Object3D) {
+    this.removePanoramaShere();
+    this.panoramaSphere = panoramaSphere;
+    this.userGroup.add(panoramaSphere);
   }
 
-  toggleLeftyMode() {
-    this.isLefty = !this.isLefty;
-    this.swapControls();
+  private removePanoramaShere() {
+    if (this.panoramaSphere) this.userGroup.remove(this.panoramaSphere);
   }
 
-  swapControls() {
-    if (!this.controller1 || !this.controller2) return;
-
-    const controllers = [this.controller1, this.controller2];
-
-    controllers.forEach((controller) => {
-      // Remove attached visual indicators
-      controller.removeRay();
-      controller.removeTeleportArea();
-
-      // Swap visual control indicators
-      if (controller.control === controlMode.INTERACTION) {
-        controller.control = controlMode.UTILITY;
-        controller.addRay(new THREE.Color('blue'));
-
-        if (this.controllerMainMenus) controller.raySpace.add(this.controllerMainMenus);
-        controller.initTeleportArea();
-      } else {
-        controller.control = controlMode.INTERACTION;
-        controller.addRay(new THREE.Color('red'));
-        if (this.controllerInfoMenus) controller.raySpace.add(this.controllerInfoMenus);
-      }
-    });
-
-    // Swap controls (callback functions)
-    [this.controller1.eventCallbacks, this.controller2.eventCallbacks] = [this.controller2
-      .eventCallbacks, this.controller1.eventCallbacks];
+  updateControllers(delta: number) {
+    if (this.controller1) this.controller1.update(delta);
+    if (this.controller2) this.controller2.update(delta);
   }
 
-  getCameraDelta() {
-    return this.userGroup.position;
-  }
-
-  changeCameraHeight(deltaY: number) {
-    this.userGroup.position.add(new THREE.Vector3(0, deltaY, 0));
+  updateCameraAspectRatio(width: number, height: number) {
+    this.renderer.setSize(width, height);
+    this.defaultCamera.aspect = width / height;
+    this.defaultCamera.updateProjectionMatrix();
   }
 
   /*
    *  This method is used to adapt the users view to
    *  the new position
    */
-  teleportToPosition(position: THREE.Vector3, adaptCameraHeight = false) {
+  teleportToPosition(
+    position: THREE.Vector3,
+    {
+      adaptCameraHeight = false,
+    }: {
+      adaptCameraHeight?: boolean;
+    } = {},
+  ) {
     if (!this.camera) return;
 
-    const cameraWorldPos = new THREE.Vector3();
-    this.camera.getWorldPosition(cameraWorldPos);
-
+    const cameraWorldPos = this.getCameraWorldPosition();
     this.userGroup.position.x += position.x - cameraWorldPos.x;
     if (adaptCameraHeight) {
       this.userGroup.position.y += position.y - cameraWorldPos.y;
@@ -151,58 +157,147 @@ export default class LocalVrUser extends Service {
     this.userGroup.position.z += position.z - cameraWorldPos.z;
   }
 
+  getCameraWorldPosition() {
+    return this.camera.getWorldPosition(new THREE.Vector3());
+  }
+
+  get cameraHeight(): number {
+    return this.userGroup.position.y;
+  }
+
+  set cameraHeight(cameraHeight: number) {
+    this.userGroup.position.y = cameraHeight;
+  }
+
+  /**
+   * Moves the user group in the given direction relative to the default camera.
+   */
+  moveInCameraDirection(
+    direction: THREE.Vector3,
+    {
+      enableX = true,
+      enableY = true,
+      enableZ = true,
+    }: { enableX?: boolean; enableY?: boolean; enableZ?: boolean },
+  ) {
+    // Convert direction from the camera's object space to world coordinates.
+    const distance = direction.length();
+    const worldDirection = direction
+      .clone()
+      .normalize()
+      .transformDirection(this.defaultCamera.matrix);
+
+    // Remove disabled components.
+    if (!enableX) worldDirection.x = 0;
+    if (!enableY) worldDirection.y = 0;
+    if (!enableZ) worldDirection.z = 0;
+
+    // Convert the direction back to object space before applying the translation.
+    const localDirection = worldDirection
+      .normalize()
+      .transformDirection(
+        this.userGroup.matrix.clone().invert(),
+      );
+    this.userGroup.translateOnAxis(localDirection, distance);
+  }
+
+  /**
+   * Rotates the camera around the local x and world y axis.
+   */
+  rotateCamera(x: number, y: number) {
+    const xAxis = new THREE.Vector3(1, 0, 0);
+    const yAxis = new THREE.Vector3(0, 1, 0);
+    this.camera.rotateOnAxis(xAxis, x);
+    this.camera.rotateOnWorldAxis(yAxis, y);
+  }
+
   /*
    * This method is used to adapt the users view to the initial position
    */
-  resetPosition() {
+  resetPositionAndRotation() {
     this.userGroup.position.set(0, 0, 0);
+    this.defaultCamera.rotation.set(0, 0, 0);
   }
 
   reset() {
-    this.userID = 'unknown';
-    this.state = 'offline';
-    this.color = undefined;
+    this.resetPositionAndRotation();
+    this.disconnect();
+    this.userId = 'unknown';
     this.color = undefined;
 
-    // remove controller rays and models
-    // since raySpace and gripSpace will else persist
-    this.controller1?.raySpace?.children.forEach((child) => {
-      this.controller1?.raySpace?.remove(child);
-    });
-    this.controller2?.gripSpace?.children.forEach((child) => {
-      this.controller2?.gripSpace?.remove(child);
-    });
-    this.controller1?.children.forEach((child) => { this.controller1?.remove(child); });
-    this.controller2?.children.forEach((child) => { this.controller2?.remove(child); });
-
+    this.resetController(this.controller1);
     this.controller1 = undefined;
+
+    this.resetController(this.controller2);
     this.controller2 = undefined;
-    this.userGroup.children.forEach((child) => { this.userGroup.remove(child); });
   }
 
-  connect() {
-    this.state = 'connecting';
-    this.webSocket.initSocket();
+  private resetController(controller: VRController | undefined) {
+    if (!controller) return;
+
+    this.userGroup.remove(controller);
+    controller.children.forEach((child) => controller.remove(child));
+    controller.gripSpace?.children.forEach((child) => {
+      controller.gripSpace?.remove(child);
+    });
+    controller.removeTeleportArea();
+  }
+
+  async hostRoom() {
+    if (!this.isConnecting) {
+      this.connectionStatus = 'connecting';
+      try {
+        const response = await this.roomService.createRoom();
+        this.joinRoom(response.roomId, { checkConnectionStatus: false });
+      } catch (e: any) {
+        this.connectionStatus = 'offline';
+        AlertifyHandler.showAlertifyError('Cannot reach VR-Service.');
+      }
+    }
+  }
+
+  async joinRoom(roomId: string, {
+    checkConnectionStatus = true,
+  }: { checkConnectionStatus?: boolean } = {}) {
+    if (!checkConnectionStatus || !this.isConnecting) {
+      this.connectionStatus = 'connecting';
+      this.currentRoomId = roomId;
+      try {
+        const response = await this.roomService.joinLobby(this.currentRoomId);
+        this.webSocket.initSocket(response.ticketId);
+      } catch (e: any) {
+        this.connectionStatus = 'offline';
+        this.currentRoomId = null;
+        AlertifyHandler.showAlertifyError('Cannot reach VR-Service.');
+      }
+    }
+  }
+
+  connected({
+    id,
+    name,
+    color,
+  }: {
+    id: string;
+    name: string;
+    color: THREE.Color;
+  }) {
+    this.connectionStatus = 'online';
+    this.userId = id;
+    this.userName = name;
+
+    this.color = color;
+    if (this.controller1) this.controller1.updateControllerColor(color);
+    if (this.controller2) this.controller2.updateControllerColor(color);
   }
 
   /**
    * Switch to offline mode, close socket connection
    */
   disconnect() {
-    this.state = 'offline';
-
-    // Close socket
+    this.connectionStatus = 'offline';
+    this.currentRoomId = null;
     this.webSocket.closeSocket();
-  }
-
-  toggleConnection() {
-    if (this.isConnecting) { return; }
-
-    if (this.isOnline) {
-      this.disconnect();
-    } else {
-      this.connect();
-    }
   }
 }
 

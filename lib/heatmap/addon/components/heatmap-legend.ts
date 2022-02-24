@@ -40,7 +40,7 @@ export default class HeatmapLegend extends Component<Args> {
       return 'Cont. score:';
     }
     if (mode === 'windowedHeatmap') {
-      return 'Windowed (average) scroe:';
+      return 'Windowed (average) score:';
     }
     return 'Subheader';
   }
@@ -58,17 +58,11 @@ export default class HeatmapLegend extends Component<Args> {
     const ctx = this.canvas.getContext('2d')!;
     const grad = ctx.createLinearGradient(0, this.canvas.height, 0, 0);
 
-    if (this.heatmapConfiguration.useSimpleHeat) {
-      const heatmapGradient = this.heatmapConfiguration.getSimpleHeatGradient();
-      Object.keys(heatmapGradient).forEach((key) => {
-        grad.addColorStop(Number(key), heatmapGradient[key]);
-      });
-    } else {
-      const heatmapGradient = this.heatmapConfiguration.getArrayHeatGradient();
-      Object.keys(heatmapGradient).forEach((key) => {
-        grad.addColorStop(Number(key) + 0.50, heatmapGradient[key]);
-      });
-    }
+    const heatmapGradient = this.heatmapConfiguration.getSimpleHeatGradient();
+    Object.keys(heatmapGradient).forEach((key) => {
+      grad.addColorStop(Number(key), heatmapGradient[key]);
+    });
+
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }

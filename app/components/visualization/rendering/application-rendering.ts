@@ -17,6 +17,7 @@ import CommunicationRendering from 'explorviz-frontend/utils/application-renderi
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import { restartableTask, task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import {
   Class, isClass, Package,
@@ -36,14 +37,12 @@ import {
   closeComponentMesh,
   moveCameraTo,
   openComponentMesh,
-  openComponentsRecursively,
+  openAllComponents,
   restoreComponentState,
   toggleComponentMeshState,
 } from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
-import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
 import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPos, removeHeatmapHelperLines } from 'heatmap/utils/heatmap-helper';
-import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import UserSettings from 'explorviz-frontend/services/user-settings';
@@ -105,11 +104,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
-  animationMixers!: Array<THREE.AnimationMixer>;
-
-  globeMesh!: THREE.Mesh;
-
-  clock!: THREE.Clock;
+  clock = new THREE.Clock();
 
   // Used to display performance and memory usage information
   threePerformance: THREEPerformance | undefined;
@@ -271,9 +266,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
 
-    this.animationMixers = new Array<THREE.AnimationMixer>();
-
-    this.clock = new THREE.Clock();
     this.debug('Renderer set up');
   }
 
@@ -304,6 +296,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   handleSingleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
+
     const mesh = intersection.object;
     this.singleClickOnMesh(mesh);
   }
@@ -485,13 +478,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         dynamic: this.applicationObject3D.traces,
       };
 
-      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', workerPayload);
+      const layoutMap: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', workerPayload);
 
       // Remember state of components
       const { openComponentIds } = this.applicationObject3D;
 
       // Converting plain JSON layout data due to worker limitations
-      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
+      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutMap);
       this.applicationObject3D.boxLayoutMap = boxLayoutMap;
 
       // Clean up old application
@@ -501,27 +494,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
 
-      if (!this.globeMesh) {
-        // Add globe for communication that comes from the outside
-        this.globeMesh = EntityRendering.addGlobeToApplication(this.applicationObject3D);
-
-        const period = 1000;
-        const times = [0, period];
-        const values = [0, 360];
-
-        const trackName = '.rotation[y]';
-        const track = new THREE.NumberKeyframeTrack(trackName, times, values);
-
-        const clip = new THREE.AnimationClip('default', period, [track]);
-
-        const animationMixer = new THREE.AnimationMixer(this.globeMesh);
-
-        const clipAction = animationMixer.clipAction(clip);
-        clipAction.play();
-        this.animationMixers.push(animationMixer);
-      } else {
+      if (!this.applicationObject3D.globeMesh) {
         // reposition
-        EntityRendering.repositionGlobeToApplication(this.applicationObject3D, this.globeMesh);
+        this.applicationObject3D.addGlobeToApplication();
+        this.applicationObject3D.initializeGlobeAnimation();
+      } else {
+        this.applicationObject3D.repositionGlobeToApplication();
       }
 
       // Restore old state of components
@@ -642,24 +620,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       return;
     }
 
-    let colorMap: number[];
-    let simpleHeatMap: any;
-    let canvas: any;
-
-    if (!this.heatmapConf.useSimpleHeat) {
-      const { depthSegments, widthSegments } = foundationMesh.geometry.parameters;
-      // Compute face numbers of top side of the cube
-      const size = widthSegments * depthSegments * 2;
-      // Prepare color map with same size as the surface of the foundation topside
-      colorMap = new Array(size).fill(0);
-    } else {
-      canvas = document.createElement('canvas');
-      canvas.width = foundationMesh.width;
-      canvas.height = foundationMesh.depth;
-      simpleHeatMap = simpleHeatmap(selectedMetric.max, canvas,
-        this.heatmapConf.getSimpleHeatGradient(),
-        this.heatmapConf.heatmapRadius, this.heatmapConf.blurRadius);
-    }
+    const canvas = document.createElement('canvas');
+    canvas.width = foundationMesh.width;
+    canvas.height = foundationMesh.depth;
+    const simpleHeatMap = simpleHeatmap(selectedMetric.max, canvas,
+      this.heatmapConf.getSimpleHeatGradient(),
+      this.heatmapConf.heatmapRadius, this.heatmapConf.blurRadius);
 
     const foundationWorldPosition = new THREE.Vector3();
 
@@ -672,24 +638,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     boxMeshes.forEach((boxMesh) => {
       if (boxMesh instanceof ClazzMesh) {
         this.heatmapClazzUpdate(boxMesh.dataModel, foundationMesh,
-          simpleHeatMap, colorMap);
+          simpleHeatMap);
       }
     });
 
-    if (!this.heatmapConf.useSimpleHeat) {
-      const color = 'rgb(255, 255, 255)';
-      foundationMesh.material = new THREE.MeshLambertMaterial({
-        color: new THREE.Color(color),
-        vertexColors: true,
-      });
-
-      invokeRecoloring(colorMap!, foundationMesh, selectedMetric.max,
-        this.heatmapConf.getArrayHeatGradient());
-    } else {
-      simpleHeatMap.draw(0.0);
-
-      applySimpleHeatOnFoundation(foundationMesh, canvas);
-    }
+    simpleHeatMap.draw(0.0);
+    applySimpleHeatOnFoundation(foundationMesh, canvas);
 
     this.heatmapConf.currentApplication = this.applicationObject3D;
     this.heatmapConf.applicationID = this.applicationObject3D.dataModel.id;
@@ -713,8 +667,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.heatmapConf.heatmapActive = false;
   }
 
-  heatmapClazzUpdate(clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any,
-    colorMap: number[]) {
+  heatmapClazzUpdate(clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any) {
     // Calculate center point of the clazz floor. This is used for computing the corresponding
     // face on the foundation box.
     const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id) as
@@ -755,31 +708,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
 
     // Compute color only for the first intersection point for consistency if one was found.
-    if (firstIntersection) {
-      if (!this.heatmapConf.useSimpleHeat && firstIntersection.faceIndex) {
-        // The number of faces at front and back of the foundation mesh,
-        // i.e. the starting index for the faces on top.
-        const depthOffset = foundationMesh.geometry.parameters.depthSegments * 4;
-        if (selectedMode === 'aggregatedHeatmap') {
-          setColorValues(firstIntersection.faceIndex - depthOffset,
-            heatmapValue - (this.heatmapConf.largestValue / 2),
-            colorMap,
-            foundationMesh);
-        } else {
-          setColorValues(firstIntersection.faceIndex - depthOffset,
-            heatmapValue,
-            colorMap,
-            foundationMesh);
-        }
-      } else if (this.heatmapConf.useSimpleHeat && firstIntersection.uv) {
-        const xPos = firstIntersection.uv.x * foundationMesh.width;
-        const zPos = (1 - firstIntersection.uv.y) * foundationMesh.depth;
-        if (selectedMode === 'aggregatedHeatmap') {
-          simpleHeatMap.add([xPos, zPos, heatmapValues.get(clazz.id)]);
-        } else {
-          simpleHeatMap.add([xPos, zPos,
-            heatmapValue + (this.heatmapConf.largestValue / 2)]);
-        }
+    if (firstIntersection && firstIntersection.uv) {
+      const xPos = firstIntersection.uv.x * foundationMesh.width;
+      const zPos = (1 - firstIntersection.uv.y) * foundationMesh.depth;
+      if (selectedMode === 'aggregatedHeatmap') {
+        simpleHeatMap.add([xPos, zPos, heatmapValues.get(clazz.id)]);
+      } else {
+        simpleHeatMap.add([xPos, zPos,
+          heatmapValue + (this.heatmapConf.largestValue / 2)]);
       }
     }
   }
@@ -811,9 +747,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.threePerformance.stats.begin();
     }
 
-    if (this.animationMixers) {
-      this.animationMixers.forEach((mixer) => mixer.update(this.clock.getDelta()));
-    }
+    this.applicationObject3D.animationMixer?.update(this.clock.getDelta());
 
     this.renderer.render(this.scene, this.camera);
 
@@ -928,13 +862,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   openAllComponents() {
-    this.applicationObject3D.dataModel.packages.forEach((child) => {
-      const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.id);
-      if (mesh !== undefined && mesh instanceof ComponentMesh) {
-        openComponentMesh(mesh, this.applicationObject3D);
-      }
-      openComponentsRecursively(child, this.applicationObject3D);
-    });
+    openAllComponents(this.applicationObject3D);
 
     this.addCommunication();
 
