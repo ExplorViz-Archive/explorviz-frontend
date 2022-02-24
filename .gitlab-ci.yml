@@ -1,9 +1,9 @@
 image: explorviz/build-images:frontend
 
-#cache:
-#  paths:
-#    - node_modules/
- #   - .npm/
+cache:
+  paths:
+    - node_modules/
+    - .npm/
 
 stages:
   - code-analysis
@@ -17,10 +17,7 @@ linting:
   tags:
     - exec-docker
   before_script:
-    - npm update
-   # - npm ci --cache .npm --prefer-offline
     - npm install
-    - npm install -g ember-template-lint
   script:
     - npm run lint
 
@@ -29,7 +26,6 @@ test:
   tags:
     - exec-docker
   script:
-    #- npm ci --cache .npm --prefer-offline
     - npm install
     - ember test --launch chromium
 
@@ -38,7 +34,6 @@ build:
   tags:
     - exec-docker
   script:
-    #- npm ci --cache .npm --prefer-offline
     - npm install
     - ember build --prod
   artifacts:
