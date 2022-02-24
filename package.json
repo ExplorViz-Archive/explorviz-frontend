@@ -130,7 +130,6 @@
     "jquery": "^3.5.1",
     "meshline": "2.0.3",
     "moment": "^2.24.0",
-    "npm-check-updates": "^10.2.2",
     "plotly.js-dist": "^1.57.1",
     "rsvp": "^4.8.5",
     "sass": "^1.24.2",
