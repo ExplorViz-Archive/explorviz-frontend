@@ -17,12 +17,16 @@ import debugLogger from 'ember-debug-logger';
 import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
+import ElkConstructor from 'elkjs/lib/elk-api';
+import THREE from 'three';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
   dynamicLandscapeData: DynamicLandscapeData;
   application?: Application;
 }
+
+export const earthTexture = new THREE.TextureLoader().load('images/earth-map.jpg');
 
 /**
  * TODO
@@ -48,6 +52,7 @@ export default class VisualizationController extends Controller {
 
   plotlyTimelineRef!: PlotlyTimeline;
 
+  @tracked
   selectedTimestampRecords: Timestamp[] = [];
 
   @tracked
@@ -58,6 +63,9 @@ export default class VisualizationController extends Controller {
 
   @tracked
   components: string[] = [];
+
+  @tracked
+  showAR: boolean = false;
 
   @tracked
   showVR: boolean = false;
@@ -74,6 +82,11 @@ export default class VisualizationController extends Controller {
   @tracked
   timelineTimestamps: Timestamp[] = [];
 
+  @tracked
+  elk = new ElkConstructor({
+    workerUrl: './assets/web-workers/elk-worker.min.js',
+  });
+
   debug = debugLogger();
 
   get showLandscapeView() {
@@ -82,7 +95,7 @@ export default class VisualizationController extends Controller {
       || this.landscapeData === null;
   }
 
-  get isLandscapeExistendAndEmpty() {
+  get isLandscapeExistentAndEmpty() {
     return this.landscapeData !== null
       && this.landscapeData.structureLandscapeData.nodes.length === 0;
   }
@@ -156,6 +169,7 @@ export default class VisualizationController extends Controller {
   @action
   receiveOpenLandscapeView() {
     this.closeDataSelection();
+    this.showAR = false;
     this.showVR = false;
     if (this.landscapeData !== null) {
       this.landscapeData = {
@@ -175,6 +189,15 @@ export default class VisualizationController extends Controller {
           this.landscapeData.structureLandscapeData),
       };
       this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: appId });
+    }
+  }
+
+  @action
+  switchToAR() {
+    if (!this.showVR) {
+      this.pauseVisualizationUpdating();
+      this.closeDataSelection();
+      this.showAR = true;
     }
   }
 
@@ -296,6 +319,8 @@ export default class VisualizationController extends Controller {
     this.landscapeData = null;
     this.selectedTimestampRecords = [];
     this.visualizationPaused = false;
+    this.showAR = false;
+    this.showVR = false;
     this.closeDataSelection();
     this.landscapeListener.initLandscapePolling();
     this.updateTimestampList();

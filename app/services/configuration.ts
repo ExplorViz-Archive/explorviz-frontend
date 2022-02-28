@@ -44,6 +44,13 @@ export default class Configuration extends Service {
 
   commCurveHeightDependsOnDistance = true;
 
+  // Determines height of class communication curves, 0 results in straight lines
+  @tracked
+  commCurveHeightMultiplier = 1;
+
+  @tracked
+  commWidthMultiplier = 1;
+
   @tracked
   popupPosition: Position2D | undefined = undefined;
 

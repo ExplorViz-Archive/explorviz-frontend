@@ -26,69 +26,46 @@
   </div>
 
   <div class="pl-3">
-    <div class="d-flex justify-content-between pr-3">
+    <div class="d-flex justify-content-between">
       <div>
-        Choose visualization style
+        Set heatmap point radius
         <HelpTooltip
-          @title={{this.descriptions.visualizationMode}}
+          @title={{this.descriptions.heatmapRadius}}
           @placement="right"
         />
       </div>
-      <div>
-        <XToggle
-          @theme="skewed"
-          @onLabel="simple"
-          @offLabel="array"
-          @value={{this.heatmapConf.useSimpleHeat}}
-          @onToggle={{this.toggleSimpleHeat}}
+      <BsForm model={{this}} as |form|>
+        <form.element
+          class="d-contents"
+          @controlType="number"
+          @step="1"
+          @value={{this.heatmapConf.heatmapRadius}}
+          @onChange={{this.onHeatmapRadiusChange}}
         />
-      </div>
+      </BsForm>
     </div>
   </div>
 
-  {{#if this.heatmapConf.useSimpleHeat}}
-    <div class="pl-3">
-      <div class="d-flex justify-content-between">
-        <div>
-          Set heatmap point radius
-          <HelpTooltip
-            @title={{this.descriptions.heatmapRadius}}
-            @placement="right"
-          />
-        </div>
-        <BsForm model={{this}} as |form|>
-          <form.element
-            class="d-contents"
-            @controlType="number"
-            @step="1"
-            @value={{this.heatmapConf.heatmapRadius}}
-            @onChange={{this.onHeatmapRadiusChange}}
-          />
-        </BsForm>
+  <div class="pl-3 py-2">
+    <div class="d-flex justify-content-between">
+      <div>
+        Set heatmap blur radius
+        <HelpTooltip
+          @title={{this.descriptions.blurRadius}}
+          @placement="right"
+        />
       </div>
+      <BsForm model={{this}} as |form|>
+        <form.element
+          class="d-contents"
+          @controlType="number"
+          @step="1"
+          @value={{this.heatmapConf.blurRadius}}
+          @onChange={{this.onBlurRadiusChange}}
+        />
+      </BsForm>
     </div>
-
-    <div class="pl-3 py-2">
-      <div class="d-flex justify-content-between">
-        <div>
-          Set heatmap blur radius
-          <HelpTooltip
-            @title={{this.descriptions.blurRadius}}
-            @placement="right"
-          />
-        </div>
-        <BsForm model={{this}} as |form|>
-          <form.element
-            class="d-contents"
-            @controlType="number"
-            @step="1"
-            @value={{this.heatmapConf.blurRadius}}
-            @onChange={{this.onBlurRadiusChange}}
-          />
-        </BsForm>
-      </div>
-    </div>
-  {{/if}}
+  </div>
 
   <div class="pl-3">
     <div class="d-flex justify-content-between pr-3">
@@ -170,53 +147,6 @@
         class="float-right"
         @type="primary"
         @onClick={{this.resetSimpleHeatGradient}}
-      >
-        Reset to default
-      </BsButton>
-    </div>
-  {{/if}}
-
-  <div class="d-flex justify-content-between pr-3 mt-5">
-    <div>
-      <h4>
-        Array heatmap gradient configuration
-        <HelpTooltip
-          @title={{this.descriptions.ahGradient}}
-          @placement="right"
-        />
-      </h4>
-    </div>
-    <XToggle
-      @theme="flat"
-      @value={{this.showArrayHeatSettings}}
-      @onToggle={{this.toggleArraySettings}}
-    />
-  </div>
-  {{#if this.showArrayHeatSettings}}
-    <div class="row">
-      {{#each-in this.heatmapConf.arrayHeatGradient as |key|}}
-        <div class="col-md-4 col-lg-2 col-xl-2 mt-3">
-          <div>
-            Stop value: {{revert-key key "_" "."}}
-          </div>
-          <div id={{concat "ah-gradient-" key}} class="input-group">
-            <Input
-              id="arrayHeatGradientInput"
-              class="form-control input-lg"
-              @type="text"
-              @value={{get this.heatmapConf.arrayHeatGradient key}}
-            />
-          </div>
-        </div>
-      {{else}}
-        ERR: Gradient is empty.
-      {{/each-in}}
-    </div>
-    <div class="d-flex justify-content-end pr-3">
-      <BsButton
-        class="float-right"
-        @type="primary"
-        @onClick={{this.resetArrayHeatGradient}}
       >
         Reset to default
       </BsButton>

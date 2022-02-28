@@ -2,7 +2,9 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import THREE from 'three';
 
 export default class TeleportMesh extends BaseMesh {
-  constructor(color = new THREE.Color(0x0000dc)) {
+  private yOffset: number;
+
+  constructor(color: THREE.Color) {
     super(color);
 
     this.geometry = new THREE.RingGeometry(0.14, 0.2, 32);
@@ -12,14 +14,15 @@ export default class TeleportMesh extends BaseMesh {
     this.material.transparent = true;
     this.material.opacity = 0.4;
 
+    // Randomize y offset to avoid z-fighting of overlapping teleport areas.
+    this.yOffset = Math.random() * 0.001 + 0.005;
+
     this.visible = false;
   }
 
-  showAbovePosition(position: THREE.Vector3, yOffset = 0.005) {
-    this.visible = true;
-
+  showAbovePosition(position: THREE.Vector3) {
     // Set teleport mesh (just) above the given position
     this.position.copy(position);
-    this.position.y += yOffset;
+    this.position.y += this.yOffset;
   }
 }

@@ -24,7 +24,7 @@ import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/st
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
-import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
+import { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import UserSettings from 'explorviz-frontend/services/user-settings';
@@ -34,10 +34,12 @@ interface Args {
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
+  readonly elk: ELK;
   showApplication(applicationId: string): void;
   openDataSelection(): void;
   toggleVisualizationUpdating(): void;
-  switchToVR(): void;
+  switchToAR(): void,
+  switchToVR(): void,
 }
 
 interface SimplePlaneLayout {
@@ -132,11 +134,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       { title: 'Reset View', action: this.resetView },
       { title: pauseItemtitle, action: this.args.toggleVisualizationUpdating },
       { title: 'Open Sidebar', action: this.args.openDataSelection },
+      { title: 'Enter AR', action: this.args.switchToAR },
       { title: 'Enter VR', action: this.args.switchToVR },
     ];
   }
-
-  readonly elk: ELK;
 
   @tracked
   popupData: PopupData | null = null;
@@ -166,10 +167,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.hammerInteraction = HammerInteraction.create();
 
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
-
-    this.elk = new ElkConstructor({
-      workerUrl: './assets/web-workers/elk-worker.min.js',
-    });
   }
 
   @action
@@ -449,7 +446,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       });
 
       // Run actual klay function (2nd step)
-      const newGraph: ElkNode = yield this.elk.layout(graph);
+      const newGraph: ElkNode = yield this.args.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
       const layoutedLandscape: Layout3Return = yield this.worker.postMessage('layout3', {
@@ -562,7 +559,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Create and add label + icon
     this.labeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
       this.configuration.landscapeColors.applicationTextColor);
-    Labeler.addApplicationLogo(applicationMesh, this.imageLoader);
+    this.labeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
     this.landscapeObject3D.add(applicationMesh);

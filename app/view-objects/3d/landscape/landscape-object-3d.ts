@@ -49,6 +49,18 @@ export default class LandscapeObject3D extends THREE.Object3D {
     return this.modelIdToMesh.get(id);
   }
 
+  getAllMeshes() {
+    return Array.from(this.modelIdToMesh.values());
+  }
+
+  setOpacity(opacity: number) {
+    this.getAllMeshes().forEach((mesh) => {
+      if (mesh instanceof THREE.Mesh && mesh.material instanceof THREE.Material) {
+        mesh.material.opacity = opacity;
+      }
+    });
+  }
+
   /**
    * Resets all maps and sets governing meshes
    */
@@ -60,7 +72,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
    * Removes all child meshes and disposes their geometries and materials
    */
   removeAllChildren() {
-    function removeChildren(entity: THREE.Object3D | THREE.Mesh) {
+    const removeChildren = (entity: THREE.Object3D | THREE.Mesh) => {
       for (let i = entity.children.length - 1; i >= 0; i--) {
         const child = entity.children[i];
 
@@ -81,7 +93,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
           entity.remove(child);
         }
       }
-    }
+    };
 
     removeChildren(this);
   }
@@ -113,5 +125,19 @@ export default class LandscapeObject3D extends THREE.Object3D {
       });
     }
     return rect;
+  }
+
+  /**
+   * Scales the landscape object such that its largest side matches the given value.
+   *
+   * @param max Desired length for the longest side of the application object
+   */
+  setLargestSide(max: number) {
+    if (max <= 0) return;
+
+    const appDimensions = new THREE.Box3().setFromObject(this);
+    const scalar = max / Math.max(...appDimensions.getSize(new THREE.Vector3()).toArray());
+
+    this.scale.multiplyScalar(scalar);
   }
 }

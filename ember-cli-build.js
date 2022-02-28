@@ -54,13 +54,15 @@ module.exports = (defaults) => {
   app.import('node_modules/alertifyjs/build/css/alertify.min.css');
   app.import('node_modules/alertifyjs/build/css/themes/default.min.css');
 
+  app.import('node_modules/@ar-js-org/ar.js/three.js/build/ar-threex.js');
+
   app.import('vendor/cytoscape/cytoscape.min.js');
 
   app.import('vendor/eventsource-polyfill/eventsource.min.js');
 
   app.import('node_modules/bootstrap/dist/js/bootstrap.min.js');
 
-  app.import('node_modules/auth0-js/build/auth0.js');
+  app.import('node_modules/auth0-js/dist/auth0.js');
   app.import('node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css');
   app.import('node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js');
 

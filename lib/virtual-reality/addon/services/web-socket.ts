@@ -1,125 +1,91 @@
 import Service, { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
+import ENV from 'explorviz-frontend/config/environment';
 
-export default class WebSocket extends Service {
+const { collaborationService, collaborationSocketPath } = ENV.backendAddresses;
+
+export default class WebSocketService extends Service {
   @service()
-  websockets !: any;
+  private websockets!: any;
 
-  debug = debugLogger('VrMultiUser');
+  private debug = debugLogger('WebSocketService');
 
-  private socketRef: any; // WebSocket to send/receive messages to/from backend
+  private currentSocket: any = null; // WebSocket to send/receive messages to/from backend
 
-  private updateQueue: any[] = []; // Messages which are ready to be sent to backend
-
-  host: string | null = '';
-
-  port: string | null = '';
-
-  secure: boolean | null = false;
-
-  path: string | null = '';
-
-  getSocketUrl() {
-    return `${this.secure ? 'wss' : 'ws'}://${this.host}:${this.port}/${this.path}`;
-  }
+  private currentSocketUrl: string | null = null;
 
   socketCloseCallback: ((event: any) => void) | null = null;
 
-  eventCallback: ((event: any, data: any) => void) | null = null;
+  messageCallback: ((message: any) => void) | null = null;
 
-  initSocket() {
-    const socket = this.websockets.socketFor(this.getSocketUrl());
-    socket.on('message', this.messageHandler, this);
-    socket.on('close', this.closeHandler, this);
-    this.socketRef = socket;
+  private getSocketUrl(ticketId: string) {
+    const collaborationServiceSocket = collaborationService.replace(/^http(s?):\/\//i, 'ws$1://');
+    return collaborationServiceSocket + collaborationSocketPath + ticketId;
   }
 
-  applyConfiguration(config: { host: string, port: string, secure: boolean, path: string }) {
-    this.host = config.host;
-    this.port = config.port;
-    this.secure = config.secure;
-    this.path = config.path;
+  async initSocket(ticketId: string) {
+    this.currentSocketUrl = this.getSocketUrl(ticketId);
+    this.currentSocket = this.websockets.socketFor(this.currentSocketUrl);
+    this.currentSocket.on('message', this.messageHandler, this);
+    this.currentSocket.on('close', this.closeHandler, this);
   }
 
   closeSocket() {
-    this.websockets.closeSocketFor(this.getSocketUrl());
-    // Close handlers
-    const socket = this.socketRef;
-    if (socket) {
-      socket.off('message', this.messageHandler);
-      socket.off('close', this.closeHandler);
-    }
-    this.socketRef = null;
-    this.updateQueue = [];
+    if (this.currentSocketUrl) this.websockets.closeSocketFor(this.currentSocketUrl);
   }
 
   private closeHandler(event: any) {
+    // Log that connection has been closed.
     if (event && event.code && event.target.url) {
-      this.debug(`Connection to Backend-Extension ( ${event.target.url} ) closed, WebSocket close code ${event.code}.`);
+      this.debug(
+        `Connection to Backend-Extension ( ${event.target.url} ) closed, WebSocket close code ${event.code}.`,
+      );
     }
+
+    // Invoke external event listener for close event.
     if (this.socketCloseCallback) {
       this.socketCloseCallback(event);
     }
+
+    // Remove internal event listeners.
+    this.currentSocket.off('message', this.messageHandler);
+    this.currentSocket.off('close', this.closeHandler);
+    this.currentSocket = null;
+    this.currentSocketUrl = null;
   }
 
   private messageHandler(event: any) {
-    // Backend could have sent multiple messages at a time
-    const messages = JSON.parse(event.data);
-    for (let i = 0; i < messages.length; i++) {
-      const data = messages[i];
-      if (this.eventCallback) {
-        this.eventCallback(data.event, data);
-      }
+    const message = JSON.parse(event.data);
+    // console.log('Message: ', message);
+    if (this.messageCallback) {
+      this.messageCallback(message);
     }
-  }
-
-  // Used to send messages to the backend
-  send(obj: any) {
-    if (this.socketRef) { this.socketRef.send(JSON.stringify(obj)); }
-  }
-
-  sendDisconnectRequest() {
-    const disconnectMessage = [{
-      event: 'receive_disconnect_request',
-    }];
-    this.send(disconnectMessage);
   }
 
   /**
-   * Check wether there are messages in the update queue and send them to the backend.
+   * Sends a message to the backend.
+   *
+   * The type parameter `T` is used to validate the type of the sent message
+   * at compile time.
+   *
+   * @param msg The message to send.
    */
-  sendUpdates() {
-    // there are updates to send
-    if (this.updateQueue && this.updateQueue.length > 0) {
-      this.send(this.updateQueue);
-      this.updateQueue = [];
-    }
-  }
-
-  enqueueIfOpen(JSONObj: any) {
-    if (!this.isWebSocketOpen()) { return; }
-
-    if (this.updateQueue) {
-      this.updateQueue.push(JSONObj);
-    }
+  send<T>(msg: T) {
+    if (this.isWebSocketOpen()) this.currentSocket.send(JSON.stringify(msg));
   }
 
   isWebSocketOpen() {
-    return this.socketRef && this.socketRef.readyState() === 1;
+    return this.currentSocket && this.currentSocket.readyState() === 1;
   }
 
   reset() {
-    this.socketRef = null;
-    this.updateQueue = [];
-    this.host = null;
-    this.port = null;
-    this.secure = null;
-    this.path = null;
+    this.currentSocket = null;
+    this.currentSocketUrl = null;
   }
 }
 
 declare module '@ember/service' {
   interface Registry {
-    'web-socket': WebSocket;
+    'web-socket': WebSocketService;
   }
 }

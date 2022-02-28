@@ -24,7 +24,6 @@ export default class HeatmapSettings extends Component<Args> {
     heatmapMode: 'Aggregated Heatmap: The values of previous heatmaps are aggregated and added to the'
       + ' current value. Windowed Heatmap: The metrics are shown as a difference to the previous heatmap.'
       + ' The windowsize can be configured in the backend.',
-    visualizationMode: 'Use a heatmap visualized with simpleheat or an array based heatmap.',
     helperLines: 'Show the helper lines to determine which point on the heatmap belongs to which class.',
     shGradient: 'Configure the simple heat gradient. Use either rgb, hex or css-style format.',
     ahGradient: 'Configure the array heat gradient. Use either rgb, hex or css-style format.',
@@ -40,9 +39,6 @@ export default class HeatmapSettings extends Component<Args> {
   @tracked
   showSimpleHeatSettings: boolean = false;
 
-  @tracked
-  showArrayHeatSettings: boolean = false;
-
   constructor(owner: any, args: Args) {
     super(owner, args);
     this.selectedMode = this.heatmapConf.selectedMode === 'aggregatedHeatmap' ? this.heatmapModes[0] : this.heatmapModes[1];
@@ -52,11 +48,6 @@ export default class HeatmapSettings extends Component<Args> {
   setHeatmapMode(mapMode: HeatmapMode) {
     this.selectedMode = mapMode;
     this.heatmapConf.set('selectedMode', mapMode.id);
-  }
-
-  @action
-  toggleSimpleHeat() {
-    this.heatmapConf.toggleProperty('useSimpleHeat');
   }
 
   @action
@@ -80,18 +71,8 @@ export default class HeatmapSettings extends Component<Args> {
   }
 
   @action
-  toggleArraySettings() {
-    this.showArrayHeatSettings = !this.showArrayHeatSettings;
-  }
-
-  @action
   resetSimpleHeatGradient() {
     this.heatmapConf.resetSimpleHeatGradient();
-  }
-
-  @action
-  resetArrayHeatGradient() {
-    this.heatmapConf.resetArrayHeatGradient();
   }
 
   @action

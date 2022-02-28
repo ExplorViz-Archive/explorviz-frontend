@@ -23,3 +23,7 @@ export function simpleHeatmap(maximumValue: number, canvas: HTMLCanvasElement, g
   simpleHeatMap.gradient(gradient);
   return simpleHeatMap;
 }
+
+export type Gradient = {
+  [value: string]: string
+};

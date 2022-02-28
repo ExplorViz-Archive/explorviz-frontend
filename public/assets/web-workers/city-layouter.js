@@ -3,8 +3,8 @@ self.addEventListener('message', function(e) {
   const structureData = e.data.structure;
   const dynamicData = e.data.dynamic;
   
-  let application = applyBoxLayout(structureData, dynamicData);
-  postMessage(application);
+  const cityLayout = applyBoxLayout(structureData, dynamicData);
+  postMessage(cityLayout);
 }, false);
   
 // Ping the Ember service to say that everything is ok.
@@ -48,7 +48,8 @@ function applyBoxLayout(application, allLandscapeTraces) {
   const INSET_SPACE = 4.0;
   const OPENED_COMPONENT_HEIGHT = 1.5;
 
-  let layoutMap = new Map();
+  const layoutMap = new Map();
+  const instanceCountMap = new Map();
 
   layoutMap.set(application.id, {
     height: 1,
@@ -68,6 +69,7 @@ function applyBoxLayout(application, allLandscapeTraces) {
       positionY: 0,
       positionZ: 0
     });
+    instanceCountMap.set(clazz.id, 0);
   });
 
   getAllComponentsInApplication(application).forEach((component) => {
@@ -207,8 +209,10 @@ function applyBoxLayout(application, allLandscapeTraces) {
     const categories = getCategories(instanceCountList, false);
 
     clazzes.forEach((clazz) => {
-      let clazzData = layoutMap.get(clazz.id);
-      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT);
+      const clazzLayout = layoutMap.get(clazz.id);
+
+      clazzLayout.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT);
+      instanceCountMap.set(clazz.id, clazz.instanceCount);
     });
   }
 
@@ -366,7 +370,7 @@ function applyBoxLayout(application, allLandscapeTraces) {
     });
 
     let componentData = layoutMap.get(application.id);
-    componentData.height = getHeightOfApplication(application);
+    componentData.height = OPENED_COMPONENT_HEIGHT;
     componentData.width = -1.0;
     componentData.depth = -1.0;
   }
@@ -412,24 +416,6 @@ function applyBoxLayout(application, allLandscapeTraces) {
     });
 
     children.forEach((child) => {
-      let childData = layoutMap.get(child.id);
-      if (childData.height > childrenHeight) {
-        childrenHeight = childData.height;
-      }
-    });
-
-    return childrenHeight + 0.1;
-  }
-
-
-  function getHeightOfApplication(application) {
-    const floorHeight = 0.75 * 4.0;
-
-    let childrenHeight = floorHeight;
-
-    const { packages } = application;
-
-    packages.forEach((child) => {
       let childData = layoutMap.get(child.id);
       if (childData.height > childrenHeight) {
         childrenHeight = childData.height;

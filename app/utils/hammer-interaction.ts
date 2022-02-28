@@ -12,11 +12,15 @@ export default class HammerInteraction extends Object.extend(Evented) {
    *
    * @param {*} canvas Events are registered on the canvas
    */
-  setupHammer(canvas: HTMLCanvasElement) {
+  setupHammer(canvas: HTMLCanvasElement, dbTapInterval = 250) {
     const self = this;
 
     let mouseDeltaX = 0;
     let mouseDeltaY = 0;
+
+    // Used to calculate delta scale and delta zoom for events
+    let lastPinchScale = 1;
+    let lastRotation = 0;
 
     // Fire Panning-Event with right click as well
     function registerRightClickWithPan() {
@@ -110,18 +114,36 @@ export default class HammerInteraction extends Object.extend(Evented) {
     const doubleTap = new Hammer.Tap({
       event: 'doubletap',
       taps: 2,
-      interval: 250,
+      interval: dbTapInterval,
+    });
+
+    const press = new Hammer.Press({
+      event: 'press',
+      pointers: 1,
+      threshold: 25,
+      time: 500,
+    });
+
+    const pinch = new Hammer.Pinch({
+      event: 'pinch',
+      pointers: 2,
+    });
+
+    const rotate = new Hammer.Rotate({
+      event: 'rotate',
+      pointers: 2,
     });
 
     const pan = new Hammer.Pan({
       event: 'pan',
     });
 
-    hammer.add([doubleTap, singleTap, pan]);
+    hammer.add([doubleTap, singleTap, press, pinch, rotate, pan]);
 
     doubleTap.recognizeWith(singleTap);
     singleTap.requireFailure(doubleTap);
     doubleTap.dropRequireFailure(singleTap);
+    pinch.recognizeWith(rotate);
 
     hammer.on('panstart', (evt: any) => {
       if (evt.button !== 1 && evt.button !== 3) {
@@ -136,6 +158,8 @@ export default class HammerInteraction extends Object.extend(Evented) {
 
       mouseDeltaX = mousePosition.x;
       mouseDeltaY = mousePosition.y;
+
+      self.trigger('panstart', evt);
     });
 
     /**
@@ -186,11 +210,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
      * Triggers a doubletap event for the right mouse button
      */
     hammer.on('doubletap', (evt: any) => {
-      if (evt.button !== 1) {
-        return;
-      }
-
-      if (evt.srcEvent.target !== canvas) {
+      if (evt.button !== 1 || evt.srcEvent.target !== canvas) {
         return;
       }
 
@@ -226,6 +246,62 @@ export default class HammerInteraction extends Object.extend(Evented) {
       } else if (evt.button === 3) {
         self.trigger('righttap', mousePosition, evt.srcEvent);
       }
+    });
+
+    /**
+     * Triggers a press event which (could e.g. be used as an alternative to 'righttap')
+     */
+    hammer.on('press', (evt: any) => {
+      if (evt.srcEvent.target !== canvas) {
+        return;
+      }
+
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
+
+      self.trigger('press', mousePosition, evt.srcEvent);
+    });
+
+    /*
+    * Expose pinch events
+    */
+
+    hammer.on('pinchstart', (evt) => {
+      lastPinchScale = evt.scale;
+      self.trigger('pinchstart', evt);
+    });
+
+    hammer.on('pinchmove', (evt) => {
+      const deltaScale = evt.scale - lastPinchScale;
+      const deltaScaleInPercent = deltaScale / lastPinchScale;
+      lastPinchScale = evt.scale;
+      self.trigger('pinch', deltaScaleInPercent, evt);
+    });
+
+    hammer.on('pinchend', (evt) => {
+      lastPinchScale = 1;
+      self.trigger('pinchend', evt);
+    });
+
+    /*
+    * Expose rotation events
+    */
+
+    hammer.on('rotatestart', (evt) => {
+      lastRotation = evt.rotation;
+      self.trigger('rotatestart', evt);
+    });
+
+    hammer.on('rotate', (evt) => {
+      // Difference in rotation between rotate events (in degrees)
+      const deltaRotation = lastRotation - evt.rotation;
+      lastRotation = evt.rotation;
+
+      self.trigger('rotate', deltaRotation, evt);
+    });
+
+    hammer.on('rotateend', (evt) => {
+      lastRotation = 0;
+      self.trigger('rotateend', evt);
     });
   }
 }

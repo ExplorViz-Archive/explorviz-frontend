@@ -1,8 +1,6 @@
 dist/**
 vendor/**
 
-lib/virtual-reality/addon/utils/lib/loader
-
 public/assets/web-workers/*
 
 testem.js

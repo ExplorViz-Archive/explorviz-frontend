@@ -96,7 +96,6 @@ export function closeComponentMesh(mesh: ComponentMesh, applicationObject3D: App
 
 /**
    * Closes all component meshes which are currently added to the applicationObject3D
-   * and re-adds the communication.
    *
    * @param applicationObject3D Application object which contains the components
    */
@@ -122,6 +121,21 @@ export function openComponentsRecursively(component: Package,
   applicationObject3D: ApplicationObject3D) {
   const components = component.subPackages;
   components.forEach((child) => {
+    const mesh = applicationObject3D.getBoxMeshbyModelId(child.id);
+    if (mesh !== undefined && mesh instanceof ComponentMesh) {
+      openComponentMesh(mesh, applicationObject3D);
+    }
+    openComponentsRecursively(child, applicationObject3D);
+  });
+}
+
+/**
+   * Opens all component meshes which are currently added to the applicationObject3D
+   *
+   * @param applicationObject3D Application object which contains the components
+   */
+export function openAllComponents(applicationObject3D: ApplicationObject3D) {
+  applicationObject3D.dataModel.packages.forEach((child) => {
     const mesh = applicationObject3D.getBoxMeshbyModelId(child.id);
     if (mesh !== undefined && mesh instanceof ComponentMesh) {
       openComponentMesh(mesh, applicationObject3D);

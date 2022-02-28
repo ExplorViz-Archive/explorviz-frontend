@@ -97,9 +97,11 @@
     "node": ">= 12.7.0"
   },
   "dependencies": {
+    "@ar-js-org/ar.js": "^3.3.3-es6-beta-03",
     "@glimmer/component": "^1.0.2",
     "@glimmer/tracking": "^1.0.2",
     "@primer/octicons": "^13.0.0",
+    "@webxr-input-profiles/motion-controllers": "^1.0.0",
     "alertifyjs": "^1.13.1",
     "auth0-js": "^9.14.0",
     "auth0-lock": "^11.30.4",
@@ -131,7 +133,6 @@
     "jquery": "^3.5.1",
     "meshline": "2.0.3",
     "moment": "^2.24.0",
-    "npm-check-updates": "^10.2.2",
     "plotly.js-dist": "^1.57.1",
     "rsvp": "^4.8.5",
     "sass": "^1.24.2",
