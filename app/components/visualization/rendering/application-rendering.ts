@@ -612,10 +612,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       if (this.globeMesh) {
         // reposition
-        this.applicationObject3D.addGlobeToApplication();
-        this.applicationObject3D.initializeGlobeAnimation();
-      } else {
-        this.applicationObject3D.repositionGlobeToApplication();
+        EntityRendering.repositionGlobeToApplication(this.applicationObject3D, this.globeMesh);
       }
 
       // Restore old state of components
