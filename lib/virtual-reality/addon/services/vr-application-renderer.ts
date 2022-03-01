@@ -11,7 +11,6 @@ import * as EntityManipulation from 'explorviz-frontend/utils/application-render
 import * as EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
@@ -24,6 +23,7 @@ import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configura
 import THREE from 'three';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
+import { DrawableClassCommunication } from 'explorviz-frontend/utils/application-rendering/class-communication-computer';
 import ArSettings from './ar-settings';
 import { isObjectClosedResponse, ObjectClosedResponse } from '../utils/vr-message/receivable/response/object-closed';
 import VrAssetRepository from './vr-asset-repo';
