@@ -47,6 +47,7 @@ build:
   variables:
     DOCKERHUB_TAG: "latest"
   rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "push"'
   image:
     name: gcr.io/kaniko-project/executor:debug
@@ -60,13 +61,15 @@ deploy-dockerhub-master:
   extends:
     - .deploy-to-dockerhub
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "master"'
 
 deploy-dockerhub-dev:
   extends:
     - .deploy-to-dockerhub
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev"
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "dev"'
       variables:
         DOCKERHUB_TAG: "dev"
   script:
@@ -76,6 +79,7 @@ deploy-dockerhub-dev:
       dotenv: build.env
 
 deploy-dockerhub-dev-noauth:
+  stage: deploy:images
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -91,7 +95,8 @@ retag-dockerhub-image:
   tags:
     - exec-docker
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master"'
     - if: '$CI_PIPELINE_SOURCE == "push"'
   image:
     name: gcr.io/go-containerregistry/crane:debug
@@ -105,7 +110,7 @@ retag-dockerhub-image-noauth:
   tags:
     - exec-docker
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master"
+    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master"'
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   image:
     name: gcr.io/go-containerregistry/crane:debug
