@@ -59,12 +59,16 @@ build:
 deploy-dockerhub-master:
   extends:
     - .deploy-to-dockerhub
+  except:
+    - schedules
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
 
 deploy-dockerhub-dev:
   extends:
     - .deploy-to-dockerhub
+  except:
+    - schedules
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
       variables:
@@ -75,8 +79,21 @@ deploy-dockerhub-dev:
     reports:
       dotenv: build.env
 
+deploy-dockerhub-dev-noauth:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  only:
+    - schedules
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(echo -n ${DOCKERHUB_USER}:${DOCKERHUB_PASSWORD} | base64)\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context=$CI_PROJECT_DIR --dockerfile=$CI_PROJECT_DIR/Dockerfile --destination=$DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:dev-noauth
+
 retag-dockerhub-image:
   stage: deploy:retagging
+  except:
+    - schedules
   tags:
     - exec-docker
   rules:
@@ -87,3 +104,18 @@ retag-dockerhub-image:
   script:
     - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD "index.docker.io"
     - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+
+retag-dockerhub-image-noauth:
+  stage: deploy:retagging
+  only:
+    - schedules
+  tags:
+    - exec-docker
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master"
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [""]
+  script:
+    - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD "index.docker.io"
+    - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:dev-noauth-$CI_COMMIT_SHORT_SHA
