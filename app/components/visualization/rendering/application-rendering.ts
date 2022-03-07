@@ -68,7 +68,8 @@ interface Args {
 type PopupData = {
   mouseX: number,
   mouseY: number,
-  entity?: Package | Class | ClazzCommuMeshDataModel
+  entity: Package | Class | ClazzCommuMeshDataModel
+  isPinned: boolean,
 };
 
 type LayoutData = {
@@ -157,7 +158,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @tracked
-  popupData: PopupData | null = null;
+  popupData: PopupData[] = [];
 
   isFirstRendering = true;
 
@@ -217,13 +218,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initThreeJs();
 
     this.resize(outerDiv);
-
-    if (this.configuration.popupPosition) {
-      this.popupData = {
-        mouseX: this.configuration.popupPosition.x,
-        mouseY: this.configuration.popupPosition.y,
-      };
-    }
 
     try {
       await perform(this.loadApplication);
@@ -484,26 +478,40 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     // Hide popups when mouse moves
     if (!this.appSettings.enableCustomPopupPosition.value) {
-      this.popupData = null;
+      this.popupData = [];
     }
   }
 
   @action
   showApplication(appId: string) {
-    this.removePopup();
+    this.removePopup(appId);
     this.args.showApplication(appId);
   }
 
   @action
-  removePopup() {
-    this.popupData = null;
+  removePopup(entityId: string) {
+    if (!this.appSettings.enableCustomPopupPosition.value) {
+      this.popupData = [];
+    } else {
+      this.popupData = this.popupData.filter(((pd) => pd.entity.id !== entityId));
+    }
+  }
+
+  @action
+  pinPopup(entityId: string) {
+    this.popupData.forEach((pd) => {
+      if (pd.entity.id === entityId) {
+        pd.isPinned = true;
+      }
+    });
+    this.popupData = [...this.popupData];
   }
 
   @action
   handleMouseWheel(delta: number) {
     // Do not show popups while zooming
     if (!this.appSettings.enableCustomPopupPosition.value) {
-      this.popupData = null;
+      this.popupData = [];
     }
 
     // Change zoom depending on mouse wheel direction
@@ -513,7 +521,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   handleMouseOut() {
     if (!this.appSettings.enableCustomPopupPosition.value) {
-      this.popupData = null;
+      this.popupData = [];
     }
   }
 
@@ -531,11 +539,28 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Show information as popup is mouse stopped on top of a mesh
     if ((mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
       || mesh instanceof ClazzCommunicationMesh)) {
-      this.popupData = {
+      const newPopup = {
         mouseX: mouseOnCanvas.x,
         mouseY: mouseOnCanvas.y,
         entity: mesh.dataModel,
+        isPinned: false,
       };
+
+      if (!this.appSettings.enableCustomPopupPosition.value) {
+        this.popupData = [newPopup];
+      } else {
+        const popupAlreadyExists = this.popupData.any((pd) => pd.entity.id === mesh.dataModel.id);
+        if (popupAlreadyExists) return;
+
+        const notPinnedPopupIndex = this.popupData.findIndex((pd) => !pd.isPinned);
+
+        if (notPinnedPopupIndex === -1) {
+          this.popupData = [...this.popupData, newPopup];
+        } else {
+          this.popupData[notPinnedPopupIndex] = newPopup;
+          this.popupData = [...this.popupData];
+        }
+      }
     }
   }
 
