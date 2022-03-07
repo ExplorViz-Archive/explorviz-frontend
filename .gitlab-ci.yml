@@ -103,7 +103,7 @@ retag-dockerhub-image-noauth:
   tags:
     - exec-docker
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "schedule"'
+    - if: '($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master") && $CI_PIPELINE_SOURCE == "schedule"'
   image:
     name: gcr.io/go-containerregistry/crane:debug
     entrypoint: [""]
