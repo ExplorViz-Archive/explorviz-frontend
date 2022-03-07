@@ -27,7 +27,7 @@ test:
     - exec-docker
   script:
     - npm install
-    - ember test --launch chromium
+    - ember test
 
 build:
   stage: build
