@@ -90,6 +90,8 @@ deploy-dockerhub-dev:
 
 deploy-dockerhub-dev-noauth:
   stage: deploy:images
+  tags:
+    - exec-docker
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
