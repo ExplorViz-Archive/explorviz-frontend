@@ -13,9 +13,11 @@ interface IArgs {
   popupData: {
     mouseX: number,
     mouseY: number,
-    entity: Node | Application | Package | Class | ClazzCommuMeshDataModel
+    entity: Node | Application | Package | Class | ClazzCommuMeshDataModel,
+    isPinned: boolean,
   };
-  removePopup(): void;
+  removePopup(entityId: string): void;
+  pinPopup(entityId: string): void;
 }
 
 export default class PopupCoordinator extends Component<IArgs> {
@@ -75,10 +77,12 @@ export default class PopupCoordinator extends Component<IArgs> {
       newPositionY = containerDiv.clientHeight - popoverHeight;
     }
 
-    this.configuration.popupPosition = {
-      x: newPositionX,
-      y: newPositionY,
-    };
+    if (!this.args.popupData.isPinned) {
+      this.configuration.popupPosition = {
+        x: newPositionX,
+        y: newPositionY,
+      };
+    }
 
     this.element.style.top = `${newPositionY}px`;
     this.element.style.left = `${newPositionX}px`;
