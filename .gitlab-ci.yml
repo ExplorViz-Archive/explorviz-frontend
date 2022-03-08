@@ -29,7 +29,7 @@ test:
     - npm install
     - ember test
 
-build:
+.build:
   stage: build
   tags:
     - exec-docker
@@ -39,6 +39,21 @@ build:
   artifacts:
     paths:
       - dist
+
+build-prod:
+  extends:
+    - .build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "schedule"'
+
+build-prod-noauth:
+  extends:
+    - .build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  before_script:
+    - export AUTH0_ENABLED=false
+
 
 .deploy-to-dockerhub:
   stage: deploy:images
@@ -79,7 +94,7 @@ deploy-dockerhub-dev-noauth:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == "dev"'
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(echo -n ${DOCKERHUB_USER}:${DOCKERHUB_PASSWORD} | base64)\"}}}" > /kaniko/.docker/config.json
@@ -103,7 +118,7 @@ retag-dockerhub-image-noauth:
   tags:
     - exec-docker
   rules:
-    - if: '($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master") && $CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "schedule"'
   image:
     name: gcr.io/go-containerregistry/crane:debug
     entrypoint: [""]
