@@ -82,7 +82,7 @@ deploy-dockerhub-dev:
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_PIPELINE_SOURCE != "schedule" && $CI_COMMIT_BRANCH == "dev"'
       variables:
         DOCKERHUB_TAG: "dev"
-  script:
+  after_script:
     - echo "DOCKERHUB_TAG=dev" >> build.env
   artifacts:
     reports:
@@ -107,7 +107,7 @@ retag-dockerhub-image:
   tags:
     - exec-docker
   rules:
-    - if: '$CI_PIPELINE_SOURCE != "schedule" && $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master" && $CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE != "schedule" && ($CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_BRANCH == "master") && $CI_PIPELINE_SOURCE == "push"'
   image:
     name: gcr.io/go-containerregistry/crane:debug
     entrypoint: [""]
@@ -126,4 +126,4 @@ retag-dockerhub-image-noauth:
     entrypoint: [""]
   script:
     - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD "index.docker.io"
-    - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:dev-noauth-$CI_COMMIT_SHORT_SHA
+    - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:dev-noauth $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:dev-noauth-$CI_COMMIT_SHORT_SHA
