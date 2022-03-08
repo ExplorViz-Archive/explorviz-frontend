@@ -33,6 +33,11 @@ export default class CollaborativeService extends Service.extend(Evented) {
   @service('collaborative-settings-service')
   settings!: CollaborativeSettingsService;
 
+  init() {
+    super.init();
+    // this.webSocket.messageCallback = (msg) => this.onMessage(msg);
+  }
+
   openSocket(username: string) {
     if (this.socketRef) {
       this.reconnect();

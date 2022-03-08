@@ -52,6 +52,17 @@ export interface VrMessageListener {
   onSpectatingUpdate(msg: ForwardedMessage<SpectatingUpdateMessage>): void;
 }
 
+// TODO should I add this.
+export interface CollaborationSessionMessageListener {
+  onSelfConnected(msg: SelfConnectedMessage): void;
+  onUserConnected(msg: UserConnectedMessage): void;
+  onUserDisconnect(msg: UserDisconnectedMessage): void;
+  onInitialLandscape(msg: InitialLandscapeMessage): void;
+
+  onTimestampUpdate(msg: ForwardedMessage<TimestampUpdateMessage>): void;
+  // onSpectatingUpdate(msg: ForwardedMessage<SpectatingUpdateMessage>): void;
+}
+
 export default class VrMessageReceiver extends Service {
   private debug = debugLogger('VrMessageReceiver');
 
@@ -60,11 +71,13 @@ export default class VrMessageReceiver extends Service {
 
   private messageListeners: VrMessageListener[] = [];
 
+  private sessionMessageListener: CollaborationSessionMessageListener[] = [];
+
   private responseHandlers = new Map<Nonce, ResponseHandler<any>>();
 
   init() {
     super.init();
-    this.webSocket.messageCallback = (msg) => this.onMessage(msg);
+    // this.webSocket.messageCallback = (msg) => this.onMessage(msg);
   }
 
   /**
@@ -77,6 +90,9 @@ export default class VrMessageReceiver extends Service {
     this.messageListeners.push(messageListener);
   }
 
+  addSessionMessageListener(sessionMessageListener: CollaborationSessionMessageListener) {
+    this.sessionMessageListener.push(sessionMessageListener);
+  }
   /**
    * Removes a listener from the list of messages that are notified when
    * messages are received from the backend.
@@ -86,6 +102,11 @@ export default class VrMessageReceiver extends Service {
   removeMessageListener(messageListener: VrMessageListener) {
     const index = this.messageListeners.indexOf(messageListener);
     this.messageListeners.splice(index, 1);
+  }
+
+  removeSessionMessageListener(sessionMessageListener: CollaborationSessionMessageListener) {
+    const index = this.sessionMessageListener.indexOf(sessionMessageListener);
+    this.sessionMessageListener.splice(index, 1);
   }
 
   private onMessage(msg: any) {

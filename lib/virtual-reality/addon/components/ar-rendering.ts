@@ -42,13 +42,13 @@ import { SelfConnectedMessage } from 'virtual-reality/utils/vr-message/receivabl
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import { ForwardedMessage } from 'virtual-reality/utils/vr-message/receivable/forwarded';
-import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
+import { TimestampUpdateMessage, TIMESTAMP_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { UserDisconnectedMessage } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
-import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
-import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
-import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
-import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
-import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
+import { InitialLandscapeMessage, INITIAL_LANDSCAPE_EVENT } from 'virtual-reality/utils/vr-message/receivable/landscape';
+import { AppOpenedMessage, APP_OPENED_EVENT } from 'virtual-reality/utils/vr-message/sendable/app_opened';
+import { AppClosedMessage, APP_CLOSED_EVENT } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
+import { ComponentUpdateMessage, COMPONENT_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/component_update';
+import { HighlightingUpdateMessage, HIGHLIGHTING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
@@ -58,7 +58,7 @@ import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPo
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import { updateHighlighting } from 'explorviz-frontend/utils/application-rendering/highlighting';
 import { perform } from 'ember-concurrency-ts';
-import { MousePingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
+import { MousePingUpdateMessage, MOUSE_PING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
 import VrRoomSerializer from '../services/vr-room-serializer';
 
 interface Args {
@@ -331,7 +331,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     this.hammerInteraction.on('panning', (delta: { x: number, y: number }) => {
       if (!(this.pannedObject instanceof LandscapeObject3D)
-      && !(this.pannedObject instanceof ApplicationObject3D)) {
+        && !(this.pannedObject instanceof ApplicationObject3D)) {
         return;
       }
 
@@ -380,9 +380,13 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   private async initWebSocket() {
     this.debug('Initializing websocket...');
-
-    this.webSocket.socketCloseCallback = () => this.onSelfDisconnected();
-    this.receiver.addMessageListener(this);
+    this.webSocket.on(MOUSE_PING_UPDATE_EVENT, this, this.onMousePingUpdate);
+    this.webSocket.on(TIMESTAMP_UPDATE_EVENT, this, this.onTimestampUpdate);
+    this.webSocket.on(INITIAL_LANDSCAPE_EVENT, this, this.onInitialLandscape);
+    this.webSocket.on(APP_OPENED_EVENT, this, this.onAppOpened);
+    this.webSocket.on(APP_CLOSED_EVENT, this, this.onAppClosed);
+    this.webSocket.on(COMPONENT_UPDATE_EVENT, this, this.onComponentUpdate);
+    this.webSocket.on(HIGHLIGHTING_UPDATE_EVENT, this, this.onHighlightingUpdate);
   }
 
   private getIntersectableObjects() {
@@ -641,7 +645,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     const intersection = this.interaction.raycastCanvasCenter();
 
     if (!(intersection?.object.parent instanceof ApplicationObject3D)
-    && !(intersection?.object.parent instanceof LandscapeObject3D)) {
+      && !(intersection?.object.parent instanceof LandscapeObject3D)) {
       return;
     }
 
@@ -751,7 +755,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
       // Remove popup if it is already opened at default position
       if (this.popupDataMap.has(mesh.id) && !this.popupDataMap.get(mesh.id)?.isPinned
-      && !this.arSettings.stackPopups) {
+        && !this.arSettings.stackPopups) {
         this.removeUnpinnedPopups();
       } else {
         this.removeUnpinnedPopups();
@@ -1065,7 +1069,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // Calculate center point of the clazz floor. This is used for computing the corresponding
     // face on the foundation box.
     const clazzMesh = applicationObject3D.getBoxMeshbyModelId(clazz.id) as
-          ClazzMesh | undefined;
+      ClazzMesh | undefined;
 
     if (!clazzMesh || !this.heatmapConf.selectedMetric) {
       return;
@@ -1124,7 +1128,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     function handleApplicationObject(appObject: THREE.Object3D) {
       if (!(appObject.parent instanceof ApplicationObject3D)
-      || Date.now() - self.lastOpenAllComponents < 20) return;
+        || Date.now() - self.lastOpenAllComponents < 20) return;
 
       if (appObject instanceof ComponentMesh) {
         self.vrApplicationRenderer.toggleComponent(
@@ -1150,7 +1154,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     if (object instanceof ApplicationMesh) {
       this.addApplication(object.dataModel);
-    // Handle application hits
+      // Handle application hits
     } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
     }
@@ -1233,11 +1237,19 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.sceneService.addSkylight();
 
     // Remove event listers.
-    this.receiver.removeMessageListener(this);
     this.willDestroyController.abort();
 
     // Reset AR and position of alerts
     ArRendering.cleanUpAr();
+
+    this.webSocket.off(MOUSE_PING_UPDATE_EVENT, this, this.onMousePingUpdate);
+    this.webSocket.off(TIMESTAMP_UPDATE_EVENT, this, this.onTimestampUpdate);
+    this.webSocket.off(INITIAL_LANDSCAPE_EVENT, this, this.onInitialLandscape);
+    this.webSocket.off(APP_OPENED_EVENT, this, this.onAppOpened);
+    this.webSocket.off(APP_CLOSED_EVENT, this, this.onAppClosed);
+    this.webSocket.off(COMPONENT_UPDATE_EVENT, this, this.onComponentUpdate);
+    this.webSocket.off(HIGHLIGHTING_UPDATE_EVENT, this, this.onHighlightingUpdate);
+
     AlertifyHandler.setAlertifyPosition('bottom-right');
   }
 
@@ -1275,63 +1287,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   /**
-   * After succesfully connecting to the backend, create and spawn other users.
-   */
-  onSelfConnected({ self, users }: SelfConnectedMessage): void {
-    // Create User model for all users and add them to the users map by
-    // simulating the event of a user connecting.
-    for (let i = 0; i < users.length; i++) {
-      const userData = users[i];
-      this.onUserConnected(
-        {
-          event: USER_CONNECTED_EVENT,
-          id: userData.id,
-          name: userData.name,
-          color: userData.color,
-          position: userData.position,
-          quaternion: userData.quaternion,
-        },
-        false,
-      );
-    }
-
-    // Initialize local user.
-    this.localUser.connected({
-      id: self.id,
-      name: self.name,
-      color: new THREE.Color(...self.color),
-    });
-  }
-
-  onUserConnected(
-    {
-      id, name, color, position, quaternion,
-    }: UserConnectedMessage,
-    showConnectMessage = true,
-  ): void {
-    const remoteUser = new RemoteVrUser({
-      userName: name,
-      userId: id,
-      color: new THREE.Color(...color),
-      state: 'online',
-      localUser: this.localUser,
-    });
-    this.remoteUsers.addRemoteUser(remoteUser, { position, quaternion });
-
-    if (showConnectMessage) {
-      AlertifyHandler.showAlertifySuccess(`User ${remoteUser.userName} connected.`);
-    }
-  }
-
-  /**
-   * Updates the specified user's camera and controller positions.
-   */
-  onUserPositions() {}
-
-  /**
    * Updates whether the given user is pinging with the specified controller or not.
    */
-  onPingUpdate() {}
+  onPingUpdate() { }
 
   onMousePingUpdate({
     userId,
@@ -1361,23 +1319,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     );
   }
 
-  onUserControllerConnect() {}
-
-  onUserControllerDisconnect() {}
-
-  /**
-   * Removes the user that disconnected and informs our user about it.
-   *
-   * @param {JSON} data - Contains the id of the user that disconnected.
-   */
-  onUserDisconnect({ id }: UserDisconnectedMessage) {
-    // Remove user and show disconnect notification.
-    const removedUser = this.remoteUsers.removeRemoteUserById(id);
-    if (removedUser) {
-      AlertifyHandler.showAlertifyError(`User ${removedUser.userName} disconnected.`);
-    }
-  }
-
   async onInitialLandscape({
     landscape,
     openApps,
@@ -1403,11 +1344,11 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     );
     if (application) {
       const applicationObject3D = await
-      this.vrApplicationRenderer.addApplicationLocally(application, {
-        position: new THREE.Vector3(...position),
-        quaternion: new THREE.Quaternion(...quaternion),
-        scale: new THREE.Vector3(...scale),
-      });
+        this.vrApplicationRenderer.addApplicationLocally(application, {
+          position: new THREE.Vector3(...position),
+          quaternion: new THREE.Quaternion(...quaternion),
+          scale: new THREE.Vector3(...scale),
+        });
 
       this.addApplicationToMarker(applicationObject3D);
     }
@@ -1477,7 +1418,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     }
   }
 
-  onSpectatingUpdate() {}
+  onSpectatingUpdate() { }
 
   onMenuDetached() { }
 

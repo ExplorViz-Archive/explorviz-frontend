@@ -1,10 +1,11 @@
 import Service, { inject as service } from '@ember/service';
+import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
 import ENV from 'explorviz-frontend/config/environment';
 
 const { collaborationService, collaborationSocketPath } = ENV.backendAddresses;
 
-export default class WebSocketService extends Service {
+export default class WebSocketService extends Service.extend(Evented) {
   @service()
   private websockets!: any;
 
@@ -13,10 +14,6 @@ export default class WebSocketService extends Service {
   private currentSocket: any = null; // WebSocket to send/receive messages to/from backend
 
   private currentSocketUrl: string | null = null;
-
-  socketCloseCallback: ((event: any) => void) | null = null;
-
-  messageCallback: ((message: any) => void) | null = null;
 
   private getSocketUrl(ticketId: string) {
     const collaborationServiceSocket = collaborationService.replace(/^http(s?):\/\//i, 'ws$1://');
@@ -43,9 +40,9 @@ export default class WebSocketService extends Service {
     }
 
     // Invoke external event listener for close event.
-    if (this.socketCloseCallback) {
-      this.socketCloseCallback(event);
-    }
+    // if (this.socketCloseCallback) {
+    //   this.socketCloseCallback(event);
+    // }
 
     // Remove internal event listeners.
     this.currentSocket.off('message', this.messageHandler);
@@ -56,9 +53,11 @@ export default class WebSocketService extends Service {
 
   private messageHandler(event: any) {
     const message = JSON.parse(event.data);
-    // console.log('Message: ', message);
-    if (this.messageCallback) {
-      this.messageCallback(message);
+    this.debug("Got a message" + message.event)
+    if (message.event == 'forward') {
+      this.trigger(message.originalMessage.event, message)
+    } else {
+      this.trigger(message.event, message)
     }
   }
 

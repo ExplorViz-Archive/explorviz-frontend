@@ -138,10 +138,9 @@ export default class VrControllerModel extends Object3D {
             break;
           case MotionControllerConstants.VisualResponseProperty.TRANSFORM:
             if (typeof value === 'number' && minNode && maxNode) {
-              Quaternion.slerp(
+              valueNode.quaternion.slerpQuaternions(
                 minNode.quaternion,
                 maxNode.quaternion,
-                valueNode.quaternion,
                 value,
               );
 

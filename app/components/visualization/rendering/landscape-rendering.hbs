@@ -72,6 +72,9 @@
               <CollaborativeSettingsOpener
                 @addComponent={{@addComponent}}
               />
+              <Visualization::PageSetup::Navbar::XrCollaborationOpener
+                @addComponent={{@addComponent}}
+              />
             </ul>
           </div>
           {{#each @components as |componentName|}}
@@ -87,6 +90,12 @@
                   <Visualization::PageSetup::Sidebar::Settings
                     @isLandscapeView={{true}}
                     @updateColors={{this.updateColors}}
+                    @removeComponent={{@removeComponent}}
+                  />
+                {{/if}}
+                {{#if (eq componentName "xr-collaboration")}}
+                  <h5 class="text-center">Collaboration</h5>
+                  <Visualization::PageSetup::Sidebar::XrCollaboration
                     @removeComponent={{@removeComponent}}
                   />
                 {{/if}}
