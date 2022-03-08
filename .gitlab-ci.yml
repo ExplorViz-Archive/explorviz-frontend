@@ -51,11 +51,12 @@ build-prod:
 build-prod-noauth:
   extends:
     - .build
+  variables:
+    VERSION_TAG: $CI_COMMIT_BRANCH-noauth-$CI_COMMIT_SHORT_SHA
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   before_script:
     - export AUTH0_ENABLED=false
-    - echo $VERSION_TAG
 
 .deploy-to-dockerhub:
   stage: deploy:images
