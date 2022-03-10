@@ -865,19 +865,19 @@ export default class VrRendering
         }
         break;
       case 'f':
-        if (this.localUser.controller1?.intersectedObject) {
-          // console.log(this.localUser.controller1?.intersectedObject);
+        if (this.localUser.controller2?.intersectedObject) {
+          console.log(this.localUser.controller2?.intersectedObject);
           this.primaryInputManager.handleTriggerUp(
-            this.localUser.controller1.intersectedObject,
-            this.localUser.controller1,
+            this.localUser.controller2.intersectedObject,
+            this.localUser.controller2,
           );
         }
         break;
       case 'g':
-        if (this.localUser.controller1?.intersectedObject) {
-          // console.log(this.localUser.controller1?.intersectedObject);
+        if (this.localUser.controller2?.intersectedObject) {
+          console.log(this.localUser.controller2?.intersectedObject);
           this.secondaryInputManager.handleTriggerDown(
-            this.localUser.controller1.intersectedObject,
+            this.localUser.controller2.intersectedObject,
           );
         }
         break;
