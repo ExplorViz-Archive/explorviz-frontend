@@ -865,20 +865,29 @@ export default class VrRendering
         }
         break;
       case 'f':
+        // open/close component
         if (this.localUser.controller2?.intersectedObject) {
-          console.log(this.localUser.controller2?.intersectedObject);
-          this.primaryInputManager.handleTriggerUp(
+          this.primaryInputManager.handleTriggerDown(
             this.localUser.controller2.intersectedObject,
             this.localUser.controller2,
           );
         }
         break;
       case 'g':
+        // highlight entity
         if (this.localUser.controller2?.intersectedObject) {
-          console.log(this.localUser.controller2?.intersectedObject);
           this.secondaryInputManager.handleTriggerDown(
             this.localUser.controller2.intersectedObject,
           );
+        }
+        break;
+      case 'i':
+        // show info popup
+        if (this.localUser.controller1?.intersectedObject) {
+          const { object } = this.localUser.controller1.intersectedObject;
+          if (isEntityMesh(object)) {
+            this.openInfoMenu(this.localUser.controller1, object);
+          }
         }
         break;
       default:

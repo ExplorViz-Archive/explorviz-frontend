@@ -89,15 +89,17 @@ function composeDrawableClazzCommunicationContent(
   const communication = communicationMesh.dataModel;
 
   const commDirection = communication.bidirectional ? ' <-> ' : ' -> ';
-  const title = communication.sourceClass.name
-    + commDirection
-    + communication.targetClass.name;
+  // const title = communication.sourceClass.name
+  //  + commDirection
+  //  + communication.targetClass.name;
+  const title = `Source ${commDirection} Target`;
 
   const content: DetailedInfo = { title, entries: [] };
 
   content.entries.push({
     key: 'Requests: ',
-    value: communication.totalRequests.toString(),
+    // value: communication.totalRequests.toString(),
+    value: 'test',
   });
 
   return content;
