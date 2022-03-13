@@ -164,6 +164,8 @@ export default class VrRendering
 
   private willDestroyController: AbortController = new AbortController();
 
+  private mouseIntersection: THREE.Intersection | null = null;
+
   @tracked
   hammerInteraction: HammerInteraction = HammerInteraction.create();
 
@@ -836,6 +838,7 @@ export default class VrRendering
   @action
   handleMouseMove(intersection: THREE.Intersection | null) {
     if (this.vrSessionActive) return;
+    this.mouseIntersection = intersection;
     this.handleHover(intersection, null);
   }
 
@@ -882,11 +885,22 @@ export default class VrRendering
         }
         break;
       case 'i':
-        // show info popup
-        if (this.localUser.controller1?.intersectedObject) {
-          const { object } = this.localUser.controller1.intersectedObject;
+        if (this.vrSessionActive) {
+          // show info popup
+          if (this.localUser.controller1?.intersectedObject) {
+            const { object } = this.localUser.controller1.intersectedObject;
+            if (isEntityMesh(object)) {
+              this.openInfoMenu(this.localUser.controller1, object);
+            }
+          }
+        } else if (this.mouseIntersection) {
+          const { object } = this.mouseIntersection;
           if (isEntityMesh(object)) {
-            this.openInfoMenu(this.localUser.controller1, object);
+            this.debugMenuGroup.openMenu(
+              this.menuFactory.buildInfoMenu(object),
+            );
+          } else {
+            this.debugMenuGroup.closeAllMenus();
           }
         }
         break;
