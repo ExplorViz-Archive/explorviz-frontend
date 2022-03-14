@@ -23,7 +23,7 @@ import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
-import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import { DrawableClassCommunication } from 'explorviz-frontend/utils/application-rendering/class-communication-computer';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
