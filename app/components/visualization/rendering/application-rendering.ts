@@ -26,7 +26,7 @@ import computeDrawableClassCommunication, { DrawableClassCommunication } from 'e
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
-import { perform } from 'ember-concurrency-ts';
+import { perform, taskFor } from 'ember-concurrency-ts';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import {
   highlight, highlightModel, highlightTrace, removeHighlighting, updateHighlighting,
@@ -46,6 +46,7 @@ import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPo
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import UserSettings from 'explorviz-frontend/services/user-settings';
+import LocalUser from 'collaborative-mode/services/local-user';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -101,6 +102,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @tracked
   camera!: THREE.PerspectiveCamera;
+
+  @service('local-user')
+  private localUser!: LocalUser;
 
   renderer!: THREE.WebGLRenderer;
 
@@ -407,6 +411,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleMouseStop(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
     if (!intersection) return;
     const mesh = intersection.object;
+
+    if (mesh && (mesh.parent instanceof ApplicationObject3D)) {
+      const parentObj = mesh.parent;
+      const pingPosition = parentObj.worldToLocal(intersection.point);
+      taskFor(this.localUser.mousePing.ping).perform({ parentObj: parentObj, position: pingPosition })
+    }
+
     this.mouseStopOnMesh(mesh, mouseOnCanvas);
   }
 
@@ -450,8 +461,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region SCENE POPULATION
 
-  @task*
-  loadApplication() {
+  @task *
+    loadApplication() {
     this.applicationObject3D.dataModel = this.args.landscapeData.application!;
     this.applicationObject3D.traces = this.args.landscapeData.dynamicLandscapeData;
     try {
@@ -470,8 +481,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
-  @restartableTask*
-  populateScene() {
+  @restartableTask *
+    populateScene() {
     try {
       const workerPayload = {
         structure: this.applicationObject3D.dataModel,
@@ -571,10 +582,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region HEATMAP
 
-  @restartableTask*
-  calculateHeatmapTask(
-    applicationObject3D: ApplicationObject3D,
-    callback?: () => void,
+  @restartableTask *
+    calculateHeatmapTask(
+      applicationObject3D: ApplicationObject3D,
+      callback?: () => void,
   ) {
     try {
       const workerPayload = {
@@ -671,7 +682,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Calculate center point of the clazz floor. This is used for computing the corresponding
     // face on the foundation box.
     const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id) as
-          ClazzMesh | undefined;
+      ClazzMesh | undefined;
 
     if (!clazzMesh || !this.heatmapConf.selectedMetric) {
       return;

@@ -16,6 +16,12 @@ import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
+import { ForwardedMessage } from 'virtual-reality/utils/vr-message/receivable/forwarded';
+import { AppOpenedMessage, APP_OPENED_EVENT } from 'virtual-reality/utils/vr-message/sendable/app_opened';
+import { HIGHLIGHTING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
+import { MousePingUpdateMessage, MOUSE_PING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
+import debugLogger from 'ember-debug-logger';
+import { perform } from 'ember-concurrency-ts';
 
 interface IModifierArgs {
   positional: [],
@@ -40,6 +46,12 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     this.collaborativeService.on(CollaborativeEvents.MouseStop, this.receiveMouseStop);
     this.collaborativeService.on(CollaborativeEvents.MouseOut, this.receiveMouseOut);
     this.collaborativeService.on(CollaborativeEvents.Perspective, this.receivePerspective);
+    this.webSocket.on(APP_OPENED_EVENT, this, this.onAppOpened);
+    this.webSocket.on(MOUSE_PING_UPDATE_EVENT, this, this.onMousePingUpdate);
+    // this.webSocket.on(TIMESTAMP_UPDATE_EVENT, this, this.onTimestampUpdate);
+    // this.webSocket.on(APP_CLOSED_EVENT, this, this.onAppClosed);
+    // this.webSocket.on(COMPONENT_UPDATE_EVENT, this, this.onComponentUpdate);
+    // this.webSocket.on(HIGHLIGHTING_UPDATE_EVENT, this, this.onHighlightingUpdate);
   }
 
   willDestroy() {
@@ -49,7 +61,17 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     this.collaborativeService.off(CollaborativeEvents.MouseStop, this.receiveMouseStop);
     this.collaborativeService.off(CollaborativeEvents.MouseOut, this.receiveMouseOut);
     this.collaborativeService.off(CollaborativeEvents.Perspective, this.receivePerspective);
+    this.webSocket.off(MOUSE_PING_UPDATE_EVENT, this, this.onMousePingUpdate);
+    this.webSocket.off(APP_OPENED_EVENT, this, this.onAppOpened);
   }
+
+  debug = debugLogger('CollaborativeModifier');
+
+  @service('web-socket')
+  private webSocket!: WebSocketService;
+
+  @service('remote-vr-users')
+  private remoteUsers!: RemoteVrUserService;
 
   @service('collaborative-settings-service')
   settings!: CollaborativeSettingsService;
@@ -85,6 +107,18 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     this.args.named.onSingleClick(applicationMesh);
   }
 
+  async onAppOpened({
+    originalMessage: {
+      id, position, quaternion, scale,
+    },
+  }: ForwardedMessage<AppOpenedMessage>): Promise<void> {
+    if (!this.args.named.onDoubleClick) { return; }
+    const application = this.getApplicationMeshById(id);
+    if (application) {
+      this.args.named.onDoubleClick(application);
+    }
+  }
+
   @action
   receiveDoubleClick(click: Click) {
     if (!this.args.named.onDoubleClick || this.settings.userInControl !== click.user) { return; }
@@ -92,6 +126,25 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
 
     const applicationMesh = this.getApplicationMeshById(click.id);
     this.args.named.onDoubleClick(applicationMesh);
+  }
+
+  onMousePingUpdate({
+    userId,
+    originalMessage: { modelId, isApplication, position },
+  }: ForwardedMessage<MousePingUpdateMessage>): void {
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
+    if (!remoteUser) return;
+
+    const applicationObj = this.getApplicationMeshById(modelId);
+    this.debug('Got mouse ping update - app: ' + applicationObj);
+
+    if (isApplication && applicationObj) {
+      perform(remoteUser.mou)
+      remoteUser.addMousePing(applicationObj, new THREE.Vector3().fromArray(position));
+    } else {
+      remoteUser.addMousePing(this.raycastObject3D,
+        new THREE.Vector3().fromArray(position));
+    }
   }
 
   @action

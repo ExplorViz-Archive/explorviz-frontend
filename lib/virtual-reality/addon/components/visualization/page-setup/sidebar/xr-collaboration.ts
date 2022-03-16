@@ -1,21 +1,21 @@
 import Component from '@glimmer/component';
 import { action, computed } from '@ember/object';
 import { inject as service } from '@ember/service';
-import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import VrRoomService from 'virtual-reality/services/vr-room';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { tracked } from '@glimmer/tracking';
 import { RoomListRecord } from 'virtual-reality/utils/vr-payload/receivable/room-list';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import RemoteVrUserService from 'virtual-reality/services/remote-vr-users';
+import LocalUser from 'collaborative-mode/services/local-user';
 
 interface XrCollaborationArgs {
   removeComponent(componentPath: string): void
 }
 
 export default class ArSettingsSelector extends Component<XrCollaborationArgs> {
-  @service('local-vr-user')
-  localUser!: LocalVrUser;
+  @service('local-user')
+  localUser!: LocalUser;
 
   @service('vr-room')
   roomService!: VrRoomService;

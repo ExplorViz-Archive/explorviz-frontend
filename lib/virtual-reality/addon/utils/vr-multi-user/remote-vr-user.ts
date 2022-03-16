@@ -1,3 +1,4 @@
+import RemoteUser from 'collaborative-mode/utils/remote-user';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import THREE from 'three';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
@@ -19,20 +20,7 @@ type Controller = {
   waypointIndicator: WaypointIndicator;
 };
 
-type Camera = {
-  model: THREE.Object3D;
-};
-
-export default class RemoteVrUser extends THREE.Object3D {
-  userName: string;
-
-  userId: string;
-
-  color: THREE.Color;
-
-  state: string;
-
-  camera: Camera | null;
+export default class RemoteVrUser extends RemoteUser {
 
   controllers: (Controller | null)[];
 
@@ -57,13 +45,12 @@ export default class RemoteVrUser extends THREE.Object3D {
     state: string;
     localUser: LocalVrUser;
   }) {
-    super();
-    this.userName = userName;
-    this.userId = userId;
-    this.color = color;
-    this.state = state;
-
-    this.camera = null;
+    super({
+      userName,
+      userId,
+      color,
+      state,
+    });
     this.controllers = [null, null];
     this.nameTag = null;
 
@@ -133,13 +120,6 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.controllers[controllerId] = null;
   }
 
-  private removeCamera() {
-    if (this.camera && this.camera.model) {
-      this.remove(this.camera.model);
-      this.camera = null;
-    }
-  }
-
   private addNameTag() {
     this.nameTag = new NameTagSprite(this.userName, this.color);
     this.nameTag.position.y += 0.3;
@@ -191,56 +171,6 @@ export default class RemoteVrUser extends THREE.Object3D {
     });
   }
 
-  addMousePing(parentObj: THREE.Object3D, position: THREE.Vector3) {
-    if (this.mousePing) {
-      this.removeMousePing();
-    }
-
-    // Default for applications
-    let size = 2;
-
-    if (parentObj instanceof LandscapeObject3D) {
-      size = 0.2;
-    }
-
-    const geometry = new THREE.SphereGeometry(size, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color: this.color });
-    const sphere = new THREE.Mesh(geometry, material);
-
-    sphere.position.copy(position);
-
-    parentObj.add(sphere);
-
-    this.mousePing = { obj: sphere, time: Date.now() };
-  }
-
-  removeMousePing() {
-    if (this.mousePing) {
-      this.mousePing.obj.parent?.remove(this.mousePing.obj);
-      this.mousePing = null;
-    }
-  }
-
-  updateMousePing() {
-    const now = Date.now();
-    if (this.mousePing && now - this.mousePing.time > 2000) {
-      this.removeMousePing();
-    }
-  }
-
-  /**
-   * Updates the camera model's position and rotation.
-   *
-   * @param Object containing the new camera position and quaterion.
-   */
-  updateCamera(pose: Pose) {
-    if (this.camera) {
-      pose.position[1] -= 0.01;
-
-      this.camera.model.position.fromArray(pose.position);
-      this.camera.model.quaternion.fromArray(pose.quaternion);
-    }
-  }
 
   /**
    * Updates the controller1 model's position and rotation.

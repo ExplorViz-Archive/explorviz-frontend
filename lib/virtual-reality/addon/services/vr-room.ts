@@ -1,4 +1,5 @@
 import Service, { inject as service } from '@ember/service';
+import LocalUser from 'collaborative-mode/services/local-user';
 import ENV from 'explorviz-frontend/config/environment';
 import Auth from 'explorviz-frontend/services/auth';
 import VrMenuFactoryService from 'explorviz-frontend/services/vr-menu-factory';
@@ -13,7 +14,6 @@ import { isLobbyJoinedResponse, LobbyJoinedResponse } from '../utils/vr-payload/
 import { isRoomCreatedResponse, RoomCreatedResponse } from '../utils/vr-payload/receivable/room-created';
 import { isRoomListRecord, RoomListRecord } from '../utils/vr-payload/receivable/room-list';
 import { JoinLobbyPayload } from '../utils/vr-payload/sendable/join-lobby';
-import LocalVrUser from './local-vr-user';
 import RemoteVrUserService from './remote-vr-users';
 import VrLandscapeRenderer from './vr-landscape-renderer';
 import VrRoomSerializer from './vr-room-serializer';
@@ -28,8 +28,8 @@ export default class VrRoomService extends Service {
   @service('detached-menu-groups')
   private detachedMenuGroups!: DetachedMenuGroupsService;
 
-  @service('local-vr-user')
-  private localUser!: LocalVrUser;
+  @service('local-user')
+  private localUser!: LocalUser;
 
   @service('remote-vr-users')
   private remoteUsers!: RemoteVrUserService;

@@ -60,6 +60,7 @@ import { updateHighlighting } from 'explorviz-frontend/utils/application-renderi
 import { perform } from 'ember-concurrency-ts';
 import { MousePingUpdateMessage, MOUSE_PING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
 import VrRoomSerializer from '../services/vr-room-serializer';
+import PingService from 'explorviz-frontend/services/ping-service';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -139,6 +140,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @service('web-socket')
   private webSocket!: WebSocketService;
+
+  @service('ping-service')
+  private pingService!: PingService;
 
   @service()
   worker!: any;
@@ -661,7 +665,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     const color = this.localUser.color ? this.localUser.color
       : this.configuration.applicationColors.highlightedEntityColor;
 
-    this.addPing(parentObj, pingPosition, color);
+    this.pingService.addPing(parentObj, pingPosition, color);
 
     if (this.localUser.isOnline) {
       if (parentObj instanceof ApplicationObject3D) {
@@ -670,46 +674,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         this.sender.sendMousePingUpdate('landscape', false, pingPosition);
       }
     }
-  }
-
-  addPing(parentObj: THREE.Object3D, position: THREE.Vector3, color: THREE.Color) {
-    if (this.localPing) {
-      this.removeLocalPing();
-    }
-
-    let size = 2;
-
-    if (parentObj instanceof LandscapeObject3D) {
-      size = 0.2;
-    }
-
-    const geometry = new THREE.SphereGeometry(size, 32, 32);
-    const material = new THREE.MeshBasicMaterial({ color });
-    const sphere = new THREE.Mesh(geometry, material);
-
-    sphere.position.copy(position);
-
-    parentObj.add(sphere);
-
-    this.localPing = { obj: sphere, time: Date.now() };
-  }
-
-  removeLocalPing() {
-    if (this.localPing) {
-      this.localPing.obj.parent?.remove(this.localPing.obj);
-      this.localPing = null;
-    }
-  }
-
-  updatePings() {
-    const now = Date.now();
-    if (this.localPing && now - this.localPing.time > 2000) {
-      this.removeLocalPing();
-    }
-
-    Array.from(this.remoteUsers.getAllRemoteUsers()).forEach((user) => {
-      user.updateMousePing();
-    });
   }
 
   @action
@@ -888,7 +852,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.arZoomHandler?.renderZoomCamera(this.localUser.renderer, this.sceneService.scene,
       this.resize);
 
-    this.updatePings();
+    this.pingService.updatePings();
   }
 
   animate() {

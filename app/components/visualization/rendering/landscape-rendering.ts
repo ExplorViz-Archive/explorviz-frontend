@@ -23,7 +23,7 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
-import { perform } from 'ember-concurrency-ts';
+import { perform, taskFor } from 'ember-concurrency-ts';
 import { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
@@ -31,31 +31,23 @@ import UserSettings from 'explorviz-frontend/services/user-settings';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
-import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
-import { SelfConnectedMessage } from 'virtual-reality/utils/vr-message/receivable/self_connected';
-import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
-import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import { ForwardedMessage } from 'virtual-reality/utils/vr-message/receivable/forwarded';
-import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
-import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
-import { UserDisconnectedMessage } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
 import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
 import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
-import { MousePingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
-import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
+import { MousePingUpdateMessage, MOUSE_PING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
 import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
 import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
 import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
-import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { UserControllerConnectMessage } from 'virtual-reality/utils/vr-message/sendable/user_controller_connect';
 import { UserControllerDisconnectMessage } from 'virtual-reality/utils/vr-message/sendable/user_controller_disconnect';
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import RemoteVrUserService from 'virtual-reality/services/remote-vr-users';
-import VrRoomSerializer from 'virtual-reality/services/vr-room-serializer';
-import VrLandscapeRenderer from 'virtual-reality/services/vr-landscape-renderer';
+import PingService from 'explorviz-frontend/services/ping-service';
+import LocalUser from 'collaborative-mode/services/local-user';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 interface Args {
   readonly id: string;
@@ -108,7 +100,7 @@ export interface Layout3Return {
 * @module explorviz
 * @submodule visualization.rendering
 */
-export default class LandscapeRendering extends GlimmerComponent<Args> implements VrMessageListener {
+export default class LandscapeRendering extends GlimmerComponent<Args> {
   // #region CLASS FIELDS AND GETTERS
 
   @service('configuration')
@@ -119,6 +111,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> implement
 
   @service('user-settings')
   userSettings!: UserSettings;
+
+  @service('ping-service')
+  private pingService!: PingService;
+
+  @service('local-user')
+  private localUser!: LocalUser;
 
   scene!: THREE.Scene;
 
@@ -198,86 +196,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> implement
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
   }
 
-  onUserDisconnect({ id }: UserDisconnectedMessage): void {
-    const removedUser = this.remoteUsers.removeRemoteUserById(id);
-    if (removedUser) {
-      AlertifyHandler.showAlertifyError(`User ${removedUser.userName} disconnected.`);
-    }
-  }
-
-  @service('vr-room-serializer')
-  private roomSerializer!: VrRoomSerializer;
-
-  @service('vr-landscape-renderer')
-  private vrLandscapeRenderer!: VrLandscapeRenderer;
-
-  async onInitialLandscape({
-    landscape,
-    openApps,
-    detachedMenus,
-  }: InitialLandscapeMessage): Promise<void> {
-    await this.roomSerializer.restoreRoom({ landscape, openApps, detachedMenus });
-
-    // this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
-    // this.arSettings.updateLandscapeOpacity();
-
-    // this.vrApplicationRenderer.getOpenApplications().forEach((applicationObject3D) => {
-    //   this.addApplicationToMarker(applicationObject3D);
-    // });
-  }
-
-  onMenuDetached(msg: MenuDetachedForwardMessage): void {
-  }
-  onUserPositions(msg: ForwardedMessage<UserPositionsMessage>): void {
-  }
-  onUserControllerConnect(msg: ForwardedMessage<UserControllerConnectMessage>): void {
-  }
-  onUserControllerDisconnect(msg: ForwardedMessage<UserControllerDisconnectMessage>): void {
-  }
-  async onAppOpened({
-    originalMessage: {
-      id, position, quaternion, scale,
-    },
-  }: ForwardedMessage<AppOpenedMessage>): Promise<void> {
-    const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(
-      id,
-    );
-    if (application) {
-      const applicationObject3D = await
-        this.vrApplicationRenderer.addApplicationLocally(application, {
-          position: new THREE.Vector3(...position),
-          quaternion: new THREE.Quaternion(...quaternion),
-          scale: new THREE.Vector3(...scale),
-        });
-
-      this.addApplicationToMarker(applicationObject3D);
-    }
-  }
-  onAppClosed(msg: ForwardedMessage<AppClosedMessage>): void {
-    throw new Error('Method not implemented.');
-  }
-  onDetachedMenuClosed(msg: ForwardedMessage<DetachedMenuClosedMessage>): void {
-  }
-  onPingUpdate(msg: ForwardedMessage<PingUpdateMessage>): void {
-    throw new Error('Method not implemented.');
-  }
-  onMousePingUpdate(msg: ForwardedMessage<MousePingUpdateMessage>): void {
-    throw new Error('Method not implemented.');
-  }
-  onTimestampUpdate(msg: ForwardedMessage<TimestampUpdateMessage>): void {
-    throw new Error('Method not implemented.');
-  }
-  onObjectMoved(msg: ForwardedMessage<ObjectMovedMessage>): void {
-  }
-  onComponentUpdate(msg: ForwardedMessage<ComponentUpdateMessage>): void {
-    throw new Error('Method not implemented.');
-  }
-  onHighlightingUpdate(msg: ForwardedMessage<HighlightingUpdateMessage>): void {
-    throw new Error('Method not implemented.');
-  }
-  onSpectatingUpdate(msg: ForwardedMessage<SpectatingUpdateMessage>): void {
-  }
-
   @action
   canvasInserted(canvas: HTMLCanvasElement) {
     this.debug('Canvas inserted');
@@ -313,7 +231,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> implement
     this.initCamera();
     this.initRenderer();
     this.initLights();
-    // this.initWebSocket()
+    this.initWebSocket()
   }
 
   @service('vr-timestamp')
@@ -322,23 +240,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> implement
   @service('repos/timestamp-repository')
   private timestampRepo!: TimestampRepository;
 
-  @service('local-vr-user')
-  localUser!: LocalVrUser;
-
-  @service('vr-message-receiver')
-  private receiver!: VrMessageReceiver;
-
-  @service('web-socket')
-  private webSocket!: WebSocketService;
-
-  @service('remote-vr-users')
-  private remoteUsers!: RemoteVrUserService;
-
   private async initWebSocket() {
     this.debug('Initializing websocket...');
-
-    this.webSocket.socketCloseCallback = () => this.onSelfDisconnected();
-    this.receiver.addMessageListener(this);
   }
 
   initServices() {
@@ -441,6 +344,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> implement
     this.webglrenderer.render(this.scene, this.camera);
 
     this.scaleSpheres();
+    this.pingService.updatePings();
 
     if (this.threePerformance) {
       this.threePerformance.stats.end();
@@ -738,6 +642,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> implement
 
   @action
   handleDoubleClick(intersection: THREE.Intersection | null) {
+
     if (!intersection) return;
     const mesh = intersection.object;
 
@@ -826,6 +731,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> implement
     if (!intersection) return;
     const mesh = intersection.object;
 
+    if (mesh && (mesh.parent instanceof ApplicationObject3D || mesh.parent instanceof LandscapeObject3D)) {
+      const parentObj = mesh.parent;
+      const pingPosition = parentObj.worldToLocal(intersection.point);
+      taskFor(this.localUser.mousePing.ping).perform({ parentObj: parentObj, position: pingPosition })
+    }
+
+
     this.mouseStopOnMesh(mesh, mouseOnCanvas);
   }
 
@@ -884,82 +796,4 @@ export default class LandscapeRendering extends GlimmerComponent<Args> implement
     });
   }
 
-
-  onSelfDisconnected(event?: any) {
-    if (this.localUser.isConnecting) {
-      AlertifyHandler.showAlertifyMessage('AR backend service not responding');
-    } else if (event) {
-      switch (event.code) {
-        case 1000: // Normal Closure
-          AlertifyHandler.showAlertifyMessage('Successfully disconnected');
-          break;
-        case 1006: // Abnormal closure
-          AlertifyHandler.showAlertifyMessage('AR backend service closed abnormally');
-          break;
-        default:
-          AlertifyHandler.showAlertifyMessage('Unexpected disconnect');
-      }
-    }
-
-    // Remove remote users.
-    this.remoteUsers.removeAllRemoteUsers();
-
-    // // Reset highlighting colors.
-    // this.webglrenderer.getOpenApplications().forEach((application) => {
-    //   application.setHighlightingColor(
-    //     this.configuration.applicationColors.highlightedEntityColor,
-    //   );
-    // });
-
-    this.localUser.disconnect();
-  }
-
-  /**
-   * After succesfully connecting to the backend, create and spawn other users.
-   */
-  onSelfConnected({ self, users }: SelfConnectedMessage): void {
-    // Create User model for all users and add them to the users map by
-    // simulating the event of a user connecting.
-    for (let i = 0; i < users.length; i++) {
-      const userData = users[i];
-      this.onUserConnected(
-        {
-          event: USER_CONNECTED_EVENT,
-          id: userData.id,
-          name: userData.name,
-          color: userData.color,
-          position: userData.position,
-          quaternion: userData.quaternion,
-        },
-        false,
-      );
-    }
-
-    // Initialize local user.
-    this.localUser.connected({
-      id: self.id,
-      name: self.name,
-      color: new THREE.Color(...self.color),
-    });
-  }
-
-  onUserConnected(
-    {
-      id, name, color, position, quaternion,
-    }: UserConnectedMessage,
-    showConnectMessage = true,
-  ): void {
-    const remoteUser = new RemoteVrUser({
-      userName: name,
-      userId: id,
-      color: new THREE.Color(...color),
-      state: 'online',
-      localUser: this.localUser,
-    });
-    this.remoteUsers.addRemoteUser(remoteUser, { position, quaternion });
-
-    if (showConnectMessage) {
-      AlertifyHandler.showAlertifySuccess(`User ${remoteUser.userName} connected.`);
-    }
-  }
 }

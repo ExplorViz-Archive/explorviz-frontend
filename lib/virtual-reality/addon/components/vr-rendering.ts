@@ -979,7 +979,7 @@ export default class VrRendering
       state: 'online',
       localUser: this.localUser,
     });
-    this.remoteUsers.addRemoteUser(remoteUser, { position, quaternion });
+    this.remoteUsers.addRemoteUser({ remoteUser, initialPose: { position, quaternion } });
 
     if (showConnectMessage) {
       this.messageMenuQueue.enqueueMenu(
@@ -1021,7 +1021,7 @@ export default class VrRendering
     remoteUser.togglePing(controllerId, isPinging);
   }
 
-  onMousePingUpdate() {}
+  onMousePingUpdate() { }
 
   onTimestampUpdate({
     originalMessage: { timestamp },
@@ -1073,6 +1073,7 @@ export default class VrRendering
    */
   onUserDisconnect({ id }: UserDisconnectedMessage) {
     // Remove user and show disconnect notification.
+    // TODO this should be triggered by event, the session handles most of the disconnect
     const removedUser = this.remoteUsers.removeRemoteUserById(id);
     if (removedUser) {
       this.messageMenuQueue.enqueueMenu(

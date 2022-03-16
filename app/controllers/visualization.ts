@@ -20,31 +20,13 @@ import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 import ElkConstructor from 'elkjs/lib/elk-api';
 import THREE from 'three';
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
-import { ForwardedMessage } from 'virtual-reality/utils/vr-message/receivable/forwarded';
 import { InitialLandscapeMessage, INITIAL_LANDSCAPE_EVENT } from 'virtual-reality/utils/vr-message/receivable/landscape';
-import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
-import { SelfConnectedMessage, SELF_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/self_connected';
-import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
-import { UserDisconnectedMessage } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
-import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
-import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
-import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
-import { MousePingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
-import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
-import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
-import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
-import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
-import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
-import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
-import { UserControllerConnectMessage } from 'virtual-reality/utils/vr-message/sendable/user_controller_connect';
-import { UserControllerDisconnectMessage } from 'virtual-reality/utils/vr-message/sendable/user_controller_disconnect';
-import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import RemoteVrUserService from 'virtual-reality/services/remote-vr-users';
-import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import { SerializedVrRoom } from 'virtual-reality/utils/vr-multi-user/serialized-vr-room';
+import CollaborationSession from 'collaborative-mode/services/collaboration-session';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -63,7 +45,7 @@ export const earthTexture = new THREE.TextureLoader().load('images/earth-map.jpg
  * @module explorviz
  * @submodule visualization
  */
-export default class VisualizationController extends Controller implements VrMessageListener {
+export default class VisualizationController extends Controller {
   @service('landscape-listener') landscapeListener!: LandscapeListener;
 
   @service('collaborative-service') collaborativeService!: CollaborativeService;
@@ -75,6 +57,9 @@ export default class VisualizationController extends Controller implements VrMes
   @service('landscape-token') landscapeTokenService!: LandscapeTokenService;
 
   @service('reload-handler') reloadHandler!: ReloadHandler;
+
+  @service('collaboration-session')
+  collaborationSession!: CollaborationSession;
 
   plotlyTimelineRef!: PlotlyTimeline;
 
@@ -290,18 +275,29 @@ export default class VisualizationController extends Controller implements VrMes
       && timestampRecordArray[0] === this.selectedTimestampRecords[0]) {
       return;
     }
+    this.updateTimestamp(timestampRecordArray[0].timestamp, timestampRecordArray)
+  }
+
+  async updateTimestamp(timestamp: number, timestampRecordArray?: Timestamp[]) {
     this.pauseVisualizationUpdating();
     try {
       const [structureData, dynamicData] = await
-        this.reloadHandler.loadLandscapeByTimestamp(timestampRecordArray[0].timestamp);
+        this.reloadHandler.loadLandscapeByTimestamp(timestamp);
 
       this.updateLandscape(structureData, dynamicData);
-      set(this, 'selectedTimestampRecords', timestampRecordArray);
+      if (timestampRecordArray) {
+        set(this, 'selectedTimestampRecords', timestampRecordArray);
+      }
     } catch (e) {
       this.debug('Landscape couldn\'t be requested!', e);
       AlertifyHandler.showAlertifyMessage('Landscape couldn\'t be requested!');
       this.resumeVisualizationUpdating();
     }
+  }
+
+  async restoreRoom(
+    room: SerializedVrRoom) {
+    this.updateTimestamp(room.landscape.timestamp)
   }
 
   @action
@@ -351,15 +347,12 @@ export default class VisualizationController extends Controller implements VrMes
     this.landscapeListener.initLandscapePolling();
     this.updateTimestampList();
     this.initWebSocket();
-    this.webSocket.on(SELF_CONNECTED_EVENT, this, this.onSelfConnected);
-    this.webSocket.on(USER_CONNECTED_EVENT, this, this.onUserConnected);
+    this.collaborationSession.updateRemoteUsers(2)
     this.webSocket.on(INITIAL_LANDSCAPE_EVENT, this, this.onInitialLandscape);
   }
 
   willDestroy() {
     this.resetLandscapeListenerPolling();
-    this.webSocket.off(SELF_CONNECTED_EVENT, this, this.onSelfConnected);
-    this.webSocket.off(USER_CONNECTED_EVENT, this, this.onUserConnected);
     this.webSocket.off(INITIAL_LANDSCAPE_EVENT, this, this.onInitialLandscape);
   }
 
@@ -387,73 +380,7 @@ export default class VisualizationController extends Controller implements VrMes
   }
 
   // collaboration start
-  // user handling
-  /**
-   * After succesfully connecting to the backend, create and spawn other users.
-   */
-  onSelfConnected({ self, users }: SelfConnectedMessage): void {
-    this.debug('Self connected stuff');
-    this.debug('Self connected stuff' + self.name);
-    this.debug('Self connected stuff' + users);
-    // Create User model for all users and add them to the users map by
-    // simulating the event of a user connecting.
-    for (let i = 0; i < users.length; i++) {
-      const userData = users[i];
-      this.onUserConnected(
-        {
-          event: USER_CONNECTED_EVENT,
-          id: userData.id,
-          name: userData.name,
-          color: userData.color,
-          position: userData.position,
-          quaternion: userData.quaternion,
-        },
-        false,
-      );
-    }
-
-    // Initialize local user.
-    this.localUser.connected({
-      id: self.id,
-      name: self.name,
-      color: new THREE.Color(...self.color),
-    });
-  }
-
-  onUserConnected(
-    {
-      id, name, color, position, quaternion,
-    }: UserConnectedMessage,
-    showConnectMessage = true,
-  ): void {
-    const remoteUser = new RemoteVrUser({
-      userName: name,
-      userId: id,
-      color: new THREE.Color(...color),
-      state: 'online',
-      localUser: this.localUser,
-    });
-    this.remoteUsers.addRemoteUser(remoteUser, { position, quaternion });
-
-    if (showConnectMessage) {
-      AlertifyHandler.showAlertifySuccess(`User ${remoteUser.userName} connected.`);
-    }
-  }
-  /**
-   * Removes the user that disconnected and informs our user about it.
-   *
-   * @param {JSON} data - Contains the id of the user that disconnected.
-   */
-  onUserDisconnect({ id }: UserDisconnectedMessage) {
-    // Remove user and show disconnect notification.
-    const removedUser = this.remoteUsers.removeRemoteUserById(id);
-    if (removedUser) {
-      AlertifyHandler.showAlertifyError(`User ${removedUser.userName} disconnected.`);
-    }
-  }
   // user handling end
-
-
   async onInitialLandscape({
     landscape,
     openApps,
@@ -469,97 +396,6 @@ export default class VisualizationController extends Controller implements VrMes
     //   this.addApplicationToMarker(applicationObject3D);
     // });
   }
-
-  async restoreRoom(
-    room: SerializedVrRoom) {
-    this.pauseVisualizationUpdating();
-    try {
-      const [structureData, dynamicData] = await
-        this.reloadHandler.loadLandscapeByTimestamp(room.landscape.timestamp);
-
-      this.updateLandscape(structureData, dynamicData);
-      // TODO is this used?
-      // set(this, 'selectedTimestampRecords', timestampRecordArray);
-    } catch (e) {
-      this.debug('Landscape couldn\'t be requested!', e);
-      AlertifyHandler.showAlertifyMessage('Landscape couldn\'t be requested!');
-      this.resumeVisualizationUpdating();
-    }
-  }
-
-  onMenuDetached(msg: MenuDetachedForwardMessage): void {
-    // vr only
-  }
-  onUserPositions(msg: ForwardedMessage<UserPositionsMessage>): void {
-    // vr only
-  }
-  onUserControllerConnect(msg: ForwardedMessage<UserControllerConnectMessage>): void {
-    // vr only
-  }
-  onUserControllerDisconnect(msg: ForwardedMessage<UserControllerDisconnectMessage>): void {
-    // vr only
-  }
-  onAppOpened(msg: ForwardedMessage<AppOpenedMessage>): void {
-    // throw new Error('Method not implemented.');
-  }
-  onAppClosed(msg: ForwardedMessage<AppClosedMessage>): void {
-    // throw new Error('Method not implemented.');
-  }
-  onDetachedMenuClosed(msg: ForwardedMessage<DetachedMenuClosedMessage>): void {
-    // vr only
-  }
-  onPingUpdate(msg: ForwardedMessage<PingUpdateMessage>): void {
-    // throw new Error('Method not implemented.');
-  }
-  onMousePingUpdate(msg: ForwardedMessage<MousePingUpdateMessage>): void {
-    // throw new Error('Method not implemented.');
-  }
-  onTimestampUpdate(msg: ForwardedMessage<TimestampUpdateMessage>): void {
-    // throw new Error('Method not implemented.');
-  }
-  onObjectMoved(msg: ForwardedMessage<ObjectMovedMessage>): void {
-    // throw new Error('Method not implemented.');
-  }
-  onComponentUpdate(msg: ForwardedMessage<ComponentUpdateMessage>): void {
-    // throw new Error('Method not implemented.');
-  }
-  onHighlightingUpdate(msg: ForwardedMessage<HighlightingUpdateMessage>): void {
-    // throw new Error('Method not implemented.');
-  }
-  onSpectatingUpdate(msg: ForwardedMessage<SpectatingUpdateMessage>): void {
-    // throw new Error('Method not implemented.');
-  }
-  // collaboration end
-
-  onSelfDisconnected(event?: any) {
-    if (this.localUser.isConnecting) {
-      AlertifyHandler.showAlertifyMessage('Collaboration backend service not responding');
-    } else if (event) {
-      switch (event.code) {
-        case 1000: // Normal Closure
-          AlertifyHandler.showAlertifyMessage('Successfully disconnected');
-          break;
-        case 1006: // Abnormal closure
-          AlertifyHandler.showAlertifyMessage('Collaboration backend service closed abnormally');
-          break;
-        default:
-          AlertifyHandler.showAlertifyMessage('Unexpected disconnect');
-      }
-    }
-
-    // Remove remote users.
-    this.remoteUsers.removeAllRemoteUsers();
-
-    // // Reset highlighting colors.
-    // this.webglrenderer.getOpenApplications().forEach((application) => {
-    //   application.setHighlightingColor(
-    //     this.configuration.applicationColors.highlightedEntityColor,
-    //   );
-    // });
-
-    this.localUser.disconnect();
-  }
-
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your controllers.

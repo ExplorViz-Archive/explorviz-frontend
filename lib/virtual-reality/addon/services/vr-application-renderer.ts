@@ -28,9 +28,9 @@ import ArSettings from './ar-settings';
 import { isObjectClosedResponse, ObjectClosedResponse } from '../utils/vr-message/receivable/response/object-closed';
 import VrAssetRepository from './vr-asset-repo';
 import VrHighlightingService, { HightlightComponentArgs } from './vr-highlighting';
-import VrMessageReceiver from './vr-message-receiver';
 import VrMessageSender from './vr-message-sender';
 import VrSceneService from './vr-scene';
+import WebSocketService from 'virtual-reality/services/web-socket';
 
 // Scalar with which the application is scaled (evenly in all dimensions)
 const APPLICATION_SCALAR = 0.01;
@@ -73,8 +73,8 @@ export default class VrApplicationRenderer extends Service {
   @service('vr-highlighting')
   private highlightingService!: VrHighlightingService;
 
-  @service('vr-message-receiver')
-  private receiver!: VrMessageReceiver;
+  @service('web-socket')
+  private webSocket!: WebSocketService;
 
   @service('vr-message-sender')
   private sender!: VrMessageSender;
@@ -96,8 +96,8 @@ export default class VrApplicationRenderer extends Service {
   readonly appCommRendering: AppCommunicationRendering;
 
   readonly drawableClassCommunications: Map<
-  string,
-  DrawableClassCommunication[]
+    string,
+    DrawableClassCommunication[]
   >;
 
   get opacity() {
@@ -221,7 +221,7 @@ export default class VrApplicationRenderer extends Service {
       const nonce = this.sender.sendAppClosed(application.dataModel.id);
 
       // Remove the application only when the backend allowed the application to be closed.
-      this.receiver.awaitResponse({
+      this.webSocket.awaitResponse({
         nonce,
         responseType: isObjectClosedResponse,
         onResponse: (response: ObjectClosedResponse) => {
@@ -336,10 +336,10 @@ export default class VrApplicationRenderer extends Service {
     });
   }
 
-  @restartableTask*
-  calculateHeatmapTask(
-    applicationObject3D: ApplicationObject3D,
-    callback?: () => void,
+  @restartableTask *
+    calculateHeatmapTask(
+      applicationObject3D: ApplicationObject3D,
+      callback?: () => void,
   ) {
     try {
       const workerPayload = {
@@ -373,7 +373,7 @@ export default class VrApplicationRenderer extends Service {
   }
 
   @enqueueTask
-  private* addApplicationTask(
+  private * addApplicationTask(
     applicationModel: Application,
     callback?: (applicationObject3D: ApplicationObject3D) => void,
   ) {
