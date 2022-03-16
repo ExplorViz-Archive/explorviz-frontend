@@ -131,18 +131,59 @@ function composeDrawableClazzCommunicationContent(
 ) {
   const communication = communicationMesh.dataModel;
 
-  const commDirection = communication.bidirectional ? ' <-> ' : ' -> ';
-  // const title = communication.sourceClass.name
-  //  + commDirection
-  //  + communication.targetClass.name;
-  const title = `Source ${commDirection} Target`;
+  const title = 'Communication Information';
 
   const content: DetailedInfo = { title, entries: [] };
 
+  // # of aggregated requests
+  let aggregatedReqCount = 0;
+
+  communication.drawableClassCommus.forEach((drawableClassComm) => {
+    aggregatedReqCount += drawableClassComm.totalRequests;
+  });
   content.entries.push({
-    key: 'Requests: ',
-    // value: communication.totalRequests.toString(),
-    value: 'test',
+    key: 'Aggregated request count:',
+    value: `${aggregatedReqCount} ( 100% )`,
+  });
+
+  // # of unique method calls
+  content.entries.push({
+    key: 'Number of unique methods:',
+    value: `${communication.drawableClassCommus.length}`,
+  });
+
+  content.entries.push({
+    key: '---',
+    value: '',
+  });
+
+  // add information for each unique method call
+  communication.drawableClassCommus.forEach((drawableCommu, index) => {
+    // Call hierarchy
+    content.entries.push({
+      key: 'Src / Tgt:',
+      value: `${drawableCommu.sourceClass.name} ( ${drawableCommu.sourceApp?.name} ) -> ${drawableCommu.targetClass.name} ( ${drawableCommu.targetApp?.name} )`,
+    });
+
+    // Name of called operation
+    content.entries.push({
+      key: 'Called Op.:',
+      value: `${drawableCommu.operationName}`,
+    });
+
+    // Request count
+    content.entries.push({
+      key: 'Request count:',
+      value: `${drawableCommu.totalRequests} ( ${Math.round((drawableCommu.totalRequests / aggregatedReqCount) * 100)}% )`,
+    });
+
+    // Spacer
+    if (index < communication.drawableClassCommus.length) {
+      content.entries.push({
+        key: '---',
+        value: '',
+      });
+    }
   });
 
   return content;
