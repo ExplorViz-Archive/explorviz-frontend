@@ -12,7 +12,7 @@
         <tr>
           <td class="text-nowrap align-top">{{svg-jar "code-16" class="octicon align-middle mr-1"}}</td>
           <td class="text-right text-break pl-1">
-            {{this.calculateAggregatedRequestCount}}
+            {{this.calculateAggregatedRequestCount}} ( 100% )
           </td>
         </tr>
         {{!-- # of unique method calls --}}
@@ -55,7 +55,7 @@
         <tr>
           <td class="text-nowrap align-top">{{svg-jar "code-16" class="octicon align-middle mr-1"}}</td>
           <td class="text-right text-break pl-1">
-            {{drawableClassCommu.totalRequests}}
+            {{drawableClassCommu.totalRequests}} ( {{round ( mult ( div drawableClassCommu.totalRequests this.calculateAggregatedRequestCount ) 100 ) }}% )
           </td>
         </tr>
         {{#if (lt index (sub @communication.drawableClassCommus.length 1))}}
