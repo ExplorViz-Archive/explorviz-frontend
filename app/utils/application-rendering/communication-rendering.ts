@@ -134,6 +134,7 @@ export default class CommunicationRendering {
       } else {
         // does not exist, therefore create pipe
         const clazzCommuMeshData = new ClazzCommuMeshDataModel(
+          application,
           [drawableClazzComm],
           false,
           drawableClazzComm.id,

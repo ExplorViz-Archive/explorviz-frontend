@@ -29,7 +29,11 @@ function countComponentElements(component: Package) {
   return { classCount, packageCount };
 }
 
-function trimString(passedString: string, charLimit: number): string {
+function trimString(passedString: string | undefined, charLimit: number): string {
+  if (!passedString) {
+    return '';
+  }
+
   if (passedString.length <= charLimit) {
     return passedString;
   }
@@ -130,6 +134,7 @@ function composeDrawableClazzCommunicationContent(
   communicationMesh: ClazzCommunicationMesh,
 ) {
   const communication = communicationMesh.dataModel;
+  const applicationId = communication.application.id;
 
   const title = 'Communication Information';
 
@@ -141,29 +146,43 @@ function composeDrawableClazzCommunicationContent(
   communication.drawableClassCommus.forEach((drawableClassComm) => {
     aggregatedReqCount += drawableClassComm.totalRequests;
   });
-  content.entries.push({
-    key: 'Aggregated request count:',
-    value: `${aggregatedReqCount} ( 100% )`,
-  });
 
-  // # of unique method calls
-  content.entries.push({
-    key: 'Number of unique methods:',
-    value: `${communication.drawableClassCommus.length}`,
-  });
+  if (communication.drawableClassCommus.length > 1) {
+    content.entries.push({
+      key: 'Aggregated request count:',
+      value: `${aggregatedReqCount} ( 100% )`,
+    });
 
-  content.entries.push({
-    key: '---',
-    value: '',
-  });
+    // # of unique method calls
+    content.entries.push({
+      key: 'Number of unique methods:',
+      value: `${communication.drawableClassCommus.length}`,
+    });
+
+    content.entries.push({
+      key: '---',
+      value: '',
+    });
+  }
 
   // add information for each unique method call
   communication.drawableClassCommus.forEach((drawableCommu, index) => {
+    const commuHasExternalApp = applicationId !== drawableCommu.sourceApp?.id
+    || applicationId !== drawableCommu.targetApp?.id;
+
     // Call hierarchy
     content.entries.push({
-      key: 'Src / Tgt:',
-      value: `${drawableCommu.sourceClass.name} ( ${drawableCommu.sourceApp?.name} ) -> ${drawableCommu.targetClass.name} ( ${drawableCommu.targetApp?.name} )`,
+      key: 'Src / Tgt Class:',
+      value: `${trimString(drawableCommu.sourceClass.name, 20)} -> ${trimString(drawableCommu.targetClass.name, 20)}`,
     });
+
+    if (commuHasExternalApp) {
+    // App hierarchy
+      content.entries.push({
+        key: 'Src / Tgt App:',
+        value: `${trimString(drawableCommu.sourceApp?.name, 20)} -> ${trimString(drawableCommu.targetApp?.name, 20)}`,
+      });
+    }
 
     // Name of called operation
     content.entries.push({

@@ -30,14 +30,14 @@
           <td class="text-nowrap align-top">{{svg-jar "arrow-switch-16" class="octicon align-middle mr-1"}}</td>
           <td class="text-right text-break pl-1">
             {{drawableClassCommu.sourceClass.name}}
-            {{#if (not (eq drawableClassCommu.sourceApp.id @application.id))}}
+            {{#if (not (eq drawableClassCommu.sourceApp.id this.application.id))}}
               (<button type="button" class="buttonToLink" {{on "click" (fn @showApplication drawableClassCommu.sourceApp.id)}}>
                  {{drawableClassCommu.sourceApp.name}}
                </button>)
             {{/if}}
             {{svg-jar "arrow-right-16" class="octicon align-middle"}}
             {{drawableClassCommu.targetClass.name}}
-            {{#if (not (eq drawableClassCommu.targetApp.id @application.id))}}
+            {{#if (not (eq drawableClassCommu.targetApp.id this.application.id))}}
               (<button type="button" class="buttonToLink" {{on "click" (fn @showApplication drawableClassCommu.targetApp.id)}}>
                  {{drawableClassCommu.targetApp.name}}
                </button>)
