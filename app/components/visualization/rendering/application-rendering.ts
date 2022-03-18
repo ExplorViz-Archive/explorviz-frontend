@@ -22,7 +22,7 @@ import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/applicati
 import {
   Class, isClass, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/application-rendering/class-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
@@ -46,6 +46,10 @@ import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPo
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import UserSettings from 'explorviz-frontend/services/user-settings';
+import ClazzCommuMeshDataModel from 'explorviz-frontend/view-objects/3d/application/utils/clazz-communication-mesh-data-model';
+import RenderingLoop from 'explorviz-frontend/rendering/application/rendering-loop';
+import { getOwner } from '@ember/application';
+import AnimationMesh from 'explorviz-frontend/view-objects/3d/animation-mesh';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -58,12 +62,14 @@ interface Args {
   openDataSelection(): void;
   closeDataSelection(): void;
   toggleVisualizationUpdating(): void;
+  showApplication(applicationId: string): void;
 }
 
 type PopupData = {
   mouseX: number,
   mouseY: number,
-  entity?: Package | Class | DrawableClassCommunication
+  entity: Package | Class | ClazzCommuMeshDataModel
+  isPinned: boolean,
 };
 
 type LayoutData = {
@@ -104,6 +110,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
+  globeMesh!: AnimationMesh;
+
+  timer!: any;
+
+  mouseMovementActive: boolean = true;
+
+  oldRotationApplicationObject3D!: THREE.Euler;
+
+  animationStartCoordinateApplicationObject3D: number = 0;
+
+  isAnimationApplicationObject3DDone: boolean = false;
+
   clock = new THREE.Clock();
 
   // Used to display performance and memory usage information
@@ -116,6 +134,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   hoveredObject: BaseMesh | null;
 
   drawableClassCommunications: DrawableClassCommunication[] = [];
+
+  renderingLoop!: RenderingLoop;
 
   // Extended Object3D which manages application meshes
   readonly applicationObject3D: ApplicationObject3D;
@@ -138,7 +158,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @tracked
-  popupData: PopupData | null = null;
+  popupData: PopupData[] = [];
 
   isFirstRendering = true;
 
@@ -162,9 +182,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   constructor(owner: any, args: Args) {
     super(owner, args);
-    this.debug('Constructor called');
 
-    this.render = this.render.bind(this);
     this.hammerInteraction = HammerInteraction.create();
 
     const { application, dynamicLandscapeData } = this.args.landscapeData;
@@ -198,16 +216,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
-    this.render();
 
     this.resize(outerDiv);
-
-    if (this.configuration.popupPosition) {
-      this.popupData = {
-        mouseX: this.configuration.popupPosition.x,
-        mouseY: this.configuration.popupPosition.y,
-      };
-    }
 
     try {
       await perform(this.loadApplication);
@@ -226,11 +236,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    const { value: showFpsCounter } = this.userSettings.applicationSettings.showFpsCounter;
+    this.renderingLoop = RenderingLoop.create(getOwner(this).ownerInjection(),
+      {
+        camera: this.camera,
+        scene: this.scene,
+        renderer: this.renderer,
+      });
+    this.renderingLoop.start();
 
-    if (showFpsCounter) {
-      this.threePerformance = new THREEPerformance();
-    }
+    this.initVisualization();
   }
 
   /**
@@ -288,6 +302,74 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
     this.debug('Lights added');
+  }
+
+  initVisualization() {
+    const applicationAnimation = () => {
+      // applicationObject3D animation
+      const period = 4000;
+      const times = [0, period];
+      let values = [this.animationStartCoordinateApplicationObject3D, 360];
+
+      let trackName = '.rotation[y]';
+
+      let track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+      let clip = new THREE.AnimationClip('default', period, [track]);
+
+      let animationMixer = new THREE.AnimationMixer(this.applicationObject3D);
+
+      let clipAction = animationMixer.clipAction(clip);
+
+      this.applicationObject3D.tick = (delta: any) => {
+        if (!this.mouseMovementActive) {
+          if (!this.isAnimationApplicationObject3DDone) {
+            values = [this.animationStartCoordinateApplicationObject3D, 360];
+
+            trackName = '.rotation[y]';
+
+            track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+            clip = new THREE.AnimationClip('default', period, [track]);
+
+            animationMixer = new THREE.AnimationMixer(this.applicationObject3D);
+            clipAction = animationMixer.clipAction(clip);
+            clipAction.play();
+            this.isAnimationApplicationObject3DDone = true;
+          }
+
+          animationMixer.update(delta);
+        } else {
+          clipAction.stop();
+          this.isAnimationApplicationObject3DDone = false;
+        }
+      };
+      this.renderingLoop.updatables.push(this.applicationObject3D);
+    };
+
+    const addGlobe = () => {
+      // Add globe for communication that comes from the outside
+      this.globeMesh = EntityRendering.addGlobeToApplication(this.applicationObject3D);
+
+      const period = 1000;
+      const times = [0, period];
+      const values = [0, 360];
+
+      const trackName = '.rotation[y]';
+      const track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+      const clip = new THREE.AnimationClip('default', period, [track]);
+
+      const animationMixer = new THREE.AnimationMixer(this.globeMesh);
+
+      const clipAction = animationMixer.clipAction(clip);
+      clipAction.play();
+      this.globeMesh.tick = (delta: any) => animationMixer.update(delta);
+      this.renderingLoop.updatables.push(this.globeMesh);
+    };
+
+    applicationAnimation();
+    addGlobe();
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -357,13 +439,30 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseMove(intersection: THREE.Intersection | null) {
-    if (!intersection) return;
-    const mesh = intersection.object;
-    this.mouseMoveOnMesh(mesh);
+    this.runOrRestartMouseMovementTimer();
+    this.mouseMoveOnMesh(intersection?.object);
+  }
+
+  runOrRestartMouseMovementTimer() {
+    if (!this.mouseMovementActive) {
+      this.mouseMovementActive = true;
+      this.applicationObject3D.rotation.copy(this.oldRotationApplicationObject3D);
+    } else {
+      this.animationStartCoordinateApplicationObject3D = this.applicationObject3D.rotation.y;
+    }
+
+    clearTimeout(this.timer);
+    this.timer = setTimeout(
+      () => {
+        this.oldRotationApplicationObject3D = new THREE.Euler()
+          .copy(this.applicationObject3D.rotation);
+        this.mouseMovementActive = false;
+      }, 25000,
+    );
   }
 
   @action
-  mouseMoveOnMesh(mesh: THREE.Object3D) {
+  mouseMoveOnMesh(mesh: THREE.Object3D | undefined) {
     const { value: enableHoverEffects } = this.appSettings.enableHoverEffects;
 
     // Update hover effect
@@ -379,15 +478,40 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     // Hide popups when mouse moves
     if (!this.appSettings.enableCustomPopupPosition.value) {
-      this.popupData = null;
+      this.popupData = [];
     }
+  }
+
+  @action
+  showApplication(appId: string) {
+    this.removePopup(appId);
+    this.args.showApplication(appId);
+  }
+
+  @action
+  removePopup(entityId: string) {
+    if (!this.appSettings.enableCustomPopupPosition.value) {
+      this.popupData = [];
+    } else {
+      this.popupData = this.popupData.filter(((pd) => pd.entity.id !== entityId));
+    }
+  }
+
+  @action
+  pinPopup(entityId: string) {
+    this.popupData.forEach((pd) => {
+      if (pd.entity.id === entityId) {
+        pd.isPinned = true;
+      }
+    });
+    this.popupData = [...this.popupData];
   }
 
   @action
   handleMouseWheel(delta: number) {
     // Do not show popups while zooming
     if (!this.appSettings.enableCustomPopupPosition.value) {
-      this.popupData = null;
+      this.popupData = [];
     }
 
     // Change zoom depending on mouse wheel direction
@@ -397,7 +521,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   handleMouseOut() {
     if (!this.appSettings.enableCustomPopupPosition.value) {
-      this.popupData = null;
+      this.popupData = [];
     }
   }
 
@@ -415,11 +539,28 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Show information as popup is mouse stopped on top of a mesh
     if ((mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
       || mesh instanceof ClazzCommunicationMesh)) {
-      this.popupData = {
+      const newPopup = {
         mouseX: mouseOnCanvas.x,
         mouseY: mouseOnCanvas.y,
         entity: mesh.dataModel,
+        isPinned: false,
       };
+
+      if (!this.appSettings.enableCustomPopupPosition.value) {
+        this.popupData = [newPopup];
+      } else {
+        const popupAlreadyExists = this.popupData.any((pd) => pd.entity.id === mesh.dataModel.id);
+        if (popupAlreadyExists) return;
+
+        const notPinnedPopupIndex = this.popupData.findIndex((pd) => !pd.isPinned);
+
+        if (notPinnedPopupIndex === -1) {
+          this.popupData = [...this.popupData, newPopup];
+        } else {
+          this.popupData[notPinnedPopupIndex] = newPopup;
+          this.popupData = [...this.popupData];
+        }
+      }
     }
   }
 
@@ -494,12 +635,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
 
-      if (!this.applicationObject3D.globeMesh) {
+      if (this.globeMesh) {
         // reposition
-        this.applicationObject3D.addGlobeToApplication();
-        this.applicationObject3D.initializeGlobeAnimation();
-      } else {
-        this.applicationObject3D.repositionGlobeToApplication();
+        EntityRendering.repositionGlobeToApplication(this.applicationObject3D, this.globeMesh);
       }
 
       // Restore old state of components
@@ -723,39 +861,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #endregion HEATMAP
 
   // #region RENDERING LOOP
-
-  /**
-   * Main rendering function
-   */
-  render() {
-    if (this.isDestroyed) { return; }
-
-    const animationId = requestAnimationFrame(this.render);
-    this.animationFrameId = animationId;
-
-    const { value: showFpsCounter } = this.userSettings.applicationSettings.showFpsCounter;
-
-    if (showFpsCounter && !this.threePerformance) {
-      this.threePerformance = new THREEPerformance();
-    } else if (!showFpsCounter && this.threePerformance) {
-      this.threePerformance.removePerformanceMeasurement();
-      this.threePerformance = undefined;
-    }
-
-    if (this.threePerformance) {
-      this.threePerformance.threexStats.update(this.renderer);
-      this.threePerformance.stats.begin();
-    }
-
-    this.applicationObject3D.animationMixer?.update(this.clock.getDelta());
-
-    this.renderer.render(this.scene, this.camera);
-
-    this.scaleSpheres();
-    if (this.threePerformance) {
-      this.threePerformance.stats.end();
-    }
-  }
 
   scaleSpheres() {
     this.spheres.forEach((sphereArray) => {
@@ -1056,7 +1161,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   willDestroy() {
     super.willDestroy();
 
-    cancelAnimationFrame(this.animationFrameId);
+    this.renderingLoop.stop();
+
     this.cleanUpApplication();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
@@ -1064,9 +1170,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.heatmapConf.cleanup();
     this.configuration.isCommRendered = true;
 
-    if (this.threePerformance) {
-      this.threePerformance.removePerformanceMeasurement();
-    }
+    this.renderingLoop.stop();
 
     this.debug('Cleaned up application rendering');
   }

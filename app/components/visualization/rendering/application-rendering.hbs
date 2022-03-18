@@ -64,15 +64,16 @@
       {{/if}}
 
       {{!-- popup(s) --}}
-      {{#if this.popupData}}
+      {{#each this.popupData as |d|}}
         <Visualization::Rendering::Popups::PopupCoordinator
           @isMovable={{this.appSettings.enableCustomPopupPosition.value}}
-          @popupData={{this.popupData}}
+          @popupData={{d}}
+          @pinPopup={{this.pinPopup}}
+          @removePopup={{this.removePopup}}
           @structureData={{@landscapeData.structureLandscapeData}}
-          @application={{@landscapeData.application}}
-          @showApplication={{@showApplication}}
+          @showApplication={{this.showApplication}}
         />
-      {{/if}}
+      {{/each}}
     </div>
   </div>
   {{#if @showDataSelection}}
