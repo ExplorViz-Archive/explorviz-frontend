@@ -27,6 +27,8 @@ export default class CollaborationSession extends Service.extend({
 
   private idToRemoteUser: Map<string, RemoteUser> = new Map();
 
+  readonly remoteUserGroup: THREE.Group = new THREE.Group(); // TODO AR ONLY
+
   init() {
     super.init();
 
@@ -79,6 +81,18 @@ export default class CollaborationSession extends Service.extend({
   updateRemoteUsers(delta: number) {
     // this.idToRemoteUser.forEach((remoteUser) => remoteUser.update(delta));
     // this.notifyPropertyChange('idToRemoteUser');
+  }
+
+  getAllRemoteUserIds() {
+    return this.idToRemoteUser.keys();
+  }
+
+  getAllRemoteUsers() {
+    return this.idToRemoteUser.values();
+  }
+
+  lookupRemoteUserById(userId: string): RemoteUser | undefined {
+    return this.idToRemoteUser.get(userId);
   }
 
   /**

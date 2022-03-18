@@ -30,24 +30,9 @@ import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import UserSettings from 'explorviz-frontend/services/user-settings';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
-import LocalVrUser from 'virtual-reality/services/local-vr-user';
-import { ForwardedMessage } from 'virtual-reality/utils/vr-message/receivable/forwarded';
-import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
-import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
-import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
-import { MousePingUpdateMessage, MOUSE_PING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
-import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
-import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
-import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
-import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
-import { UserControllerConnectMessage } from 'virtual-reality/utils/vr-message/sendable/user_controller_connect';
-import { UserControllerDisconnectMessage } from 'virtual-reality/utils/vr-message/sendable/user_controller_disconnect';
-import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
-import WebSocketService from 'virtual-reality/services/web-socket';
-import RemoteVrUserService from 'virtual-reality/services/remote-vr-users';
-import PingService from 'explorviz-frontend/services/ping-service';
 import LocalUser from 'collaborative-mode/services/local-user';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import LandscapeRenderer from 'explorviz-frontend/services/landscape-renderer';
 
 interface Args {
   readonly id: string;
@@ -112,11 +97,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @service('user-settings')
   userSettings!: UserSettings;
 
-  @service('ping-service')
-  private pingService!: PingService;
-
   @service('local-user')
   private localUser!: LocalUser;
+
+  @service('landscape-renderer')
+  private landscapeRenderer!: LandscapeRenderer;
 
   scene!: THREE.Scene;
 
@@ -193,7 +178,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.render = this.render.bind(this);
     this.hammerInteraction = HammerInteraction.create();
 
-    this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
+    this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData)
   }
 
   @action
@@ -246,6 +231,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   initServices() {
     if (this.args.landscapeData) {
+      this.landscapeRenderer.font = this.font // TODO init this somewhere else/ better
+      this.landscapeRenderer.landscapeObject3D = this.landscapeObject3D
       const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
       const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
         || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
@@ -280,6 +267,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     this.camera.position.set(0, 0, 0);
     this.localUser.defaultCamera = this.camera
+    this.landscapeRenderer.camera = this.camera
     this.debug('Camera added');
   }
 
@@ -295,6 +283,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.webglrenderer.setPixelRatio(window.devicePixelRatio);
     this.webglrenderer.setSize(width, height);
     this.localUser.renderer = this.webglrenderer
+    this.landscapeRenderer.webglrenderer = this.webglrenderer
     this.debug('Renderer set up');
   }
 
@@ -344,7 +333,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.webglrenderer.render(this.scene, this.camera);
 
     this.scaleSpheres();
-    this.pingService.updatePings();
 
     if (this.threePerformance) {
       this.threePerformance.stats.end();
@@ -447,17 +435,20 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  */
   @action
   async cleanAndUpdateScene() {
-    await perform(this.populateScene);
+    // TODO this is never used
+    // await perform(this.populateScene);
 
     this.debug('clean and populate landscape-rendering');
   }
 
   // Listener-Callbacks. Override in extending components
+  //
+  // TODO this might belong to landscape-renderer
   @action
   resetView() {
-    if (this.modelIdToPlaneLayout) {
+    if (this.landscapeRenderer.modelIdToPlaneLayout) {
       this.camera.position.set(0, 0, 0);
-      const landscapeRect = this.landscapeObject3D.getMinMaxRect(this.modelIdToPlaneLayout);
+      const landscapeRect = this.landscapeObject3D.getMinMaxRect(this.landscapeRenderer.modelIdToPlaneLayout);
 
       updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
     }
@@ -477,150 +468,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @task *
     loadNewLandscape() {
     this.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
-    yield perform(this.populateScene);
-  }
-
-  /**
- * Computes new meshes for the landscape and adds them to the scene
- *
- * @method populateScene
- */
-  @restartableTask *
-    populateScene() {
-    this.debug('populate landscape-rendering');
 
     const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
-    this.landscapeObject3D.dataModel = structureLandscapeData;
-
-    // Run Klay layouting in 3 steps within workers
-    try {
-      const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
-        dynamicLandscapeData);
-
-      // Do layout pre-processing (1st step)
-      const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
-        structureLandscapeData,
-        applicationCommunications,
-      });
-
-      // Run actual klay function (2nd step)
-      const newGraph: ElkNode = yield this.args.elk.layout(graph);
-
-      // Post-process layout graph (3rd step)
-      const layoutedLandscape: Layout3Return = yield this.worker.postMessage('layout3', {
-        graph: newGraph,
-        modelIdToPoints,
-        structureLandscapeData,
-        applicationCommunications,
-      });
-
-      // Clean old landscape
-      this.landscapeObject3D.removeAllChildren();
-      this.landscapeObject3D.resetMeshReferences();
-
-      const {
-        modelIdToLayout,
-        modelIdToPoints: modelIdToPointsComplete,
-      }: Layout3Return = layoutedLandscape;
-
-      const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
-
-      this.modelIdToPlaneLayout = modelIdToPlaneLayout;
-
-      // Convert the simple to a PlaneLayout map
-      LandscapeRendering.convertToPlaneLayoutMap(modelIdToLayout, modelIdToPlaneLayout);
-
-      // Compute center of landscape
-      const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
-      const centerPoint = landscapeRect.center;
-
-      // Update camera zoom accordingly
-      updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
-
-      // Render all landscape entities
-      const { nodes } = structureLandscapeData;
-
-      // Draw boxes for nodes
-      nodes.forEach((node) => {
-        this.renderNode(node, modelIdToPlaneLayout.get(node.id), centerPoint);
-
-        const { applications } = node;
-
-        // Draw boxes for applications
-        applications.forEach((application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.id),
-            centerPoint);
-        });
-      });
-
-      // Render application communication
-
-      const color = this.configuration.landscapeColors.communicationColor;
-
-      const tiles = CommunicationRendering.computeCommunicationTiles(applicationCommunications,
-        modelIdToPointsComplete, color);
-
-      CommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
-        centerPoint);
-
-      this.debug('Landscape loaded');
-    } catch (e) {
-      // console.log(e);
-    }
-  }
-
-  /**
-   * Creates & positions a node mesh with corresponding labels.
-   * Then adds it to the landscapeObject3D.
-   *
-   * @param node Data model for the node mesh
-   * @param layout Layout data to position the mesh correctly
-   * @param centerPoint Offset of landscape object
-   */
-  renderNode(node: Node, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create node mesh
-    const nodeMesh = new NodeMesh(layout, node, this.configuration.landscapeColors.nodeColor);
-
-    // Create and add label + icon
-    nodeMesh.setToDefaultPosition(centerPoint);
-
-    // Label with own ip-address by default
-    const labelText = nodeMesh.getDisplayName();
-
-    this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font,
-      this.configuration.landscapeColors.nodeTextColor);
-
-    // Add to scene
-    this.landscapeObject3D.add(nodeMesh);
-  }
-
-  /**
-   * Creates & positions an application mesh with corresponding labels.
-   * Then adds it to the landscapeObject3D.
-   *
-   * @param application Data model for the application mesh
-   * @param layout Layout data to position the mesh correctly
-   * @param centerPoint Offset of landscape object
-   */
-  renderApplication(application: Application, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create application mesh
-    const applicationMesh = new ApplicationMesh(layout, application,
-      this.configuration.landscapeColors.applicationColor);
-    applicationMesh.setToDefaultPosition(centerPoint);
-
-    // Create and add label + icon
-    this.labeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
-      this.configuration.landscapeColors.applicationTextColor);
-    this.labeler.addApplicationLogo(applicationMesh, this.imageLoader);
-
-    // Add to scene
-    this.landscapeObject3D.add(applicationMesh);
+    // TODO populateScene with landscape renderer
+    yield perform(this.landscapeRenderer.populateLandscape, structureLandscapeData, dynamicLandscapeData);
   }
 
   // #endregion SCENE POPULATION
@@ -731,12 +582,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (!intersection) return;
     const mesh = intersection.object;
 
+
     if (mesh && (mesh.parent instanceof ApplicationObject3D || mesh.parent instanceof LandscapeObject3D)) {
       const parentObj = mesh.parent;
       const pingPosition = parentObj.worldToLocal(intersection.point);
       taskFor(this.localUser.mousePing.ping).perform({ parentObj: parentObj, position: pingPosition })
     }
-
 
     this.mouseStopOnMesh(mesh, mouseOnCanvas);
   }
@@ -776,24 +627,4 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       this.args.showApplication(application.id);
     }
   }
-
-  /**
-   * Takes a map with plain JSON layout objects and creates PlaneLayout objects from it
-   *
-   * @param layoutedApplication Map containing plain JSON layout data
-   */
-  static convertToPlaneLayoutMap(modelIdToSimpleLayout: Map<string, SimplePlaneLayout>,
-    modelIdToPlaneLayout: Map<string, PlaneLayout>) {
-    // Construct a layout map from plain JSON layouts
-    modelIdToSimpleLayout.forEach((simplePlaneLayout: SimplePlaneLayout, modelId: string) => {
-      const planeLayoutObject = new PlaneLayout();
-      planeLayoutObject.height = simplePlaneLayout.height;
-      planeLayoutObject.width = simplePlaneLayout.width;
-      planeLayoutObject.positionX = simplePlaneLayout.positionX;
-      planeLayoutObject.positionY = simplePlaneLayout.positionY;
-
-      modelIdToPlaneLayout.set(modelId, planeLayoutObject);
-    });
-  }
-
 }

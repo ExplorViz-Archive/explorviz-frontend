@@ -1,4 +1,3 @@
-import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import THREE from 'three';
 import { Pose } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import MousePing from './mouse-ping-helper';

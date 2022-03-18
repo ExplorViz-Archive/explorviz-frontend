@@ -61,6 +61,7 @@ import { perform } from 'ember-concurrency-ts';
 import { MousePingUpdateMessage, MOUSE_PING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
 import VrRoomSerializer from '../services/vr-room-serializer';
 import PingService from 'explorviz-frontend/services/ping-service';
+import LocalUser from 'collaborative-mode/services/local-user';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -95,6 +96,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @service('local-vr-user')
   localUser!: LocalVrUser;
+
+  @service('local-user')
+  localColabUser!: LocalUser;
 
   @service('delta-time')
   deltaTimeService!: DeltaTime;
@@ -140,9 +144,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @service('web-socket')
   private webSocket!: WebSocketService;
-
-  @service('ping-service')
-  private pingService!: PingService;
 
   @service()
   worker!: any;
@@ -656,12 +657,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     const parentObj = intersection.object.parent;
     const pingPosition = parentObj.worldToLocal(intersection.point);
 
-    if (parentObj instanceof ApplicationObject3D) {
-      pingPosition.y += 1;
-    } else {
-      pingPosition.z += 0.1;
-    }
+    this.localColabUser.mousePing.ping({ parentObj: parentObj, position: pingPosition })
 
+    // TODO is this
     const color = this.localUser.color ? this.localUser.color
       : this.configuration.applicationColors.highlightedEntityColor;
 

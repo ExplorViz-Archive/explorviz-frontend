@@ -24,7 +24,6 @@ import { InitialLandscapeMessage, INITIAL_LANDSCAPE_EVENT } from 'virtual-realit
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import WebSocketService from 'virtual-reality/services/web-socket';
-import RemoteVrUserService from 'virtual-reality/services/remote-vr-users';
 import { SerializedVrRoom } from 'virtual-reality/utils/vr-multi-user/serialized-vr-room';
 import CollaborationSession from 'collaborative-mode/services/collaboration-session';
 
@@ -356,23 +355,11 @@ export default class VisualizationController extends Controller {
     this.webSocket.off(INITIAL_LANDSCAPE_EVENT, this, this.onInitialLandscape);
   }
 
-  @service('vr-timestamp')
-  private timestampService!: VrTimestampService;
-
-  @service('repos/timestamp-repository')
-  private timestampRepo!: TimestampRepository;
-
   @service('local-vr-user')
   localUser!: LocalVrUser;
 
-  @service('vr-message-receiver')
-  private receiver!: VrMessageReceiver;
-
   @service('web-socket')
   private webSocket!: WebSocketService;
-
-  @service('remote-vr-users')
-  private remoteUsers!: RemoteVrUserService;
 
   private async initWebSocket() {
     this.debug('Initializing websocket...');

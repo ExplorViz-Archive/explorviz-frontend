@@ -6,8 +6,8 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { tracked } from '@glimmer/tracking';
 import { RoomListRecord } from 'virtual-reality/utils/vr-payload/receivable/room-list';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
-import RemoteVrUserService from 'virtual-reality/services/remote-vr-users';
 import LocalUser from 'collaborative-mode/services/local-user';
+import CollaborationSession from 'collaborative-mode/services/collaboration-session';
 
 interface XrCollaborationArgs {
   removeComponent(componentPath: string): void
@@ -24,20 +24,19 @@ export default class ArSettingsSelector extends Component<XrCollaborationArgs> {
   // @ts-ignore since it is used in template
   private timestampService!: VrTimestampService;
 
-  @service('remote-vr-users')
-  // @ts-ignore since it is used in template
-  private remoteUsers!: RemoteVrUserService;
+  @service('collaboration-session')
+  private collaborationSession!: CollaborationSession;
 
   @tracked
   rooms: RoomListRecord[] = [];
 
-  @computed('remoteUsers.idToRemoteUser')
+  @computed('collaborationSession.idToRemoteUser')
   get users() {
     const users = [];
     if (this.localUser.color) {
       users.push({ name: this.localUser.userName, style: `color:#${this.localUser.color.getHexString()}` });
     }
-    const remoteUsers = Array.from(this.remoteUsers.getAllRemoteUsers()).map(
+    const remoteUsers = Array.from(this.collaborationSession.getAllRemoteUsers()).map(
       (user) => ({ name: user.userName, style: `color:#${user.color.getHexString()}` }),
     );
 

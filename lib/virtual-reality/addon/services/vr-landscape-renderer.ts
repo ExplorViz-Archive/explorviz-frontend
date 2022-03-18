@@ -6,6 +6,7 @@ import debugLogger from 'ember-debug-logger';
 import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
 import ArSettings from 'explorviz-frontend/services/ar-settings';
 import Configuration from 'explorviz-frontend/services/configuration';
+import LandscapeRenderer from 'explorviz-frontend/services/landscape-renderer';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import * as LandscapeCommunicationRendering from 'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
@@ -41,6 +42,8 @@ export default class VrLandscapeRenderer extends Service {
 
   @service('vr-scene')
   private sceneService!: VrSceneService;
+
+  modelIdToPlaneLayout: Map<string, PlaneLayout> | null = null;
 
   @service()
   private worker!: any;
@@ -163,7 +166,7 @@ export default class VrLandscapeRenderer extends Service {
    * @method populateLandscape
    */
   @restartableTask
-  private* populateLandscape(
+  private * populateLandscape(
     structureLandscapeData: StructureLandscapeData,
     dynamicLandscapeData: DynamicLandscapeData,
   ): any {
@@ -209,8 +212,11 @@ export default class VrLandscapeRenderer extends Service {
 
       const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
 
+      this.modelIdToPlaneLayout = modelIdToPlaneLayout
+
+
       // Convert the simple to a PlaneLayout map
-      LandscapeRendering.convertToPlaneLayoutMap(
+      LandscapeRenderer.convertToPlaneLayoutMap(
         modelIdToLayout,
         modelIdToPlaneLayout,
       );

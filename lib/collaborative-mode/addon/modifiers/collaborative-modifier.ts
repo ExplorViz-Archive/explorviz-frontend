@@ -70,9 +70,6 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
   @service('web-socket')
   private webSocket!: WebSocketService;
 
-  @service('remote-vr-users')
-  private remoteUsers!: RemoteVrUserService;
-
   @service('collaborative-settings-service')
   settings!: CollaborativeSettingsService;
 
