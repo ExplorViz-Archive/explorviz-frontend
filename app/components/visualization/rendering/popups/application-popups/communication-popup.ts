@@ -1,11 +1,15 @@
 import GlimmerComponent from '@glimmer/component';
-import { StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import {
+  StructureLandscapeData,
+  Class, Package,
+} from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import ClazzCommuMeshDataModel from 'explorviz-frontend/view-objects/3d/application/utils/clazz-communication-mesh-data-model';
 
 interface Args {
   communication: ClazzCommuMeshDataModel
   structureData: StructureLandscapeData
   showApplication(applicationId: string): void;
+  highlightModel(entity: Package | Class): void;
 }
 
 export default class CommunicationPopup extends GlimmerComponent<Args> {

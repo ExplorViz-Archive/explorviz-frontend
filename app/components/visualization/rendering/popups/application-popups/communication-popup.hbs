@@ -29,7 +29,9 @@
         <tr>
           <td class="text-nowrap align-top">{{svg-jar "arrow-switch-16" class="octicon align-middle mr-1"}}</td>
           <td class="text-right text-break pl-1">
-            {{drawableClassCommu.sourceClass.name}}
+            <button type="button" class="buttonToLink" {{on "click" (fn @highlightModel drawableClassCommu.sourceClass)}}>
+              {{drawableClassCommu.sourceClass.name}}
+            </button>
             {{#if (not (eq drawableClassCommu.sourceApp.id this.application.id))}}
               (<button type="button" class="buttonToLink" {{on "click" (fn @showApplication drawableClassCommu.sourceApp.id)}}>
                  {{drawableClassCommu.sourceApp.name}}
