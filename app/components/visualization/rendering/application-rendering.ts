@@ -20,7 +20,7 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import {
-  Class, isClass, Package,
+  Class, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/application-rendering/class-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
@@ -913,9 +913,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   openParents(entity: Package | Class) {
     // eslint-disable-next-line @typescript-eslint/no-shadow
     function getAllAncestorComponents(entity: Package | Class): Package[] {
-      if (isClass(entity)) {
-        return getAllAncestorComponents(entity.parent);
-      }
+      // if (isClass(entity)) {
+      //  return getAllAncestorComponents(entity.parent);
+      // }
 
       if (entity.parent === undefined) {
         return [];

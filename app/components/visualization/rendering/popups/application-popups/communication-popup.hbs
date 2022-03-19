@@ -29,14 +29,26 @@
         <tr>
           <td class="text-nowrap align-top">{{svg-jar "arrow-switch-16" class="octicon align-middle mr-1"}}</td>
           <td class="text-right text-break pl-1">
-            {{drawableClassCommu.sourceClass.name}}
+            {{#if (eq drawableClassCommu.sourceApp.id this.application.id)}}
+              <button type="button" class="buttonToLink" {{on "click" (fn this.highlightEntity drawableClassCommu.sourceClass)}}>
+                {{drawableClassCommu.sourceClass.name}}
+              </button>
+            {{else}}
+              {{drawableClassCommu.sourceClass.name}}
+            {{/if}}
             {{#if (not (eq drawableClassCommu.sourceApp.id this.application.id))}}
               (<button type="button" class="buttonToLink" {{on "click" (fn @showApplication drawableClassCommu.sourceApp.id)}}>
                  {{drawableClassCommu.sourceApp.name}}
                </button>)
             {{/if}}
             {{svg-jar "arrow-right-16" class="octicon align-middle"}}
-            {{drawableClassCommu.targetClass.name}}
+            {{#if (eq drawableClassCommu.targetApp.id this.application.id)}}
+              <button type="button" class="buttonToLink" {{on "click" (fn this.highlightEntity drawableClassCommu.targetClass)}}>
+                {{drawableClassCommu.targetClass.name}}
+              </button>
+            {{else}}
+              {{drawableClassCommu.targetClass.name}}
+            {{/if}}
             {{#if (not (eq drawableClassCommu.targetApp.id this.application.id))}}
               (<button type="button" class="buttonToLink" {{on "click" (fn @showApplication drawableClassCommu.targetApp.id)}}>
                  {{drawableClassCommu.targetApp.name}}
