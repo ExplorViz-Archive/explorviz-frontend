@@ -1,4 +1,5 @@
 import Service, { inject as service } from '@ember/service';
+import debugLogger from 'ember-debug-logger';
 import Configuration from 'explorviz-frontend/services/configuration';
 import VrApplicationRenderer from 'explorviz-frontend/services/vr-application-renderer';
 import VrLandscapeRenderer from 'explorviz-frontend/services/vr-landscape-renderer';
@@ -29,20 +30,24 @@ export default class VrSceneService extends Service {
 
   skyLight: THREE.SpotLight;
 
+  private debug = debugLogger('LandscapeRenderer');
+
   constructor(properties?: object) {
     super(properties);
 
     // Initialize sceene.
+    this.debug('Scene initializing')
     this.scene = new THREE.Scene();
     this.scene.background = this.configuration.landscapeColors.backgroundColor;
+    this.debug('Scene initialized')
 
     // Initilize floor.
     this.floor = new FloorMesh(FLOOR_SIZE, FLOOR_SIZE);
-    this.scene.add(this.floor);
+    // this.scene.add(this.floor);
 
     // Initialize lights.
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
-    this.scene.add(light);
+    // this.scene.add(light);
 
     this.spotLight = new THREE.SpotLight(0xffffff, 0.5, 2000);
     this.spotLight.position.set(-200, 100, 100);
@@ -51,12 +56,12 @@ export default class VrSceneService extends Service {
     this.spotLight.penumbra = 0.2;
     this.spotLight.decay = 2;
 
-    this.addSpotlight();
+    // this.addSpotlight();
 
     // Add a light that illuminates the sky box if the user dragged in a backgound image.
     this.skyLight = new THREE.SpotLight(0xffffff, 0.5, 1000, Math.PI, 0, 0);
     this.skyLight.castShadow = false;
-    this.addSkylight();
+    // this.addSkylight();
   }
 
   addSpotlight() {

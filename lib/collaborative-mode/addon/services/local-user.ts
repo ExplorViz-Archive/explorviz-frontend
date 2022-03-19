@@ -22,6 +22,9 @@ export default class LocalUser extends Service.extend({
   @tracked
   currentRoomId: string | null = null;
 
+  @tracked
+  defaultCamera!: THREE.PerspectiveCamera;
+
   // TODO this should be handled elsewhere
   @service('vr-room')
   private roomService!: VrRoomService;

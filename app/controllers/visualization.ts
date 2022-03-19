@@ -26,6 +26,8 @@ import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import { SerializedVrRoom } from 'virtual-reality/utils/vr-multi-user/serialized-vr-room';
 import CollaborationSession from 'collaborative-mode/services/collaboration-session';
+import LandscapeRenderer from 'explorviz-frontend/services/landscape-renderer';
+import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -154,7 +156,11 @@ export default class VisualizationController extends Controller {
       dynamicLandscapeData: dynamicData,
       application,
     };
+    this.landscapeRenderer.landscapeObject3D.dataModel = this.landscapeData.structureLandscapeData // TODO landscapeModel
   }
+
+  @service('landscape-renderer')
+  private landscapeRenderer!: LandscapeRenderer;
 
   private static getApplicationFromLandscapeById(id: string,
     structureData: StructureLandscapeData) {

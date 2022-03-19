@@ -7,21 +7,18 @@ import THREE from 'three';
 import Configuration from 'explorviz-frontend/services/configuration';
 
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
-import * as CommunicationRendering from
-  'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
-import { restartableTask, task } from 'ember-concurrency-decorators';
+import { task } from 'ember-concurrency-decorators';
 import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform, taskFor } from 'ember-concurrency-ts';
 import { ELK, ElkNode } from 'elkjs/lib/elk-api';
@@ -33,6 +30,7 @@ import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repo
 import LocalUser from 'collaborative-mode/services/local-user';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import LandscapeRenderer from 'explorviz-frontend/services/landscape-renderer';
+import VrSceneService from 'virtual-reality/services/vr-scene';
 
 interface Args {
   readonly id: string;
@@ -100,18 +98,16 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @service('local-user')
   private localUser!: LocalUser;
 
+  @service('vr-scene')
+  private sceneService!: VrSceneService;
+
   @service('landscape-renderer')
   private landscapeRenderer!: LandscapeRenderer;
-
-  scene!: THREE.Scene;
 
   webglrenderer!: THREE.WebGLRenderer;
 
   @tracked
   hammerInteraction: HammerInteraction;
-
-  @tracked
-  camera!: THREE.PerspectiveCamera;
 
   canvas!: HTMLCanvasElement;
 
@@ -129,8 +125,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   // Maps models to a computed layout
   modelIdToPlaneLayout: Map<string, PlaneLayout> | null = null;
 
-  // Extended Object3D which manages landscape meshes
-  readonly landscapeObject3D: LandscapeObject3D;
+  // // Extended Object3D which manages landscape meshes
+  // readonly landscapeObject3D: LandscapeObject3D;
 
   // Provides functions to label landscape meshes
   readonly labeler = new Labeler();
@@ -177,8 +173,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.render = this.render.bind(this);
     this.hammerInteraction = HammerInteraction.create();
+    this.landscapeRenderer.font = this.font
 
-    this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData)
+    // this.landscapeRenderer.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData // TODO remove reminder
   }
 
   @action
@@ -212,7 +209,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    */
   initThreeJs() {
     this.initServices();
-    this.initScene();
     this.initCamera();
     this.initRenderer();
     this.initLights();
@@ -231,8 +227,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   initServices() {
     if (this.args.landscapeData) {
-      this.landscapeRenderer.font = this.font // TODO init this somewhere else/ better
-      this.landscapeRenderer.landscapeObject3D = this.landscapeObject3D
+      // this.landscapeRenderer.landscapeObject3D = this.landscapeObject3D
       const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
       const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
         || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
@@ -248,26 +243,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   /**
-   * Creates a scene, its background and adds a landscapeObject3D to it
-   */
-  initScene() {
-    this.scene = new THREE.Scene();
-    this.scene.background = this.configuration.landscapeColors.backgroundColor;
-
-    this.scene.add(this.landscapeObject3D);
-
-    this.debug('Scene created');
-  }
-
-  /**
    * Creates a PerspectiveCamera according to canvas size and sets its initial position
    */
   initCamera() {
     const { width, height } = this.canvas;
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    this.camera.position.set(0, 0, 0);
-    this.localUser.defaultCamera = this.camera
-    this.landscapeRenderer.camera = this.camera
+    this.localUser.defaultCamera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    this.localUser.camera.position.set(0, 0, 0);
     this.debug('Camera added');
   }
 
@@ -300,7 +281,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   setPerspective(position: number[] /* , rotation: number[] */) {
-    this.camera.position.fromArray(position);
+    this.localUser.camera.position.fromArray(position);
   }
 
   // #endregion COLLABORATIVE
@@ -330,7 +311,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       this.threePerformance.stats.begin();
     }
 
-    this.webglrenderer.render(this.scene, this.camera);
+    this.webglrenderer.render(this.sceneService.scene, this.localUser.camera);
 
     this.scaleSpheres();
 
@@ -370,7 +351,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     for (let i = 0; i < 30; i++) {
       const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-      this.scene.add(sphere);
+      this.sceneService.scene.add(sphere);
       spheres.push(sphere);
     }
     return spheres;
@@ -406,7 +387,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('cleanup landscape rendering');
 
     // Clean up all remaining meshes
-    this.landscapeObject3D.removeAllChildren();
+    this.landscapeRenderer.landscapeObject3D.removeAllChildren();
     this.labeler.clearCache();
   }
 
@@ -421,8 +402,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Update renderer and camera according to canvas size
     this.webglrenderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    this.localUser.camera.aspect = width / height;
+    this.localUser.camera.updateProjectionMatrix();
   }
 
   /**
@@ -447,10 +428,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @action
   resetView() {
     if (this.landscapeRenderer.modelIdToPlaneLayout) {
-      this.camera.position.set(0, 0, 0);
-      const landscapeRect = this.landscapeObject3D.getMinMaxRect(this.landscapeRenderer.modelIdToPlaneLayout);
+      this.localUser.camera.position.set(0, 0, 0);
+      const landscapeRect = this.landscapeRenderer.landscapeObject3D.getMinMaxRect(this.landscapeRenderer.modelIdToPlaneLayout);
 
-      updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
+      updateCameraZoom(landscapeRect, this.localUser.camera, this.webglrenderer);
     }
   }
 
@@ -467,7 +448,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @task *
     loadNewLandscape() {
-    this.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
+    this.landscapeRenderer.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
 
     const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
     // TODO populateScene with landscape renderer
@@ -480,7 +461,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   updateColors() {
-    this.scene.traverse((object3D) => {
+    this.sceneService.scene.traverse((object3D) => {
       if (object3D instanceof BaseMesh) {
         object3D.updateColor();
       }
@@ -515,15 +496,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     if (button === LEFT_MOUSE_BUTTON) {
       // Move landscape further if camera is far away
-      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
+      const ZOOM_CORRECTION = (Math.abs(this.localUser.camera.position.z) / 4.0);
 
       // Divide delta by 100 to achieve reasonable panning speeds
       const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
       const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
 
       // Adapt camera position (apply panning)
-      this.camera.position.x += xOffset;
-      this.camera.position.y += yOffset;
+      this.localUser.camera.position.x += xOffset;
+      this.localUser.camera.position.y += yOffset;
     }
   }
 
@@ -534,11 +515,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     const scrollDelta = delta * 1.5;
 
-    const landscapeVisible = this.camera.position.z + scrollDelta > 0.2;
+    const landscapeVisible = this.localUser.camera.position.z + scrollDelta > 0.2;
 
     // Apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
     if (landscapeVisible) {
-      this.camera.position.z += scrollDelta;
+      this.localUser.camera.position.z += scrollDelta;
     }
   }
 

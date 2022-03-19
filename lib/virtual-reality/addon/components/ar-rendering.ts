@@ -849,8 +849,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     this.arZoomHandler?.renderZoomCamera(this.localUser.renderer, this.sceneService.scene,
       this.resize);
-
-    this.pingService.updatePings();
   }
 
   animate() {

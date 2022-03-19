@@ -1,7 +1,9 @@
 import Service, { inject as service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import Auth from 'explorviz-frontend/services/auth';
+import LandscapeRenderer from 'explorviz-frontend/services/landscape-renderer';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
@@ -38,6 +40,9 @@ export default class VrTimestampService extends Service {
 
   @service('vr-message-sender')
   private sender!: VrMessageSender;
+
+  @service('landscape-renderer')
+  private landscapeRenderer!: LandscapeRenderer;
 
   @tracked
   timestamp!: number;
@@ -96,10 +101,7 @@ export default class VrTimestampService extends Service {
     this.timestamp = timestamp;
 
     await Promise.all([
-      this.vrLandscapeRenderer.updateLandscapeData(
-        structureLandscapeData,
-        dynamicLandscapeData,
-      ),
+      // await perform(this.landscapeRenderer.populateLandscape, structureLandscapeData, dynamicLandscapeData),
       this.vrApplicationRenderer.updateLandscapeData(
         structureLandscapeData,
         dynamicLandscapeData,
