@@ -62,6 +62,7 @@ import { MousePingUpdateMessage, MOUSE_PING_UPDATE_EVENT } from 'virtual-reality
 import VrRoomSerializer from '../services/vr-room-serializer';
 import PingService from 'explorviz-frontend/services/ping-service';
 import LocalUser from 'collaborative-mode/services/local-user';
+import LandscapeRenderer from 'explorviz-frontend/services/landscape-renderer';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -145,6 +146,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   @service('web-socket')
   private webSocket!: WebSocketService;
 
+  @service('landscape-renderer')
+  private landscapeRenderer!: LandscapeRenderer;
+
   @service()
   worker!: any;
 
@@ -210,7 +214,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     super(owner, args);
     this.debug('Constructor called');
 
-    this.vrLandscapeRenderer.setLargestSide(2);
+    this.landscapeRenderer.setLargestSide(2);
 
     this.hammerInteraction = HammerInteraction.create();
 
@@ -249,23 +253,14 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // Use given font for landscape and application rendering.
     this.assetRepo.font = this.args.font;
     this.remoteUsers.displayHmd = false;
+    this.landscapeRenderer.landscape_depth = 0.7
+    this.landscapeRenderer.z_depth = 0.2
+    this.landscapeRenderer.commLineMinSize = 0.004
+    this.landscapeRenderer.commLineScalar = 0.028
+    this.landscapeRenderer.z_offset = 0.7 / 2 + 0.25
+    this.landscapeRenderer.z_pos_application = 0.3
+    this.landscapeRenderer.arMode = true
 
-    // Initialize timestamp and landscape data. If no timestamp is selected,
-    // the latest timestamp is used. When there is no timestamp, we fall back
-    // to the current time.
-    if (this.args.landscapeData) {
-      const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
-      const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
-        || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
-        || new Date().getTime();
-      this.timestampService.setTimestampLocally(
-        timestamp,
-        this.args.landscapeData.structureLandscapeData,
-        this.args.landscapeData.dynamicLandscapeData,
-      );
-    } else {
-      AlertifyHandler.showAlertifyWarning('No landscape found!');
-    }
   }
 
   /**
@@ -395,7 +390,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   private getIntersectableObjects() {
-    return [this.vrLandscapeRenderer.landscapeObject3D, ...this.applicationMarkers];
+    return [this.landscapeRenderer.landscapeObject3D, ...this.applicationMarkers];
   }
 
   static raycastFilter(intersection: THREE.Intersection) {
@@ -415,7 +410,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // setup arToolkitContext
     /// /////////////////////////////////////////////////////////
 
-    this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
+    this.landscapeMarker.add(this.landscapeRenderer.landscapeObject3D);
     this.sceneService.scene.add(this.landscapeMarker);
 
     // Init controls for camera
@@ -556,9 +551,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @action
   resetView() {
-    this.vrLandscapeRenderer.setLargestSide(2);
-    this.vrLandscapeRenderer.landscapeObject3D.position.set(0, 0, 0);
-    this.vrLandscapeRenderer.resetRotation();
+    this.landscapeRenderer.setLargestSide(2);
+    this.landscapeRenderer.landscapeObject3D.position.set(0, 0, 0);
+    this.landscapeRenderer.resetRotation();
 
     this.vrApplicationRenderer.getOpenApplications().forEach((application) => {
       application.position.set(0, 0, 0);
@@ -1192,7 +1187,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   willDestroy() {
     // Reset services.
     this.localUser.reset();
-    this.vrLandscapeRenderer.resetService();
+    this.landscapeRenderer.resetService();
     this.vrApplicationRenderer.removeAllApplicationsLocally();
     this.sceneService.addSkylight();
 

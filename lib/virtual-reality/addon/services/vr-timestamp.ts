@@ -100,14 +100,16 @@ export default class VrTimestampService extends Service {
   ): Promise<void> {
     this.timestamp = timestamp;
 
+    this.debug('SetTimestapLocallyStart:' + timestamp)
     await Promise.all([
-      // await perform(this.landscapeRenderer.populateLandscape, structureLandscapeData, dynamicLandscapeData),
+      await perform(this.landscapeRenderer.populateLandscape, structureLandscapeData, dynamicLandscapeData),
       this.vrApplicationRenderer.updateLandscapeData(
         structureLandscapeData,
         dynamicLandscapeData,
       ),
       this.detachedMenuGroups.updateLandscapeData(),
     ]);
+    this.debug('SetTimestapLocallyDone:' + timestamp)
   }
 }
 

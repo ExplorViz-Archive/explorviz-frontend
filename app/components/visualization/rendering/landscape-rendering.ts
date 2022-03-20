@@ -198,8 +198,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.render();
 
     this.resize(outerDiv);
-
-    await perform(this.loadNewLandscape);
     this.initDone = true;
   }
 
@@ -208,7 +206,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    * performance panel if it is activated in user settings
    */
   initThreeJs() {
-    this.initServices();
     this.initCamera();
     this.initRenderer();
     this.initLights();
@@ -225,22 +222,22 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Initializing websocket...');
   }
 
-  initServices() {
-    if (this.args.landscapeData) {
-      // this.landscapeRenderer.landscapeObject3D = this.landscapeObject3D
-      const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
-      const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
-        || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
-        || new Date().getTime();
-      this.timestampService.setTimestampLocally(
-        timestamp,
-        this.args.landscapeData.structureLandscapeData,
-        this.args.landscapeData.dynamicLandscapeData,
-      );
-    } else {
-      AlertifyHandler.showAlertifyWarning('No landscape found!');
-    }
-  }
+  // // TODO this is new, was taken from ar-rendering
+  // initServices() {
+  //   if (this.args.landscapeData) {
+  //     const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
+  //     const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
+  //       || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
+  //       || new Date().getTime();
+  //     this.timestampService.setTimestampLocally(
+  //       timestamp,
+  //       this.args.landscapeData.structureLandscapeData,
+  //       this.args.landscapeData.dynamicLandscapeData,
+  //     );
+  //   } else {
+  //     AlertifyHandler.showAlertifyWarning('No landscape found!');
+  //   }
+  // }
 
   /**
    * Creates a PerspectiveCamera according to canvas size and sets its initial position
@@ -437,9 +434,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   onUpdated() {
-    if (this.initDone) {
-      perform(this.loadNewLandscape);
-    }
+    // if (this.initDone) {
+    //   this.debug('onUpdated called')
+    //   perform(this.loadNewLandscape);
+    // }
   }
 
   // #endregion ACTIONS
@@ -448,6 +446,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @task *
     loadNewLandscape() {
+    this.debug('loadNewLandscape called')
     this.landscapeRenderer.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
 
     const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;

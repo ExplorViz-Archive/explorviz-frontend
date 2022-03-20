@@ -19,7 +19,6 @@ import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 import ElkConstructor from 'elkjs/lib/elk-api';
 import THREE from 'three';
-import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import { InitialLandscapeMessage, INITIAL_LANDSCAPE_EVENT } from 'virtual-reality/utils/vr-message/receivable/landscape';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
@@ -27,7 +26,6 @@ import WebSocketService from 'virtual-reality/services/web-socket';
 import { SerializedVrRoom } from 'virtual-reality/utils/vr-multi-user/serialized-vr-room';
 import CollaborationSession from 'collaborative-mode/services/collaboration-session';
 import LandscapeRenderer from 'explorviz-frontend/services/landscape-renderer';
-import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -61,6 +59,9 @@ export default class VisualizationController extends Controller {
 
   @service('collaboration-session')
   collaborationSession!: CollaborationSession;
+
+  @service('vr-timestamp')
+  private timestampService!: VrTimestampService;
 
   plotlyTimelineRef!: PlotlyTimeline;
 
@@ -123,6 +124,7 @@ export default class VisualizationController extends Controller {
 
   @action
   updateTimestampList() {
+    this.debug('updateTimestampList')
     const currentToken = this.landscapeTokenService.token!.value;
     this.timelineTimestamps = this.timestampRepo.getTimestamps(currentToken) ?? [];
   }
@@ -130,6 +132,7 @@ export default class VisualizationController extends Controller {
   @action
   receiveNewLandscapeData(structureData: StructureLandscapeData,
     dynamicData: DynamicLandscapeData) {
+    this.debug('receiveNewLandscapeData')
     if (!this.visualizationPaused) {
       this.heatmapConf.latestClazzMetricScores = [];
       this.updateLandscape(structureData, dynamicData);
@@ -138,6 +141,7 @@ export default class VisualizationController extends Controller {
 
   updateLandscape(structureData: StructureLandscapeData,
     dynamicData: DynamicLandscapeData) {
+    this.debug('updateLandscape')
     let application;
     if (this.landscapeData !== null) {
       application = this.landscapeData.application;
@@ -150,17 +154,28 @@ export default class VisualizationController extends Controller {
           application = newApplication;
         }
       }
+
     }
+    // TODO this is taken form ar/vr and adjusted. Might have to be moved back into the ...-rendering render loop?
+    // At least the creation of the objects?
+    const landscapeToken = this.landscapeTokenService.token!.value;
+    this.debug('LandscapeToken:' + landscapeToken)
+    const timestamp = this.selectedTimestampRecords[0]?.timestamp
+      || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
+      || new Date().getTime();
+    this.debug('Timestamp:' + timestamp)
+    this.timestampService.setTimestampLocally(
+      timestamp,
+      structureData,
+      dynamicData,
+    );
+    this.debug('Set timestamp locally done:' + timestamp)
     this.landscapeData = {
       structureLandscapeData: structureData,
       dynamicLandscapeData: dynamicData,
       application,
     };
-    this.landscapeRenderer.landscapeObject3D.dataModel = this.landscapeData.structureLandscapeData // TODO landscapeModel
   }
-
-  @service('landscape-renderer')
-  private landscapeRenderer!: LandscapeRenderer;
 
   private static getApplicationFromLandscapeById(id: string,
     structureData: StructureLandscapeData) {
@@ -178,12 +193,15 @@ export default class VisualizationController extends Controller {
 
   @action
   openLandscapeView() {
+    this.debug('openLandscapeView')
     this.receiveOpenLandscapeView();
     this.collaborativeService.send(CollaborativeEvents.OpenLandscapeView, {});
   }
 
   @action
   receiveOpenLandscapeView() {
+
+    this.debug('receiveOpenLandscapeView')
     this.closeDataSelection();
     this.showAR = false;
     this.showVR = false;
@@ -197,6 +215,8 @@ export default class VisualizationController extends Controller {
 
   @action
   showApplication(appId: string) {
+
+    this.debug('showApplication')
     this.closeDataSelection();
     if (this.landscapeData !== null) {
       this.landscapeData = {
@@ -240,17 +260,20 @@ export default class VisualizationController extends Controller {
 
   @action
   closeDataSelection() {
+    this.debug('closeDataSelection')
     this.showDataSelection = false;
     this.components = [];
   }
 
   @action
   openDataSelection() {
+    this.debug('openDataSelection')
     this.showDataSelection = true;
   }
 
   @action
   addComponent(component: string) {
+    this.debug('addComponent')
     if (this.components.includes(component)) {
       // remove it and readd it in the code below,
       // so it again appears on top inside the sidebar
@@ -302,6 +325,8 @@ export default class VisualizationController extends Controller {
 
   async restoreRoom(
     room: SerializedVrRoom) {
+    this.debug('restoreRoom')
+
     this.updateTimestamp(room.landscape.timestamp)
   }
 
@@ -343,6 +368,7 @@ export default class VisualizationController extends Controller {
   }
 
   initRendering() {
+    this.debug('initRendering')
     this.landscapeData = null;
     this.selectedTimestampRecords = [];
     this.visualizationPaused = false;
@@ -354,6 +380,7 @@ export default class VisualizationController extends Controller {
     this.initWebSocket();
     this.collaborationSession.updateRemoteUsers(2)
     this.webSocket.on(INITIAL_LANDSCAPE_EVENT, this, this.onInitialLandscape);
+    this.debug('initRendering done')
   }
 
   willDestroy() {
